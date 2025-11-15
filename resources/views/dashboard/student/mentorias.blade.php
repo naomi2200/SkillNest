@@ -15,35 +15,42 @@
 @endphp
 
 @section('dashboard-content')
-    <div class="card">
+    {{-- Contenedor principal de la tabla de mentorías del estudiante --}}
+    <div class="rounded-3xl border border-slate-100 bg-white/80 p-6 shadow-lg shadow-primary/5 transition hover:shadow-xl animate-fadeIn">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl font-semibold text-secondary">Sesiones agendadas</h2>
-                <p class="text-sm text-slate-500">Revisa tus proximas mentorias y sus detalles.</p>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Sesiones</p>
+                <h2 class="text-2xl font-semibold text-secondary">Sesiones agendadas</h2>
+                <p class="text-sm text-slate-500">Revisa tus próximas mentorías y sus detalles.</p>
             </div>
-            <a href="{{ route('mentor-market.index') }}" class="btn-secondary">Explorar mentores</a>
+            <a href="{{ route('mentor-market.index') }}"
+               class="btn-secondary rounded-full px-5 py-2 shadow-card transition hover:scale-[1.01]">
+                Explorar mentores
+            </a>
         </div>
 
-        <div class="mt-6 overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-100 text-sm">
-                <thead>
-                <tr class="text-left text-xs uppercase tracking-wide text-slate-400">
+        {{-- Tabla responsive que lista cada mentoría agendada --}}
+        <div class="mt-6 overflow-x-auto rounded-3xl border border-slate-100 bg-slate-50/70 p-4">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
+                <tr>
                     <th class="px-4 py-3">Tema</th>
                     <th class="px-4 py-3">Mentor</th>
                     <th class="px-4 py-3">Especialidad</th>
                     <th class="px-4 py-3">Fecha programada</th>
                     <th class="px-4 py-3">Estado</th>
-                    <th class="px-4 py-3">Acciones</th>
+                    <th class="px-4 py-3 text-center">Acciones</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                 @forelse($mentorias as $mentoria)
                     @php
+                        // Calcula estilos y fechas de la mentoría actual
                         $badge = $statusClasses[$mentoria->estado] ?? 'bg-slate-100 text-slate-600';
                         $scheduleDate = $mentoria->fecha_programada ?? $mentoria->fecha_mentoria;
                     @endphp
-                    <tr class="text-slate-600">
-                        <td class="px-4 py-4 font-medium text-secondary">{{ $mentoria->titulo }}</td>
+                    <tr class="text-slate-600 transition hover:bg-white hover:shadow-md">
+                        <td class="px-4 py-4 font-semibold text-secondary">{{ $mentoria->titulo }}</td>
                         <td class="px-4 py-4">{{ $mentoria->mentor->name ?? 'Por asignar' }}</td>
                         <td class="px-4 py-4">{{ $mentoria->especialidad ?? 'General' }}</td>
                         <td class="px-4 py-4">{{ optional($scheduleDate)->format('d/m/Y H:i') ?? 'Por definir' }}</td>
@@ -51,31 +58,46 @@
                             <span class="badge {{ $badge }} capitalize">{{ $mentoria->estado }}</span>
                         </td>
                         @php
+                            // Prepara datos para unirse a Jitsi cuando el estado lo permita
                             $displayName = urlencode(auth()->user()?->name ?? 'Invitado');
                             $subject = urlencode('SkillNest - Sesión de Mentoría');
                             $joinUrl = $mentoria->jitsi_room
                                 ? "{$mentoria->jitsi_room}#userInfo.displayName={$displayName}&config.requireDisplayName=true&subject={$subject}"
                                 : null;
                         @endphp
-                        <td class="px-4 py-4 space-y-1">
-                            @if($mentoria->estado === 'aceptada' && $mentoria->payment_status === 'pending')
-                                <a href="{{ route('payments.show', $mentoria->id) }}" class="btn-primary">
-                                    Pagar mentoría
-                                </a>
-                            @endif
+                        <td class="px-4 py-4 space-y-2 text-center">
+                            {{-- Estado rechazada: solo se muestra un aviso --}}
+                            @if($mentoria->estado === 'rechazada')
+                                <span class="inline-flex items-center justify-center rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-500 shadow-sm">
+                                    Tu solicitud fue rechazada por el mentor.
+                                </span>
+                            @else
+                                {{-- Estado aceptada con pago pendiente: CTA para pagar --}}
+                                @if($mentoria->estado === 'aceptada' && $mentoria->payment_status === 'pending')
+                                    <a href="{{ route('mentorias.payment.show', $mentoria->id) }}"
+                                       class="btn-primary inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-xs shadow-card transition hover:shadow-lg">
+                                        Pagar mentoría
+                                    </a>
+                                @endif
 
-                            @if($mentoria->estado === 'pagada' && $joinUrl)
-                                <a href="{{ $joinUrl }}" target="_blank" class="btn-success">
-                                    Unirse a la sesión
-                                </a>
-                            @endif
+                                {{-- Estado pagada: muestra botón para unirse a la sesión --}}
+                                @if($mentoria->estado === 'pagada' && $joinUrl)
+                                    <a href="{{ $joinUrl }}"
+                                       target="_blank"
+                                       class="btn-success inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-xs shadow-card transition hover:shadow-lg">
+                                        Unirse a la sesión
+                                    </a>
+                                @endif
 
-                            @if($mentoria->estado === 'completada')
-                                <span class="text-green-600 font-semibold text-xs">Sesión completada</span>
-                            @endif
+                                {{-- Estado completada: etiqueta informativa --}}
+                                @if($mentoria->estado === 'completada')
+                                    <span class="text-green-600 font-semibold text-xs">Sesión completada</span>
+                                @endif
 
-                            @if($mentoria->estado === 'pendiente')
-                                <span class="text-xs text-slate-400">Esperando la aprobación del mentor</span>
+                                {{-- Estado pendiente: aviso de espera --}}
+                                @if($mentoria->estado === 'pendiente')
+                                    <span class="text-xs text-slate-400">Esperando la aprobación del mentor</span>
+                                @endif
                             @endif
                         </td>
                     </tr>

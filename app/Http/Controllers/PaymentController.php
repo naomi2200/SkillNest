@@ -9,6 +9,9 @@ use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
+    /**
+     * Muestra el formulario de pago para una mentoría aceptada del estudiante autenticado.
+     */
     public function show(Mentoria $mentoria)
     {
         abort_unless(auth()->id() === $mentoria->estudiante_id, 403);
@@ -17,6 +20,12 @@ class PaymentController extends Controller
             return redirect()
                 ->route('student.mentorias')
                 ->with('status', 'Esta mentoría ya fue pagada.');
+        }
+
+        if ($mentoria->estado === 'rechazada') {
+            return redirect()
+                ->route('student.mentorias')
+                ->with('error', 'Esta mentoría fue rechazada por el mentor.');
         }
 
         if ($mentoria->estado !== 'aceptada') {
@@ -31,6 +40,9 @@ class PaymentController extends Controller
         return view('payments.pay', compact('mentoria', 'monto'));
     }
 
+    /**
+     * Registra el pago simulado y marca la mentoría como pagada.
+     */
     public function store(Request $request, Mentoria $mentoria)
     {
         abort_unless(auth()->id() === $mentoria->estudiante_id, 403);
@@ -40,6 +52,12 @@ class PaymentController extends Controller
             return redirect()
                 ->route('student.mentorias')
                 ->with('status', 'Esta mentoría ya fue pagada anteriormente.');
+        }
+
+        if ($mentoria->estado === 'rechazada') {
+            return redirect()
+                ->route('student.mentorias')
+                ->with('error', 'Esta mentoría fue rechazada por el mentor.');
         }
 
         if ($mentoria->estado !== 'aceptada') {
@@ -97,7 +115,7 @@ class PaymentController extends Controller
         ]);
 
         return redirect()
-            ->route('student.mentorias')
+            ->route('mentorias.payment.show', $mentoria->id)
             ->with('status', 'Pago registrado correctamente.');
     }
 }

@@ -12,9 +12,9 @@
     $mentoriaSpecialty = optional($mentoria)->especialidad ?? 'Generalista';
     $mentoriaModalidad = $mentoria && $mentoria->modalidad ? ucfirst($mentoria->modalidad) : 'Modalidad no definida';
     $experienceLabels = [
-        'junior' => 'Junior (0-2 anios)',
-        'mid' => 'Mid (3-6 anios)',
-        'senior' => 'Senior (7+ anios)',
+       'junior' => 'Junior (0-2 años)',
+       'mid' => 'Intermedio (3-6 años)',
+       'senior' => 'Senior (7+ años)',
     ];
     $experienceLabel = $profile->nivel_experiencia
         ? ($experienceLabels[$profile->nivel_experiencia] ?? ucfirst($profile->nivel_experiencia))
@@ -34,13 +34,13 @@
                     <p class="text-lg text-slate-500">{{ $mentoriaSpecialty }}</p>
                 </div>
                 <div class="space-y-2 text-right">
-                    <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Tarifa por sesi?n</p>
+                    <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Tarifa por sesión</p>
                     <p class="text-3xl font-semibold text-secondary">
                         S/ {{ number_format($mentoriaPrice, 2) }}
                         <span class="text-base font-normal text-slate-400">/ {{ $mentoriaDuration }} min</span>
                     </p>
                     <p class="text-sm text-slate-500">Modalidad: {{ $mentoriaModalidad }}</p>
-                    <p class="text-sm text-slate-500">{{ $profile->experiencia_anios ?? 0 }} a?os de experiencia</p>
+                    <p class="text-sm text-slate-500">{{ $profile->experiencia_anios ?? 0 }} años de experiencia</p>
                 </div>
             </div>
         </div>

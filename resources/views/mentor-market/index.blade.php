@@ -77,7 +77,7 @@
                     <div class="mt-4 grid gap-2 text-sm text-slate-600">
                         <p>
                             <strong class="text-secondary">Especialidad:</strong>
-                            {{ $mentorProfile->profesion ?? $mentoria->especialidad ?? 'Generalista' }}
+                            {{ $mentoria->especialidad ?? $mentorProfile->profesion ?? 'Generalista' }}
                         </p>
                         @if($mentorProfile?->nivel_experiencia)
                             <p>

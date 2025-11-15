@@ -10,9 +10,9 @@
             $skillValue = old('skills', $profile ? (is_array($profile->display_skills) ? implode(', ', $profile->display_skills) : ($profile->skills ?? '')) : '');
             $categoryValue = old('categorias', $profile->categorias ?? '');
             $experienceOptions = [
-                'junior' => 'Junior (0-2 aÃ±os)',
-                'mid' => 'Mid (3-6 aÃ±os)',
-                'senior' => 'Senior (7+ aÃ±os)',
+                'junior' => 'Junior (0-2 años)',
+                'mid' => 'Intermedio (3-6 años)',
+                'senior' => 'Senior (7+ años)',
             ];
         @endphp
         <div class="card">

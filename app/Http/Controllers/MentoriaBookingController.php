@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 
 class MentoriaBookingController extends Controller
 {
+    /**
+     * Crea una mentoría personalizada para un estudiante a partir de la oferta publicada del mentor.
+     */
     public function store(Request $request, User $mentor)
     {
         abort_unless($mentor->isMentor(), 404);

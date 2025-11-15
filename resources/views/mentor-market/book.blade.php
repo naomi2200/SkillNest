@@ -7,8 +7,12 @@
     $price = $mentoria->precio ?? 0;
     $duration = $mentoria->duracion_minutos ?? 60;
     $modalidad = $mentoria->modalidad ? ucfirst($mentoria->modalidad) : 'Modalidad no definida';
+
+    // Comisión que la plataforma retiene DEL MENTOR (no del estudiante)
     $serviceFee = round($price * 0.05, 2);
-    $total = $price + $serviceFee;
+
+    // El estudiante paga solo el precio base
+    $total = $price;
 @endphp
 
 @section('content')
@@ -74,10 +78,12 @@
                             <dt>Precio por sesión</dt>
                             <dd class="font-semibold text-secondary">S/ {{ number_format($price, 2) }}</dd>
                         </div>
+
                         <div class="flex justify-between">
                             <dt>Servicio SkillNest (5%)</dt>
-                            <dd class="font-semibold text-secondary">S/ {{ number_format($serviceFee, 2) }}</dd>
+                            <dd class="font-semibold text-red-500">- S/ {{ number_format($serviceFee, 2) }}</dd>
                         </div>
+
                         <div class="flex justify-between">
                             <dt>Duración</dt>
                             <dd class="font-semibold text-secondary">{{ $duration }} minutos</dd>
@@ -86,12 +92,17 @@
                             <dt>Modalidad</dt>
                             <dd class="font-semibold text-secondary">{{ $modalidad }}</dd>
                         </div>
+
                         <div class="flex justify-between text-base font-semibold text-secondary">
                             <dt>Total estimado</dt>
                             <dd>S/ {{ number_format($total, 2) }}</dd>
                         </div>
                     </dl>
-                    <p class="mt-4 text-xs text-slate-400">El mentor confirmará la reserva y te notificaremos por correo.</p>
+
+                    <p class="mt-4 text-xs text-slate-400">
+                        El estudiante no paga comisiones adicionales.  
+                        SkillNest retiene su comisión directamente del pago del mentor.
+                    </p>
                 </aside>
             </div>
         </div>

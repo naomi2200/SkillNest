@@ -29,6 +29,9 @@ class MentoriaController extends Controller
             : view('mentorias.index', compact('mentorias'));
     }
 
+    /**
+     * CRUD: persiste una nueva mentoría creada por el mentor en estado borrador.
+     */
     public function store(Request $request)
     {
         try {
@@ -116,6 +119,9 @@ class MentoriaController extends Controller
         return view('mentor.mentorias.edit', compact('mentoria'));
     }
 
+    /**
+     * CRUD: actualiza los campos editables de una mentoría creada por el mentor.
+     */
     public function update(Request $request, Mentoria $mentoria)
     {
         $this->authorizeMentorAction($mentoria);
@@ -137,6 +143,9 @@ class MentoriaController extends Controller
             ->with('success', 'Mentoría actualizada correctamente.');
     }
 
+    /**
+     * CRUD: elimina una mentoría siempre que no tenga un estudiante asignado.
+     */
     public function destroy(Mentoria $mentoria)
     {
         $this->authorizeMentorAction($mentoria);
@@ -150,6 +159,9 @@ class MentoriaController extends Controller
         return back()->with('success', 'Mentoría eliminada correctamente.');
     }
 
+    /**
+     * Flujo mentor: acepta una solicitud pendiente para habilitar el pago.
+     */
     public function aceptar(Request $request, Mentoria $mentoria)
     {
         $user = $request->user();
@@ -171,6 +183,9 @@ class MentoriaController extends Controller
             ->with('status', 'Mentor?a aceptada. El estudiante ahora puede proceder con el pago.');
     }
 
+    /**
+     * Flujo mentor: rechaza la solicitud, limpia enlaces y notifica al estudiante.
+     */
     public function rechazar(Request $request, Mentoria $mentoria)
     {
         $user = $request->user();
@@ -178,21 +193,26 @@ class MentoriaController extends Controller
         abort_unless($mentoria->mentor_id === $user->id, 403);
 
         if (! $mentoria->estudiante_id || $mentoria->estado !== 'pendiente') {
-            return back()->with('status', 'No se puede rechazar esta mentor?a.');
+            return back()->with('status', 'No se puede rechazar esta mentoría.');
         }
 
         $mentoria->update([
-            'estado' => 'cancelada',
-            'estudiante_id' => null,
+            'estado' => 'rechazada',
+            'payment_status' => null,
+            'link_pago' => null,
             'link_meet' => null,
+            'link_sesion' => null,
             'jitsi_room' => null,
         ]);
 
         return redirect()
             ->route('mentor.mentorias.index')
-            ->with('status', 'Mentor?a rechazada. El estudiante ha sido notificado.');
+            ->with('status', 'Mentoría rechazada. El estudiante ha sido notificado.');
     }
 
+    /**
+     * Flujo mentor: marca una sesión pagada/confirmada como completada y registra el pago interno.
+     */
     public function completar(Request $request, Mentoria $mentoria)
     {
         $user = $request->user();
@@ -229,6 +249,9 @@ class MentoriaController extends Controller
         return Mentoria::generateMeetLink();
     }
 
+    /**
+     * Flujo mentor: publica una mentoría en borrador para que aparezca en el marketplace.
+     */
     public function publicar(Mentoria $mentoria)
     {
         $this->authorizeMentorAction($mentoria);
@@ -237,10 +260,15 @@ class MentoriaController extends Controller
             return back()->with('error', 'Solo puedes publicar mentorías en borrador sin estudiante.');
         }
 
-        $mentoria->estado = 'publicada';
-        $mentoria->save();
+        $mentoria->forceFill([
+            'estado' => 'publicada',
+            'payment_status' => 'pending',
+            'link_pago' => null,
+        ])->save();
 
-        return back()->with('success', 'Mentoría publicada correctamente.');
+        return redirect()
+            ->route('mentor.mentorias.index')
+            ->with('success', 'Mentoría publicada correctamente y visible en el marketplace.');
     }
 
     protected function authorizeMentorAction(Mentoria $mentoria): void

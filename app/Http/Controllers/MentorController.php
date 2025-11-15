@@ -87,6 +87,9 @@ class MentorController extends Controller
         return back()->with('status', 'Perfil actualizado');
     }
 
+    /**
+     * Dashboard del mentor: agrupa borradores/publicadas y solicitudes activas para el panel.
+     */
     public function mentorships(Request $request)
     {
         $user = $request->user();

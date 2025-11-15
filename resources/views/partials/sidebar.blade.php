@@ -7,7 +7,7 @@
         <div class="h-full space-y-4 p-4">
             <div class="rounded-3xl bg-white p-5 shadow-card">
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Mentor</p>
-                <h2 class="mt-2 text-lg font-semibold text-secondary">Panel Lovable</h2>
+                <h2 class="mt-2 text-lg font-semibold text-secondary">Panel de Mentor</h2>
 
                 <nav class="mt-5 space-y-2 text-sm font-medium text-slate-500">
                     <a href="{{ route('mentor.courses') }}"

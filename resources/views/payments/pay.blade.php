@@ -27,7 +27,10 @@
                 $showCard = $selectedMethod === 'tarjeta';
             @endphp
 
-            <form method="POST" action="{{ route('payments.store', $mentoria) }}" enctype="multipart/form-data" class="space-y-4">
+            <form method="POST"
+                  action="{{ route('mentorias.payment.store', $mentoria->id) }}"
+                  enctype="multipart/form-data"
+                  class="space-y-4">
                 @csrf
                 <div>
                     <label class="form-label">Método de pago</label>

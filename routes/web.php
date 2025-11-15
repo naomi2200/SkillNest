@@ -20,10 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('home'))->name('home');
 
+// Catálogo público de mentorías y perfil del mentor (acceso libre)
 Route::get('/mentorias', [MentorPublicController::class, 'index'])->name('mentor-market.index');
 Route::get('/mentorias/mentor/{mentor}', [MentorPublicController::class, 'show'])->name('mentor.public.show');
 Route::get('/mentorias/mentor/{mentor}/agendar', [MentorPublicController::class, 'agendar'])->name('mentor.book.form');
 
+// Flujo de autenticación (login, registro, logout, recuperación)
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');
     Route::post('/login', 'login');
@@ -51,9 +53,11 @@ Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'
 //     });
 // });
 
+// Todo lo que sigue requiere sesión activa
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // CRUD principal de cursos y progreso (Laravel resource)
     Route::resource('cursos', CursoController::class);
     Route::post('/cursos/{curso}/enroll', [CursoController::class, 'enroll'])->name('cursos.enroll');
     Route::post('/courses/{course}/purchase', [CoursePurchaseController::class, 'store'])->name('courses.purchase');
@@ -61,17 +65,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/lessons/{lesson}/progress', [CourseProgressController::class, 'storeLessonProgress'])->name('lessons.progress');
     Route::post('/modules/{module}/unlock', [CourseProgressController::class, 'unlockModule'])->name('modules.unlock');
 
+    // CRUD interno para mentorías dentro del dashboard (usa resource completo)
     Route::prefix('dashboard')->group(function () {
         Route::resource('mentorias', MentoriaController::class);
     });
     Route::get('/mentorias/{mentoria}/join', [MentoriaController::class, 'join'])->name('mentorias.join');
 
+    // Acciones exclusivas de estudiantes (reservar y pagar mentorías)
     Route::middleware('student')->group(function () {
         Route::post('/mentorias/mentor/{mentor}/book', [MentoriaBookingController::class, 'store'])->name('mentor-market.book');
-        Route::get('/mentorias/{mentoria}/pago', [PaymentController::class, 'show'])->name('payments.show');
-        Route::post('/mentorias/{mentoria}/pago', [PaymentController::class, 'store'])->name('payments.store');
+        Route::get('/mentorias/{mentoria}/pago', [PaymentController::class, 'show'])->name('mentorias.payment.show');
+        Route::post('/mentorias/{mentoria}/pago', [PaymentController::class, 'store'])->name('mentorias.payment.store');
     });
 
+    // Dashboard del estudiante (métricas, cursos y mentorías)
     Route::prefix('student')
         ->name('student.')
         ->middleware('student')
@@ -82,6 +89,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/perfil', [StudentDashboardController::class, 'perfil'])->name('profile');
         });
 
+    // Zona privada del mentor (cursos, mentorías y perfil)
     Route::prefix('mentor')->name('mentor.')->middleware('mentor')->group(function () {
         Route::get('/courses', [MentorController::class, 'courseStats'])->name('courses');
         Route::get('/courses/create', [CourseBuilderController::class, 'create'])->name('courses.create');

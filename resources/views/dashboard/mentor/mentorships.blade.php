@@ -17,19 +17,6 @@
 
 @section('mentor-content')
     <div class="space-y-6">
-        <div class="card">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p class="text-sm uppercase tracking-wide text-slate-400">Mentorias</p>
-                    <h2 class="text-2xl font-semibold text-secondary">Mis mentorias</h2>
-                    <p class="text-sm text-slate-500">
-                        Gestiona las sesiones creadas y responde las solicitudes de tus estudiantes.
-                    </p>
-                </div>
-                <span class="text-sm text-slate-500">{{ $stats['total'] ?? 0 }} mentorias en total</span>
-            </div>
-        </div>
-
         @if (session('status'))
             <div class="rounded-2xl border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
                 {{ session('status') }}
