@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
+class Mentoria extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'mentor_id',
+        'estudiante_id',
+        'titulo',
+        'descripcion',
+        'estado',
+        'fecha_solicitud',
+        'fecha_mentoria',
+        'fecha_programada',
+        'hora_programada',
+        'duracion_minutos',
+        'objetivos',
+        'notas',
+        'precio',
+        'monto',
+        'modalidad',
+        'link_sesion',
+        'jitsi_room',
+        'payment_status'
+    ];
+
+    protected $casts = [
+        'fecha_solicitud' => 'datetime',
+        'fecha_mentoria' => 'datetime',
+        'fecha_programada' => 'date',
+        'precio' => 'decimal:2'
+    ];
+
+    protected $appends = [
+        'session_link',
+        'can_view_session',
+    ];
+
+    // Relación con el mentor
+    public function mentor()
+    {
+        return $this->belongsTo(User::class, 'mentor_id');
+    }
+
+    // Relación con el estudiante
+    public function estudiante()
+    {
+        return $this->belongsTo(User::class, 'estudiante_id');
+    }
+
+    public function getCanJoinAttribute(): bool
+    {
+        if (!$this->can_view_session) {
+            return false;
+        }
+
+        return $this->estado === 'pagada' || $this->payment_status === 'paid';
+    }
+
+    public function jitsiUrl(): ?string
+    {
+        if (!$this->jitsi_room) {
+            return null;
+        }
+
+        return 'https://meet.jit.si/' . $this->jitsi_room;
+    }
+
+    public function getSessionLinkAttribute(): ?string
+    {
+        if ($this->link_sesion) {
+            return $this->link_sesion;
+        }
+
+        return $this->jitsi_room
+            ? 'https://meet.jit.si/' . $this->jitsi_room
+            : null;
+    }
+
+    public function getCanViewSessionAttribute(): bool
+    {
+        return in_array($this->estado, ['confirmada', 'pagada'], true)
+            && (bool) $this->session_link;
+    }
+
+    public function ensureSessionLink(): void
+    {
+        if ($this->link_sesion) {
+            return;
+        }
+
+        $room = $this->jitsi_room ?? static::generateRoomName();
+
+        $this->forceFill([
+            'jitsi_room' => $room,
+            'link_sesion' => 'https://meet.jit.si/' . $room,
+        ])->save();
+    }
+
+    public static function generateRoomName(): string
+    {
+        return 'skillnest-' . Str::uuid();
+    }
+
+    public function shouldGenerateLink(): bool
+    {
+        return in_array($this->estado, ['confirmada', 'pagada'], true)
+            || $this->payment_status === 'paid';
+    }
+}

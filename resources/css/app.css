@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+}
+
+.btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-secondary/20 bg-white px-4 py-2 text-sm font-semibold text-secondary hover:bg-secondary/5;
+}
+
+.card {
+    @apply rounded-2xl bg-white p-6 shadow-card;
+}
+
+.badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.btn-gradient {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#6366f1] px-6 py-2 text-sm font-semibold text-white shadow hover:from-[#7c3aed] hover:to-[#4f46e5];
+}

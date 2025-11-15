@@ -1,0 +1,108 @@
+<?php
+
+// use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\CourseReviewController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CourseProgressController;
+use App\Http\Controllers\CoursePurchaseController;
+use App\Http\Controllers\CursoController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MentorPublicController;
+use App\Http\Controllers\MentoriaBookingController;
+use App\Http\Controllers\MentoriaController;
+use App\Http\Controllers\Mentor\CourseBuilderController;
+use App\Http\Controllers\MentorController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\StudentDashboardController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', fn () => view('home'))->name('home');
+
+Route::get('/mentorias', [MentorPublicController::class, 'index'])->name('mentor-market.index');
+Route::get('/mentorias/mentor/{mentor}', [MentorPublicController::class, 'show'])->name('mentor.public.show');
+Route::get('/mentorias/mentor/{mentor}/agendar', [MentorPublicController::class, 'agendar'])->name('mentor.book.form');
+
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'login');
+    Route::get('/register', 'showRegisterForm')->name('register');
+    Route::post('/register', 'register');
+    Route::post('/logout', 'logout')->name('logout');
+    Route::get('/forgot-password', 'showForgotForm')->name('password.request');
+});
+
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+
+// Route::prefix('admin')->name('admin.')->group(function () {
+//     Route::middleware('guest:admin')->group(function () {
+//         Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+//         Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+//     });
+//
+//     Route::middleware('auth:admin')->group(function () {
+//         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+//         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+//
+//         Route::get('/courses/review', [CourseReviewController::class, 'index'])->name('courses.review');
+//         Route::post('/courses/{course}/approve', [CourseReviewController::class, 'approve'])->name('courses.approve');
+//         Route::post('/courses/{course}/reject', [CourseReviewController::class, 'reject'])->name('courses.reject');
+//     });
+// });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('cursos', CursoController::class);
+    Route::post('/cursos/{curso}/enroll', [CursoController::class, 'enroll'])->name('cursos.enroll');
+    Route::post('/courses/{course}/purchase', [CoursePurchaseController::class, 'store'])->name('courses.purchase');
+    Route::get('/courses/{course}/classroom', [CourseProgressController::class, 'classroom'])->name('courses.classroom');
+    Route::post('/lessons/{lesson}/progress', [CourseProgressController::class, 'storeLessonProgress'])->name('lessons.progress');
+    Route::post('/modules/{module}/unlock', [CourseProgressController::class, 'unlockModule'])->name('modules.unlock');
+
+    Route::prefix('dashboard')->group(function () {
+        Route::resource('mentorias', MentoriaController::class);
+    });
+    Route::get('/mentorias/{mentoria}/join', [MentoriaController::class, 'join'])->name('mentorias.join');
+
+    Route::middleware('student')->group(function () {
+        Route::post('/mentorias/mentor/{mentor}/book', [MentoriaBookingController::class, 'store'])->name('mentor-market.book');
+        Route::get('/mentorias/{mentoria}/pago', [PaymentController::class, 'show'])->name('payments.show');
+        Route::post('/mentorias/{mentoria}/pago', [PaymentController::class, 'store'])->name('payments.store');
+    });
+
+    Route::prefix('student')
+        ->name('student.')
+        ->middleware('student')
+        ->group(function () {
+            Route::get('/', [StudentDashboardController::class, 'index'])->name('dashboard');
+            Route::get('/cursos', [StudentDashboardController::class, 'cursos'])->name('courses');
+            Route::get('/mentorias', [StudentDashboardController::class, 'mentorias'])->name('mentorias');
+            Route::get('/perfil', [StudentDashboardController::class, 'perfil'])->name('profile');
+        });
+
+    Route::prefix('mentor')->name('mentor.')->middleware('mentor')->group(function () {
+        Route::get('/courses', [MentorController::class, 'courseStats'])->name('courses');
+        Route::get('/courses/create', [CourseBuilderController::class, 'create'])->name('courses.create');
+        Route::post('/courses', [CourseBuilderController::class, 'store'])->name('courses.store');
+        Route::get('/courses/{course}/builder', [CourseBuilderController::class, 'edit'])->name('courses.builder');
+        Route::put('/courses/{course}', [CourseBuilderController::class, 'update'])->name('courses.update');
+        Route::post('/courses/{course}/structure', [CourseBuilderController::class, 'syncStructure'])->name('courses.structure');
+        Route::post('/courses/{course}/submit', [CourseBuilderController::class, 'submitForReview'])->name('courses.submit');
+
+        Route::get('/mentorias', [MentorController::class, 'mentorships'])->name('mentorias.index');
+        Route::get('/mentorias/{mentoria}/edit', [MentoriaController::class, 'edit'])->name('mentorias.edit');
+        Route::put('/mentorias/{mentoria}', [MentoriaController::class, 'update'])->name('mentorias.update');
+        Route::delete('/mentorias/{mentoria}', [MentoriaController::class, 'destroy'])->name('mentorias.destroy');
+        Route::post('/mentorias/{mentoria}/publicar', [MentoriaController::class, 'publicar'])->name('mentorias.publicar');
+        Route::post('/mentorias/{mentoria}/aceptar', [MentoriaController::class, 'aceptar'])->name('mentorias.accept');
+        Route::post('/mentorias/{mentoria}/rechazar', [MentoriaController::class, 'rechazar'])->name('mentorias.reject');
+        Route::post('/mentorias/{mentoria}/completar', [MentoriaController::class, 'completar'])->name('mentorias.completar');
+
+        Route::get('/profile', [MentorController::class, 'editProfile'])->name('profile');
+        Route::post('/profile', [MentorController::class, 'updateProfile'])->name('profile.update');
+
+        Route::get('/students', [MentorController::class, 'myStudents'])->name('students');
+    });
+});

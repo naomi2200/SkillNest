@@ -1,0 +1,250 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Mentoria;
+use App\Models\PaymentLog;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class MentoriaController extends Controller
+{
+    public function create(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user?->isMentor(), 403);
+
+        return view('mentorias.create');
+    }
+
+    public function index(Request $request)
+    {
+        $mentorias = Mentoria::with(['mentor', 'estudiante'])
+            ->latest('fecha_mentoria')
+            ->latest('fecha_solicitud')
+            ->get();
+
+        return $request->expectsJson()
+            ? response()->json($mentorias)
+            : view('mentorias.index', compact('mentorias'));
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            Log::info('[Mentorías] Creando mentoría', $request->all());
+
+            $validated = $request->validate([
+                'titulo' => 'required|string|max:255',
+                'especialidad' => 'required|string|max:255',
+                'descripcion' => 'required|string',
+                'precio' => 'required|numeric',
+                'duracion_minutos' => 'required|integer',
+                'modalidad' => 'required|string',
+                'objetivos' => 'nullable|string',
+                'fecha_programada' => 'nullable|date',
+                'hora_programada' => 'nullable|date_format:H:i',
+            ]);
+
+            $mentor = $request->user();
+            abort_unless($mentor?->isMentor(), 403);
+
+            $mentoria = Mentoria::create([
+                'mentor_id' => $mentor->id,
+                'titulo' => $validated['titulo'],
+                'especialidad' => $validated['especialidad'],
+                'descripcion' => $validated['descripcion'],
+                'precio' => $validated['precio'],
+                'duracion_minutos' => $validated['duracion_minutos'],
+                'modalidad' => $validated['modalidad'],
+                'estado' => 'borrador',
+                'estudiante_id' => null,
+                'objetivos' => $validated['objetivos'] ?? null,
+                'fecha_programada' => $validated['fecha_programada'] ?? null,
+                'hora_programada' => $validated['hora_programada'] ?? null,
+                'monto' => $validated['precio'],
+            ]);
+
+            Log::info('Mentorias store saved row', $mentoria->toArray());
+            Log::info('[Mentorías] Mentoría creada', ['id' => $mentoria->id]);
+
+            return redirect()
+                ->route('mentor.mentorias.index')
+                ->with('status', 'Mentoría creada exitosamente.');
+        } catch (\Exception $e) {
+            Log::error('[Mentorías] Error creando mentoría', [
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->route('mentor.mentorias.index')
+                ->with('status', 'Error al crear mentoría: ' . $e->getMessage());
+        }
+    }
+
+    public function show(Request $request, Mentoria $mentoria)
+    {
+        $mentoria->load(['mentor', 'estudiante']);
+
+        return $request->expectsJson()
+            ? response()->json($mentoria)
+            : view('mentorias.show', compact('mentoria'));
+    }
+
+    public function join(Request $request, Mentoria $mentoria)
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+        abort_unless(
+            in_array($user->id, [$mentoria->mentor_id, $mentoria->estudiante_id], true),
+            403
+        );
+
+        $mentoria->refresh();
+        $mentoria->ensureSessionLink();
+
+        abort_unless($mentoria->can_view_session, 403);
+        abort_unless($mentoria->can_join, 403);
+
+        return redirect()->away($mentoria->session_link);
+    }
+
+    public function edit(Mentoria $mentoria)
+    {
+        $this->authorizeMentorAction($mentoria);
+
+        return view('mentor.mentorias.edit', compact('mentoria'));
+    }
+
+    public function update(Request $request, Mentoria $mentoria)
+    {
+        $this->authorizeMentorAction($mentoria);
+
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'especialidad' => 'nullable|string|max:255',
+            'precio' => 'required|numeric|min:0',
+            'duracion_minutos' => 'required|integer|min:1',
+            'modalidad' => 'required|in:presencial,virtual',
+            'objetivos' => 'nullable|string',
+            'descripcion' => 'required|string',
+        ]);
+
+        $mentoria->update($validated);
+
+        return redirect()
+            ->route('mentor.mentorias.index')
+            ->with('success', 'Mentoría actualizada correctamente.');
+    }
+
+    public function destroy(Mentoria $mentoria)
+    {
+        $this->authorizeMentorAction($mentoria);
+
+        if ($mentoria->estudiante_id !== null) {
+            return back()->with('error', 'No puedes eliminar una mentoría que ya tiene un estudiante asignado.');
+        }
+
+        $mentoria->delete();
+
+        return back()->with('success', 'Mentoría eliminada correctamente.');
+    }
+
+    public function aceptar(Request $request, Mentoria $mentoria)
+    {
+        $user = $request->user();
+        abort_unless($user?->isMentor(), 403);
+        abort_unless($mentoria->mentor_id === $user->id, 403);
+        abort_unless($mentoria->estudiante_id, 403);
+
+        if ($mentoria->estado !== 'pendiente') {
+            return back()->with('status', 'Esta mentor?a ya fue procesada.');
+        }
+
+        $mentoria->update([
+            'estado' => 'aceptada',
+            'fecha_solicitud' => $mentoria->fecha_solicitud ?? now(),
+        ]);
+
+        return redirect()
+            ->route('mentor.mentorias.index')
+            ->with('status', 'Mentor?a aceptada. El estudiante ahora puede proceder con el pago.');
+    }
+
+    public function rechazar(Request $request, Mentoria $mentoria)
+    {
+        $user = $request->user();
+        abort_unless($user?->isMentor(), 403);
+        abort_unless($mentoria->mentor_id === $user->id, 403);
+
+        if (! $mentoria->estudiante_id || $mentoria->estado !== 'pendiente') {
+            return back()->with('status', 'No se puede rechazar esta mentor?a.');
+        }
+
+        $mentoria->update([
+            'estado' => 'cancelada',
+            'estudiante_id' => null,
+            'link_meet' => null,
+            'jitsi_room' => null,
+        ]);
+
+        return redirect()
+            ->route('mentor.mentorias.index')
+            ->with('status', 'Mentor?a rechazada. El estudiante ha sido notificado.');
+    }
+
+    public function completar(Request $request, Mentoria $mentoria)
+    {
+        $user = $request->user();
+        abort_unless($user?->isMentor(), 403);
+        abort_unless($mentoria->mentor_id === $user->id, 403);
+        abort_unless(in_array($mentoria->estado, ['pagada', 'confirmada'], true), 403);
+
+        $mentoria->update([
+            'estado' => 'completada',
+        ]);
+
+        $monto = $mentoria->monto ?? $mentoria->precio ?? 0;
+        $mentorShare = round($monto * 0.95, 2);
+        $platformShare = round($monto - $mentorShare, 2);
+
+        PaymentLog::create([
+            'mentoria_id' => $mentoria->id,
+            'estudiante_id' => $mentoria->estudiante_id,
+            'mentor_id' => $mentoria->mentor_id,
+            'monto_total' => $monto,
+            'monto_mentor' => $mentorShare,
+            'monto_plataforma' => $platformShare,
+            'metodo' => 'liberacion',
+            'referencia' => 'release-' . now()->timestamp,
+        ]);
+
+        return redirect()
+            ->route('mentor.mentorias.index')
+            ->with('status', 'Sesi?n completada. La ganancia del mentor ha sido registrada.');
+    }
+
+    protected function generarLinkMeet(): string
+    {
+        return Mentoria::generateMeetLink();
+    }
+
+    public function publicar(Mentoria $mentoria)
+    {
+        $this->authorizeMentorAction($mentoria);
+
+        if ($mentoria->estado !== 'borrador' || $mentoria->estudiante_id !== null) {
+            return back()->with('error', 'Solo puedes publicar mentorías en borrador sin estudiante.');
+        }
+
+        $mentoria->estado = 'publicada';
+        $mentoria->save();
+
+        return back()->with('success', 'Mentoría publicada correctamente.');
+    }
+
+    protected function authorizeMentorAction(Mentoria $mentoria): void
+    {
+        abort_unless(auth()->id() === $mentoria->mentor_id, 403);
+    }
+}
