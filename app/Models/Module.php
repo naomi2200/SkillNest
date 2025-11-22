@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Models\Course;
+use App\Models\Curso;
 use App\Models\Lesson;
 use App\Models\Quiz;
 
@@ -21,7 +21,7 @@ class Module extends Model
 
     public function course(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Curso::class, 'course_id');
     }
 
     public function lessons(): HasMany

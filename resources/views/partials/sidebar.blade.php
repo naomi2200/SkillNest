@@ -14,10 +14,13 @@
                        class="flex items-center gap-3 rounded-2xl px-3 py-2 transition {{ request()->routeIs('mentor.courses') ? 'bg-primary/10 text-primary' : 'hover:bg-slate-100' }}">
                         Mis cursos
                     </a>
-                    <a href="{{ route('mentor.courses.create') }}"
-                       class="flex items-center gap-3 rounded-2xl px-3 py-2 transition {{ request()->routeIs('mentor.courses.create') ? 'bg-primary/10 text-primary' : 'hover:bg-slate-100' }}">
-                        Crear curso
-                    </a>
+                    <form action="{{ route('cursos.create-draft') }}" method="POST">
+                        @csrf
+                        <button type="submit"
+                                class="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-medium text-slate-500 transition hover:bg-slate-100">
+                            Crear curso
+                        </button>
+                    </form>
                     <a href="{{ route('mentor.mentorias.index') }}"
                        class="flex items-center gap-3 rounded-2xl px-3 py-2 transition {{ request()->routeIs('mentor.mentorias.*') ? 'bg-primary/10 text-primary' : 'hover:bg-slate-100' }}">
                         Mis mentorías
@@ -52,6 +55,14 @@
                             Cursos
                         </a>
                     </li>
+                    @if($sidebarUser->isAdmin())
+                        <li>
+                            <a href="{{ route('admin.courses.index') }}"
+                               class="block rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('admin.courses.*') ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-100' }}">
+                                Revisión de cursos
+                            </a>
+                        </li>
+                    @endif
                     <li>
                         <a href="{{ route('mentor-market.index') }}"
                            class="block rounded-md px-3 py-2 text-sm font-medium {{ request()->routeIs('mentor-market.*') ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-100' }}">

@@ -28,7 +28,7 @@ return new class extends Migration
             $table->enum('level', ['principiante', 'intermedio', 'avanzado']);
             $table->string('category');
             $table->string('image_url')->nullable();
-            $table->enum('status', ['borrador', 'activo', 'inactivo'])->default('borrador');
+            $table->enum('status', ['borrador', 'pendiente', 'aprobado', 'rechazado'])->default('borrador');
             $table->enum('review_status', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
             $table->timestamp('published_at')->nullable();
             $table->text('rejection_reason')->nullable();

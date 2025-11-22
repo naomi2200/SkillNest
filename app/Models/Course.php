@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Module;
 use App\Models\Lesson;
 use App\Models\Quiz;
@@ -54,6 +55,11 @@ class Course extends Model
     public function purchases(): HasMany
     {
         return $this->hasMany(Purchase::class);
+    }
+
+    public function estudiantes(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'curso_estudiante', 'curso_id', 'estudiante_id');
     }
 
     public function scopeApproved($query)

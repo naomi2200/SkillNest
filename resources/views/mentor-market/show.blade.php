@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @php
     use Illuminate\Support\Str;
@@ -13,8 +13,8 @@
     $mentoriaModalidad = $mentoria && $mentoria->modalidad ? ucfirst($mentoria->modalidad) : 'Modalidad no definida';
     $experienceLabels = [
        'junior' => 'Junior (0-2 años)',
-       'mid' => 'Intermedio (3-6 años)',
-       'senior' => 'Senior (7+ años)',
+        'mid' => 'Intermedio (3-6 años)',
+        'senior' => 'Senior (7+ años)',
     ];
     $experienceLabel = $profile->nivel_experiencia
         ? ($experienceLabels[$profile->nivel_experiencia] ?? ucfirst($profile->nivel_experiencia))
@@ -22,28 +22,43 @@
 @endphp
 
 @section('content')
-    <div class="mx-auto max-w-5xl space-y-8">
-        <div class="rounded-[32px] border border-slate-100 bg-white/95 p-8 shadow-card">
-            <div class="flex flex-wrap items-center gap-6">
-                <div class="flex h-24 w-24 items-center justify-center rounded-[24px] bg-primary/10 text-4xl font-bold text-primary">
-                    {{ strtoupper(Str::substr($mentor->name, 0, 1)) }}
-                </div>
-                <div class="flex-1 space-y-1">
-                    <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Mentor verificado</p>
-                    <h1 class="text-4xl font-semibold text-secondary">{{ $mentor->name }}</h1>
-                    <p class="text-lg text-slate-500">{{ $mentoriaSpecialty }}</p>
-                </div>
-                <div class="space-y-2 text-right">
-                    <p class="text-sm uppercase tracking-[0.3em] text-slate-400">Tarifa por sesión</p>
-                    <p class="text-3xl font-semibold text-secondary">
-                        S/ {{ number_format($mentoriaPrice, 2) }}
-                        <span class="text-base font-normal text-slate-400">/ {{ $mentoriaDuration }} min</span>
-                    </p>
-                    <p class="text-sm text-slate-500">Modalidad: {{ $mentoriaModalidad }}</p>
-                    <p class="text-sm text-slate-500">{{ $profile->experiencia_anios ?? 0 }} años de experiencia</p>
+    <div class="mx-auto max-w-6xl space-y-8">
+        <section class="rounded-[40px] border border-slate-100 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-[1px] text-white shadow-card">
+            <div class="rounded-[38px] bg-slate-900/75 px-8 py-8 backdrop-blur">
+                <div class="flex flex-wrap items-center gap-8">
+                    <div class="flex h-28 w-28 items-center justify-center rounded-[30px] bg-white/10 text-4xl font-bold uppercase">
+                        {{ strtoupper(Str::substr($mentor->name, 0, 1)) }}
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <p class="text-xs uppercase tracking-[0.6em] text-white/70">Mentor verificado</p>
+                        <h1 class="text-4xl font-semibold">{{ $mentor->name }}</h1>
+                        <p class="text-lg text-white/80">{{ $mentoriaSpecialty }}</p>
+                        <div class="flex flex-wrap gap-4 text-sm text-white/80">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1">
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09L5.4 12.545.8 8.41l6.09-.885L10 2l3.11 5.525 6.09.885-4.6 4.137 1.278 5.545z"/></svg>
+                                <strong class="text-white">{{ number_format($mentor->rating ?? 4.8, 1) }}</strong>
+                                <span>{{ $mentor->sessions_count ?? 0 }} sesiones</span>
+                            </span>
+                            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2 2m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $profile->experiencia_anios ?? 0 }} años de experiencia
+                            </span>
+                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100/20 px-4 py-1 text-emerald-200">
+                                Disponible para mentorías
+                            </span>
+                        </div>
+                    </div>
+                    <div class="rounded-[24px] border border-white/10 bg-white/5 px-6 py-5 text-right shadow-inner">
+                        <p class="text-xs uppercase tracking-[0.4em] text-white/70">Tarifa por sesión</p>
+                        <p class="mt-1 text-3xl font-semibold text-white">
+                            S/ {{ number_format($mentoriaPrice, 2) }}
+                            <span class="text-base font-normal text-white/70">/ {{ $mentoriaDuration }} min</span>
+                        </p>
+                        <p class="text-sm text-white/70">Modalidad: {{ $mentoriaModalidad }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <div class="grid gap-6 lg:grid-cols-3">
             <section class="space-y-6 rounded-[32px] border border-slate-100 bg-white/95 p-6 shadow-card lg:col-span-2">
@@ -88,12 +103,12 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold text-secondary">Categorias destacadas</h3>
+                    <h3 class="text-lg font-semibold text-secondary">Categorías destacadas</h3>
                     <div class="mt-3 flex flex-wrap gap-2">
                         @forelse($categories as $category)
                             <span class="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">{{ $category }}</span>
                         @empty
-                            <p class="text-sm text-slate-500">Este mentor aun no define categorias.</p>
+                            <p class="text-sm text-slate-500">Este mentor aún no define categorías.</p>
                         @endforelse
                     </div>
                 </div>
@@ -115,8 +130,8 @@
             </section>
 
             <aside id="booking" class="space-y-4 rounded-[32px] border border-slate-100 bg-white/95 p-6 shadow-card">
-                <h3 class="text-xl font-semibold text-secondary">Agendar sesión</h3>
-                <p class="text-sm text-slate-500">Sesiones virtuales de 60 minutos. Comparte tus objetivos y agenda una cita.</p>
+                <h3 class="text-xl font-semibold text-secondary">Agenda tu mentoría</h3>
+                <p class="text-sm text-slate-500">Sesiones personalizadas. Comparte tus objetivos y define un plan con tu mentor.</p>
 
                 @if(!auth()->check())
                     <a href="{{ route('login') }}" class="btn-primary w-full justify-center">Inicia sesión para agendar</a>
@@ -146,18 +161,20 @@
                         @endphp
 
                         <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 text-sm text-slate-600">
-                            <div class="flex justify-between">
-                                <span>Precio por sesión</span>
-                                <strong class="text-secondary">S/ {{ number_format($mentoriaPrice, 2) }}</strong>
-                            </div>
-                            <div class="mt-2 flex justify-between">
-                                <span>Servicio SkillNest (5%)</span>
-                                <strong class="text-secondary">S/ {{ number_format($serviceFee, 2) }}</strong>
-                            </div>
-                            <div class="mt-3 flex justify-between text-base font-semibold text-secondary">
-                                <span>Total estimado</span>
-                                <span>S/ {{ number_format($total, 2) }}</span>
-                            </div>
+                            <dl class="space-y-2">
+                                <div class="flex justify-between">
+                                    <dt>Precio por sesión</dt>
+                                    <dd class="font-semibold text-secondary">S/ {{ number_format($mentoriaPrice, 2) }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt>Servicio SkillNest (5%)</dt>
+                                    <dd class="font-semibold text-secondary">S/ {{ number_format($serviceFee, 2) }}</dd>
+                                </div>
+                                <div class="flex justify-between text-base font-semibold text-secondary">
+                                    <dt>Total estimado</dt>
+                                    <dd>S/ {{ number_format($total, 2) }}</dd>
+                                </div>
+                            </dl>
                         </div>
 
                         <button class="btn-gradient w-full justify-center">Agendar sesión</button>

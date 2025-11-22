@@ -6,6 +6,7 @@ use App\Models\Curso;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CursoController extends Controller
 {
@@ -55,6 +56,11 @@ class CursoController extends Controller
                 ]);
             }
 
+            $image = $request->input('image_url') ?: sprintf(
+                'https://picsum.photos/seed/%s/800/600',
+                Str::uuid()
+            );
+
             $curso = Curso::create([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
@@ -64,7 +70,7 @@ class CursoController extends Controller
                 'category' => $validated['category'],
                 'mentor_id' => $mentor->id,
                 'status' => $validated['status'] ?? 'borrador',
-                'image_url' => $request->input('image_url'),
+                'image_url' => $image,
                 'objectives' => $request->input('objectives'),
                 'requirements' => $request->input('requirements'),
             ]);
@@ -111,7 +117,7 @@ class CursoController extends Controller
 
     public function edit(Curso $curso)
     {
-        return view('cursos.edit', compact('curso'));
+        return redirect()->route('cursos.editor', $curso);
     }
 
     public function update(Request $request, Curso $curso)
@@ -181,6 +187,16 @@ class CursoController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'Debes iniciar sesión para inscribirte.']);
         }
 
+        $hasPaid = $curso->purchases()
+            ->where('student_id', $user->id)
+            ->where('status', 'paid')
+            ->exists();
+
+        if (! $hasPaid && ! $curso->isOwnedBy($user)) {
+            return redirect()->route('courses.checkout', $curso)
+                ->withErrors(['payment' => 'Debes completar el pago antes de inscribirte.']);
+        }
+
         $curso->estudiantes()->syncWithoutDetaching([$user->id]);
 
         if ($request->expectsJson()) {
@@ -193,5 +209,61 @@ class CursoController extends Controller
         return redirect()
             ->route('student.courses')
             ->with('status', 'Te inscribiste en el curso correctamente.');
+    }
+
+    public function createDraft(Request $request)
+    {
+        $mentor = $request->user();
+        abort_unless($mentor && method_exists($mentor, 'isMentor') && $mentor->isMentor(), 403);
+
+        $image = sprintf('https://picsum.photos/seed/%s/800/600', Str::uuid());
+
+        $curso = Curso::create([
+            'mentor_id' => $mentor->id,
+            'title' => 'Curso sin título',
+            'description' => 'Añade una descripción atractiva a tu curso.',
+            'price' => 0,
+            'duration' => 1,
+            'level' => 'principiante',
+            'category' => 'General',
+            'status' => 'borrador',
+            'image_url' => $image,
+            'objectives' => null,
+            'requirements' => null,
+        ]);
+
+        return redirect()->route('cursos.editor', $curso);
+    }
+
+    public function editor(Request $request, Curso $curso)
+    {
+        $this->authorizeCourseMentor($request->user(), $curso);
+
+        $curso->load(['modules.lessons']);
+
+        return view('cursos.editor', compact('curso'));
+    }
+
+    public function sendToReview(Request $request, Curso $curso)
+    {
+        $this->authorizeCourseMentor($request->user(), $curso);
+
+        if ($curso->status === 'pendiente') {
+            return back()->with('status', 'El curso ya fue enviado a revisión.');
+        }
+
+        $curso->update(['status' => 'pendiente']);
+
+        return redirect()
+            ->route('cursos.editor', $curso)
+            ->with('status', 'Curso enviado a revisión.');
+    }
+
+    protected function authorizeCourseMentor(?User $user, Curso $curso): void
+    {
+        abort_unless(
+            $user && method_exists($user, 'isMentor') && $user->isMentor() && $curso->mentor_id === $user->id,
+            403
+        );
     }
 }

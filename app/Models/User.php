@@ -28,6 +28,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // ✅ Agregar role aquí
+        'avatar_url',
+        'timezone',
+        'notification_channel',
+        'profile_level',
     ];
 
     /**
