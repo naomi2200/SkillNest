@@ -135,7 +135,7 @@ Route::middleware('auth')->group(function () {
         ->prefix('admin')
         ->name('admin.')
         ->group(function () {
-            Route::view('/dashboard', 'dashboard.admin.index')->name('dashboard');
+            Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
 
             Route::prefix('courses')->name('courses.')->group(function () {
                 Route::get('/', [CourseReviewController::class, 'index'])->name('index');

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Panel Administrativo') · SkillNest</title>
+    <title><?php echo $__env->yieldContent('title', 'Panel Administrativo'); ?> · SkillNest</title>
     <style>
         * {
             margin: 0;
@@ -296,11 +296,11 @@
                 <p>Admin Panel</p>
             </div>
             <nav>
-                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a href="<?php echo e(route('admin.dashboard')); ?>" class="<?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>">
                     <span class="nav-icon">📊</span>
                     Dashboard
                 </a>
-                <a href="{{ route('admin.courses.index') }}" class="{{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
+                <a href="<?php echo e(route('admin.courses.index')); ?>" class="<?php echo e(request()->routeIs('admin.courses.*') ? 'active' : ''); ?>">
                     <span class="nav-icon">📚</span>
                     Cursos
                 </a>
@@ -326,26 +326,28 @@
             <header>
                 <div class="header-content">
                     <div class="header-title">
-                        <h1>@yield('header-title', 'Panel Administrativo')</h1>
-                        <p>@yield('header-subtitle', 'Monitorea la actividad general de SkillNest')</p>
+                        <h1><?php echo $__env->yieldContent('header-title', 'Panel Administrativo'); ?></h1>
+                        <p><?php echo $__env->yieldContent('header-subtitle', 'Monitorea la actividad general de SkillNest'); ?></p>
                     </div>
                     <div class="header-user">
                         <div class="user-info">
-                            <p>{{ auth()->user()->name ?? 'Administrador' }}</p>
-                            <p>{{ auth()->user()->email ?? 'admin@skillnest.com' }}</p>
+                            <p><?php echo e(auth()->user()->name ?? 'Administrador'); ?></p>
+                            <p><?php echo e(auth()->user()->email ?? 'admin@skillnest.com'); ?></p>
                         </div>
                         <div class="user-avatar">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                            <?php echo e(strtoupper(substr(auth()->user()->name ?? 'A', 0, 1))); ?>
+
                         </div>
                     </div>
                 </div>
             </header>
             <main>
                 <div class="admin-content">
-                    @yield('content')
+                    <?php echo $__env->yieldContent('content'); ?>
                 </div>
             </main>
         </div>
     </div>
 </body>
 </html>
+<?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/layouts/admin.blade.php ENDPATH**/ ?>

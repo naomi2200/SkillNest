@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@php
+<?php
     use Illuminate\Support\Facades\Route;
 
     $student = auth()->user();
@@ -30,8 +28,8 @@
             'active' => request()->routeIs('student.profile'),
         ],
     ];
-@endphp
-@push('styles')
+?>
+<?php $__env->startPush('styles'); ?>
     <style>
         .app-main {
             padding: 0;
@@ -760,9 +758,9 @@
             border-radius: 4px;
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="student-shell">
         <aside class="student-sidebar">
             <div class="student-brand">
@@ -770,26 +768,26 @@
                 <h2>SkillNest</h2>
             </div>
             <nav class="student-nav">
-                @foreach($navLinks as $link)
+                <?php $__currentLoopData = $navLinks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $link): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <a href="{{ $link['url'] }}" class="student-nav-link {{ $link['active'] ? 'active' : '' }}">
-                            <span>{{ $link['icon'] }}</span>
-                            <span>{{ $link['label'] }}</span>
+                        <a href="<?php echo e($link['url']); ?>" class="student-nav-link <?php echo e($link['active'] ? 'active' : ''); ?>">
+                            <span><?php echo e($link['icon']); ?></span>
+                            <span><?php echo e($link['label']); ?></span>
                         </a>
-                        @if($link['label'] === 'Dashboard')
+                        <?php if($link['label'] === 'Dashboard'): ?>
                             <button id="student-theme-toggle" class="student-theme-toggle" type="button" title="Cambiar tema" aria-pressed="false">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                     <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/>
                                 </svg>
                             </button>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </nav>
             <div style="margin-top:auto; font-size:12px; color:#94a3b8;">
                 <p style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">Sesión</p>
-                <p style="font-weight:600; color:#1f2937;">{{ $student->name }}</p>
-                <p>{{ $student->email }}</p>
+                <p style="font-weight:600; color:#1f2937;"><?php echo e($student->name); ?></p>
+                <p><?php echo e($student->email); ?></p>
             </div>
         </aside>
 
@@ -797,28 +795,28 @@
             <div class="student-header">
                 <div>
                     <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Panel estudiante</p>
-                    <h1>@yield('student-title', 'Panel del estudiante')</h1>
-                    <p>@yield('student-subtitle', 'Revisa tus cursos y mentorías')</p>
+                    <h1><?php echo $__env->yieldContent('student-title', 'Panel del estudiante'); ?></h1>
+                    <p><?php echo $__env->yieldContent('student-subtitle', 'Revisa tus cursos y mentorías'); ?></p>
                 </div>
                 <div class="student-actions">
-                    @yield('student-actions')
+                    <?php echo $__env->yieldContent('student-actions'); ?>
                 </div>
             </div>
 
             <div class="student-content">
-                @hasSection('student-widgets')
+                <?php if (! empty(trim($__env->yieldContent('student-widgets')))): ?>
                     <div class="stats-grid">
-                        @yield('student-widgets')
+                        <?php echo $__env->yieldContent('student-widgets'); ?>
                     </div>
-                @endif
+                <?php endif; ?>
 
-                @yield('student-content')
+                <?php echo $__env->yieldContent('student-content'); ?>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         (function(){
             const KEY = 'student-theme';
@@ -844,4 +842,6 @@
             });
         })();
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/layouts/student.blade.php ENDPATH**/ ?>

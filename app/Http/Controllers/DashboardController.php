@@ -22,6 +22,9 @@ class DashboardController extends Controller
         if ($user?->isStudent()) {
             return redirect()->route('student.dashboard');
         }
+        if ($user?->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
 
         $stats = [
             'courses_active' => Curso::where('status', 'aprobado')->count(),
@@ -39,6 +42,7 @@ class DashboardController extends Controller
             ->orderBy('fecha_mentoria')
             ->take(5)
             ->get();
+        $pendingMentorships = Mentoria::where('estado', 'pendiente')->latest()->take(5)->get();
 
         return view('dashboard.index', compact(
             'stats',
@@ -46,6 +50,7 @@ class DashboardController extends Controller
             'upcomingMentorships',
             'pendingCourses',
             'recentUsers',
+            'pendingMentorships',
             'user'
         ));
     }

@@ -2,18 +2,25 @@
 
 @section('dashboard-title', 'Editor de curso')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pIVp98VYqCw42Hcps225y7sY9qsK0kGugHgdGXNq35p3xNmPR9U1FVLtZL1YI7Di5urN6LyjHgNsZM3Rp3crGQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+@endpush
+
+
 @section('dashboard-actions')
-    <div class="flex w-full flex-wrap items-center gap-4 rounded-[32px] border border-white/70 bg-white/95 px-6 py-4 shadow-lg shadow-primary/5 backdrop-blur">
-        <div class="flex flex-1 flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
-            <span class="rounded-full bg-secondary/10 px-4 py-1 text-secondary">Estado: <span class="text-secondary" id="course-status">{{ $curso->status }}</span></span>
-            <span class="text-xs normal-case tracking-normal text-slate-400" id="last-saved-indicator">Último guardado hace instantes</span>
+    <div class="editor-actions-bar">
+        <div>
+            <p class="editor-actions-caption">Acciones rápidas</p>
+            <h3 class="editor-actions-title">Gestiona tu publicación</h3>
         </div>
-        <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
-            <a href="{{ route('cursos.show', $curso) }}" class="rounded-full border border-slate-200 bg-white px-5 py-2 text-secondary transition hover:border-secondary hover:text-secondary">Vista previa</a>
-            <form action="{{ route('cursos.send-to-review', $curso) }}" method="POST" class="flex">
+        <div class="editor-actions-buttons">
+            <a href="{{ route('cursos.show', $curso) }}" class="btn-secondary">
+                <i class="fas fa-eye"></i> Vista Previa
+            </a>
+            <form action="{{ route('cursos.send-to-review', $curso) }}" method="POST">
                 @csrf
-                <button type="submit" class="rounded-full bg-gradient-to-r from-secondary to-primary px-6 py-2 text-white shadow-lg shadow-primary/30 transition hover:from-secondary/90 hover:to-primary/90">
-                    Enviar a revisión
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Enviar a Revisión
                 </button>
             </form>
         </div>
@@ -26,203 +33,494 @@
 @endphp
 
 @section('dashboard-content')
-    <div id="editor-toast" class="pointer-events-none fixed right-6 top-24 hidden rounded-2xl bg-secondary px-4 py-2 text-sm font-semibold text-white shadow-card"></div>
+    <div id="editor-toast" class="fixed right-6 top-24 z-50 hidden rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 font-semibold text-white shadow-2xl">
+        <i class="fas fa-check-circle mr-2"></i>Cambios guardados correctamente
+    </div>
     <style>
-        .editor-shell {
-            background: linear-gradient(135deg, #f6f4ff 0%, #e8e5ff 40%, #e0dbff 100%);
-            border-radius: 44px;
-            padding: 36px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --color-primary: #6c47ff;
+            --color-primary-hover: #5a38e6;
+            --shadow-card: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #fafafa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .editor-actions-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 20px 28px;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(108,71,255,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .editor-actions-caption {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #9ca3af;
+            margin: 0 0 4px;
+        }
+        .editor-actions-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1f2937;
+        }
+        .editor-actions-buttons {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .navbar {
+            background: #fff;
+            padding: 16px 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 0;
+        }
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--color-primary);
+        }
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--color-primary);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(108,71,255,0.4);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-primary);
+            padding: 12px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: 2px solid var(--color-primary);
+        }
+        .btn-secondary:hover {
+            background: var(--color-primary);
+            color: #fff;
+        }
+        .editor-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
         }
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
         }
         .stat-card {
-            border-radius: 28px;
-            background: rgba(255,255,255,0.95);
-            border: 1px solid rgba(229,231,235,0.8);
-            box-shadow: 0 20px 55px rgba(108,71,255,0.12);
-            padding: 26px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            border-color: rgba(108,71,255,0.2);
         }
         .stat-card h4 {
-            font-size: 11px;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.35em;
-            color: #a5a6d6;
+            letter-spacing: 0.2em;
+            color: #6b7280;
             font-weight: 800;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         .stat-card strong {
-            font-size: 34px;
+            font-size: 2.5rem;
             font-weight: 900;
-            background: linear-gradient(135deg, #6c47ff, #8b5cf6);
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            display: block;
+            line-height: 1;
         }
         .editor-layout {
             display: grid;
-            grid-template-columns: 360px minmax(0,1fr) 300px;
-            gap: 24px;
+            grid-template-columns: 380px 1fr 320px;
+            gap: 32px;
         }
         @media (max-width: 1400px) {
-            .editor-layout { grid-template-columns: 320px minmax(0,1fr); }
-            .editor-layout aside:last-of-type { grid-column: span 2; }
+            .editor-layout {
+                grid-template-columns: 340px 1fr;
+            }
+            .editor-layout aside:last-of-type {
+                grid-column: span 2;
+            }
         }
         @media (max-width: 1024px) {
-            .editor-shell { padding: 24px; }
-            .editor-layout { grid-template-columns: 1fr; }
-            .editor-layout aside:last-of-type { grid-column: auto; }
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+            .editor-layout aside:last-of-type {
+                grid-column: auto;
+            }
         }
         .editor-card {
-            background: rgba(255,255,255,0.98);
-            border-radius: 32px;
-            padding: 28px;
-            border: 1px solid rgba(229,231,235,0.8);
-            box-shadow: 0 22px 60px rgba(99,102,241,0.15);
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-card);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .editor-card:hover {
+            border-color: rgba(108,71,255,0.1);
+        }
+        .editor-card h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--color-primary);
+            font-weight: 800;
+            margin-bottom: 24px;
         }
         .form-stack label {
             display: block;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #4b5563;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
             margin-bottom: 8px;
         }
         .form-stack input,
         .form-stack textarea,
         .form-stack select {
             width: 100%;
-            border-radius: 16px;
-            border: 2px solid rgba(226,232,240,0.85);
-            padding: 12px 16px;
-            font-size: 14px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.08);
+            padding: 16px 20px;
+            font-size: 0.95rem;
             background: #fff;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
         .form-stack input:focus,
         .form-stack textarea:focus,
         .form-stack select:focus {
             outline: none;
-            border-color: #6c47ff;
-            box-shadow: 0 0 0 4px rgba(108,71,255,0.12);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px rgba(108,71,255,0.1);
+            transform: translateY(-2px);
+        }
+        .image-preview-container {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px dashed rgba(108,71,255,0.3);
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            margin-bottom: 16px;
+        }
+        .image-preview-container img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .image-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.95);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .modules-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0,0,0,0.06);
+        }
+        .modules-head h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .module-card {
-            border-radius: 28px;
-            border: 2px solid rgba(226,232,240,0.9);
             background: #fff;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(108,71,255,0.1);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 2px solid rgba(0,0,0,0.06);
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .module-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 20px 40px rgba(108,71,255,0.15);
+            transform: translateY(-4px);
         }
         .module-card.sortable-ghost,
         .lesson-block.sortable-ghost { opacity: 0.6; transform: scale(0.98); }
         .module-card.is-dragging,
-        .lesson-block.is-dragging { border-color: #6c47ff; }
-        .module-top { display: flex; gap: 16px; margin-bottom: 18px; }
+        .lesson-block.is-dragging { border-color: var(--color-primary); }
+        .module-top {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .module-fields {
+            flex: 1;
+        }
         .module-fields input,
         .module-fields textarea {
             width: 100%;
-            border-radius: 18px;
-            border: 2px solid rgba(226,232,240,0.85);
-            padding: 12px 16px;
-            font-size: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(0,0,0,0.08);
+            padding: 16px 20px;
+            font-size: 0.95rem;
             background: #fff;
+            transition: all 0.3s ease;
         }
-        .module-fields textarea { margin-top: 10px; min-height: 70px; resize: vertical; }
+        .module-fields textarea {
+            margin-top: 16px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        .module-actions {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
         .module-actions button {
             border: none;
             border-radius: 12px;
-            padding: 10px 14px;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.05em;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
             cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .module-handle { background: rgba(108,71,255,0.08); border: 2px solid rgba(108,71,255,0.25); cursor: grab; }
-        .module-add-lesson { background: rgba(16,185,129,0.15); color: #047857; }
-        .module-delete { background: rgba(239,68,68,0.15); color: #dc2626; }
+        .module-handle {
+            background: rgba(108,71,255,0.1);
+            color: var(--color-primary);
+            border: 2px solid rgba(108,71,255,0.2);
+            cursor: grab;
+        }
+        .module-add-lesson {
+            background: rgba(16,185,129,0.1);
+            color: #047857;
+            border: 2px solid rgba(16,185,129,0.2);
+        }
+        .module-delete {
+            background: rgba(239,68,68,0.1);
+            color: #dc2626;
+            border: 2px solid rgba(239,68,68,0.2);
+        }
         .lesson-block {
-            border-radius: 20px;
-            border: 1px solid rgba(226,232,240,0.8);
-            background: linear-gradient(135deg, #fafbff 0%, #f3f5ff 100%);
-            padding: 16px;
-            margin-top: 12px;
+            background: linear-gradient(135deg, #fafbff, #f3f5ff);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
         }
-        .lesson-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .lesson-block:hover {
+            border-color: var(--color-primary);
+            transform: translateX(4px);
+        }
+        .lesson-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
         .lesson-row input,
         .lesson-row select {
-            border-radius: 14px;
+            flex: 1;
+            min-width: 120px;
+            border-radius: 12px;
             border: 2px solid transparent;
-            padding: 10px 14px;
+            padding: 12px 16px;
             background: #fff;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
         .lesson-row input:focus,
         .lesson-row select:focus {
-            border-color: #6c47ff;
+            border-color: var(--color-primary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(108,71,255,0.1);
         }
-        .lesson-delete { background: rgba(239,68,68,0.15); color: #dc2626; }
+        .checklist {
+            list-style: none;
+        }
         .checklist li {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            color: #4b5563;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            font-weight: 500;
+            color: #374151;
+        }
+        .checklist li:last-child {
+            border-bottom: none;
         }
         .check-dot {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border: 2px solid rgba(226,232,240,0.9);
+            border: 2px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
         .check-dot.fill {
             background: linear-gradient(135deg, #10b981, #059669);
             border-color: transparent;
         }
+        .check-dot.fill::before {
+            content: '\2713';
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
         .progress-bar {
             height: 8px;
             border-radius: 999px;
-            background: rgba(226,232,240,0.8);
+            background: rgba(0,0,0,0.06);
             overflow: hidden;
+            margin-top: 8px;
         }
         .progress-bar span {
             display: block;
             height: 100%;
             border-radius: inherit;
-            background: linear-gradient(90deg, #6c47ff, #8b5cf6);
+            background: linear-gradient(90deg, var(--color-primary), #8b5cf6);
+            transition: width 0.5s ease;
+        }
+        .tips-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 32px;
+            border: 1px solid rgba(186,230,253,0.5);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 48px 32px;
+            color: #6b7280;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(108,71,255,0.1), rgba(139,92,246,0.1));
+            border: 1px solid rgba(108,71,255,0.2);
+            width: fit-content;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--color-primary);
         }
     </style>
-
-    <div class="editor-shell space-y-6">
+    @php
+        $initialImage = $curso->image_url
+            ? (\Illuminate\Support\Str::startsWith($curso->image_url, ['http://', 'https://'])
+                ? $curso->image_url
+                : asset($curso->image_url))
+            : 'https://picsum.photos/seed/' . $curso->id . '/800/600';
+        $basicFields = [
+            ['name' => 'title', 'label' => 'T?tulo del Curso', 'type' => 'text'],
+            ['name' => 'category', 'label' => 'Categor?a', 'type' => 'text'],
+            ['name' => 'level', 'label' => 'Nivel', 'type' => 'select', 'options' => ['principiante','intermedio','avanzado']],
+            ['name' => 'price', 'label' => 'Precio (S/)', 'type' => 'number', 'step' => '0.01'],
+            ['name' => 'duration', 'label' => 'Duraci?n (horas)', 'type' => 'number', 'min' => 1],
+            ['name' => 'description', 'label' => 'Descripci?n Corta', 'type' => 'textarea'],
+            ['name' => 'objectives', 'label' => 'Objetivos de Aprendizaje', 'type' => 'textarea'],
+            ['name' => 'requirements', 'label' => 'Requisitos', 'type' => 'textarea'],
+        ];
+    @endphp
+    <div class="editor-wrapper">
         <div class="stats-row">
             <div class="stat-card">
-                <h4>Estado</h4>
-                <div class="flex items-center gap-2 text-sm font-semibold text-secondary">
-                    <span class="rounded-full bg-secondary/10 px-3 py-1 capitalize" id="course-status">{{ $curso->status }}</span>
-                    <span class="text-slate-400" id="last-saved-indicator">Último guardado hace instantes</span>
+                <h4>Estado del Curso</h4>
+                <div class="flex items-center gap-4">
+                    <span class="status-badge">
+                        <i class="fas fa-pencil-alt"></i> <span class="capitalize" id="course-status">{{ $curso->status }}</span>
+                    </span>
+                    <span class="text-sm text-gray-600" id="last-saved-indicator">?ltimo guardado hace instantes</span>
                 </div>
             </div>
             <div class="stat-card">
-                <h4>Módulos</h4>
+                <h4>M?dulos</h4>
                 <strong>{{ $modulesCount }}</strong>
-                <p class="text-sm text-slate-500">Estructuras creadas</p>
+                <p class="text-sm text-gray-600 mt-2">Estructuras creadas</p>
             </div>
             <div class="stat-card">
                 <h4>Lecciones</h4>
                 <strong>{{ $lessonsCount }}</strong>
-                <p class="text-sm text-slate-500">Bloques interactivos</p>
+                <p class="text-sm text-gray-600 mt-2">Bloques de contenido</p>
             </div>
         </div>
 
@@ -232,175 +530,189 @@
              data-order-endpoint="{{ route('cursos.order', $curso) }}"
              data-image-endpoint="{{ route('cursos.update-image', $curso) }}"
              class="editor-layout">
-        @php
-            $initialImage = $curso->image_url
-                ? (\Illuminate\Support\Str::startsWith($curso->image_url, ['http://', 'https://'])
-                    ? $curso->image_url
-                    : asset($curso->image_url))
-                : 'https://picsum.photos/seed/' . $curso->id . '/800/600';
-        @endphp
+            <aside class="editor-card form-stack">
+                <h3>Imagen del Curso</h3>
+                <div class="image-preview-container">
+                    <img id="course-image-preview" src="{{ $initialImage }}" alt="Imagen del curso">
+                    <span class="image-badge">Portada</span>
+                </div>
+                <label>
+                    <input type="file" accept="image/*" id="course-image-input" class="w-full cursor-pointer rounded-2xl border border-dashed border-gray-300 px-4 py-3">
+                </label>
+                <span class="text-xs text-gray-500 mt-2">Formatos: JPG o PNG (m?x 4 MB)</span>
 
-        <aside class="editor-card form-stack">
-            <h3 class="mb-4 text-xs font-extrabold uppercase tracking-[0.35em] text-secondary">Imagen del curso</h3>
-            <div class="relative overflow-hidden rounded-[28px] border border-slate-100">
-                <img id="course-image-preview" src="{{ $initialImage }}" alt="Imagen del curso" class="h-48 w-full object-cover">
-                <span class="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-secondary shadow">Portada</span>
-            </div>
-            <label class="mt-3 block">
-                <input type="file" accept="image/*" id="course-image-input" class="w-full cursor-pointer rounded-2xl border border-dashed border-slate-300 px-3 py-2 text-sm">
-            </label>
-            <span class="text-xs text-slate-400">Formatos permitidos: JPG o PNG (máx 4 MB).</span>
+                <div class="mt-8 space-y-6">
+                    @foreach($basicFields as $field)
+                        <div>
+                            <label>{{ $field['label'] }}</label>
+                            @if($field['type'] === 'select')
+                                <select data-basic-field="{{ $field['name'] }}">
+                                    @foreach($field['options'] as $option)
+                                        <option value="{{ $option }}" @selected($curso->{$field['name']} === $option)>{{ ucfirst($option) }}</option>
+                                    @endforeach
+                                </select>
+                            @elseif($field['type'] === 'textarea')
+                                <textarea data-basic-field="{{ $field['name'] }}" rows="3">{{ $curso->{$field['name']} }}</textarea>
+                            @else
+                                <input type="{{ $field['type'] }}"
+                                       step="{{ $field['step'] ?? '' }}"
+                                       min="{{ $field['min'] ?? '' }}"
+                                       data-basic-field="{{ $field['name'] }}"
+                                       value="{{ $curso->{$field['name']} }}">
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </aside>
 
-            <div class="mt-6 space-y-4">
-                @php
-                    $basicFields = [
-                        ['name' => 'title', 'label' => 'Título', 'type' => 'text'],
-                        ['name' => 'category', 'label' => 'Categoría', 'type' => 'text'],
-                        ['name' => 'level', 'label' => 'Nivel', 'type' => 'select', 'options' => ['principiante','intermedio','avanzado']],
-                        ['name' => 'price', 'label' => 'Precio (S/)', 'type' => 'number', 'step' => '0.01'],
-                        ['name' => 'duration', 'label' => 'Duración (horas)', 'type' => 'number', 'min' => 1],
-                        ['name' => 'description', 'label' => 'Descripción corta', 'type' => 'textarea'],
-                        ['name' => 'objectives', 'label' => 'Objetivos', 'type' => 'textarea'],
-                        ['name' => 'requirements', 'label' => 'Requisitos', 'type' => 'textarea'],
-                    ];
-                @endphp
-
-                @foreach($basicFields as $field)
+            <section class="editor-card">
+                <div class="modules-head">
                     <div>
-                        <label>{{ $field['label'] }}</label>
-                        @if($field['type'] === 'select')
-                            <select data-basic-field="{{ $field['name'] }}">
-                                @foreach($field['options'] as $option)
-                                    <option value="{{ $option }}" @selected($curso->{$field['name']} === $option)>{{ ucfirst($option) }}</option>
-                                @endforeach
-                            </select>
-                        @elseif($field['type'] === 'textarea')
-                            <textarea data-basic-field="{{ $field['name'] }}" rows="3">{{ $curso->{$field['name']} }}</textarea>
-                        @else
-                            <input type="{{ $field['type'] }}"
-                                   step="{{ $field['step'] ?? '' }}"
-                                   min="{{ $field['min'] ?? '' }}"
-                                   data-basic-field="{{ $field['name'] }}"
-                                   value="{{ $curso->{$field['name']} }}">
-                        @endif
+                        <p class="text-sm uppercase tracking-wider text-gray-500">Estructura del Curso</p>
+                        <h2>Organiza m?dulos y lecciones</h2>
                     </div>
-                @endforeach
-            </div>
-        </aside>
-
-        <section class="editor-card">
-            <div class="modules-head">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Módulos</p>
-                    <h2 class="text-xl font-bold text-secondary">Estructura visual del curso</h2>
+                    <button type="button" id="add-module-btn" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Agregar M?dulo
+                    </button>
                 </div>
-                <button type="button" id="add-module-btn" class="rounded-full bg-gradient-to-r from-secondary to-primary px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/30">+ Agregar módulo</button>
-            </div>
 
-            <div id="modules-canvas" class="space-y-4">
-                @foreach($curso->modules as $module)
-                    <div class="module-card" data-module-id="{{ $module->id }}">
-                        <div class="module-top">
-                            <div class="module-fields">
-                                <input type="text" class="module-title" value="{{ $module->title }}">
-                                <textarea class="module-description" placeholder="Descripción del módulo (opcional)">{{ $module->description }}</textarea>
-                            </div>
-                            <div class="module-actions">
-                                <button type="button" class="module-handle" title="Arrastrar módulo">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 9h14M5 15h14"/>
-                                    </svg>
-                                </button>
-                                <button type="button" class="module-add-lesson">+ Lección</button>
-                                <button type="button" class="module-delete">Eliminar</button>
-                            </div>
-                        </div>
-
-                        <div class="lessons-wrapper" data-lessons-container>
-                            @foreach($module->lessons as $lesson)
-                                <div class="lesson-block" data-lesson-id="{{ $lesson->id }}">
-                                    <div class="lesson-row">
-                                        <button type="button" class="lesson-handle" title="Arrastrar lección">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h4m-4 6h4M5 9h.01M5 15h.01M18.99 9H19m-.01 6H19"/>
-                                            </svg>
-                                        </button>
-                                        <input type="text" class="lesson-title" value="{{ $lesson->title }}">
-                                        <select class="lesson-type">
-                                            @foreach(['video','reading','quiz','live','file'] as $type)
-                                                <option value="{{ $type }}" @selected($lesson->type === $type)>{{ ucfirst($type) }}</option>
-                                            @endforeach
-                                        </select>
-                                        <button type="button" class="lesson-delete">Eliminar</button>
-                                    </div>
-                                    <div class="lesson-extra mt-3 space-y-2 text-sm text-slate-600">
-                                        <input type="text" class="lesson-video hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del video" value="{{ $lesson->video_url }}">
-                                        <input type="text" class="lesson-resource hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del recurso" value="{{ $lesson->resource_url }}">
-                                        <div class="lesson-editor hidden rounded-2xl border border-slate-200 px-3 py-2 text-sm" contenteditable="true">{!! nl2br(e($lesson->content)) !!}</div>
-                                        <textarea class="lesson-content hidden w-full rounded-2xl border border-slate-200 px-3 py-2" rows="3" placeholder="Contenido">{{ $lesson->content }}</textarea>
-                                    </div>
+                <div id="modules-canvas" class="space-y-6">
+                    @foreach($curso->modules as $module)
+                        <div class="module-card" data-module-id="{{ $module->id }}">
+                            <div class="module-top">
+                                <div class="module-fields">
+                                    <input type="text" class="module-title" value="{{ $module->title }}" placeholder="T?tulo del m?dulo">
+                                    <textarea class="module-description" placeholder="Descripci?n del m?dulo (opcional)">{{ $module->description }}</textarea>
                                 </div>
-                            @endforeach
+                                <div class="module-actions">
+                                    <button type="button" class="module-handle" title="Arrastrar m?dulo">
+                                        <i class="fas fa-grip-vertical"></i>
+                                    </button>
+                                    <button type="button" class="module-add-lesson">
+                                        <i class="fas fa-plus mr-1"></i>Lecci?n
+                                    </button>
+                                    <button type="button" class="module-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="lessons-wrapper" data-lessons-container>
+                                @foreach($module->lessons as $lesson)
+                                    <div class="lesson-block" data-lesson-id="{{ $lesson->id }}">
+                                        <div class="lesson-row">
+                                            <button type="button" class="module-handle lesson-handle" title="Arrastrar lecci?n">
+                                                <i class="fas fa-grip-vertical"></i>
+                                            </button>
+                                            <input type="text" class="lesson-title" value="{{ $lesson->title }}" placeholder="T?tulo de la lecci?n">
+                                            <select class="lesson-type">
+                                                @foreach(['video','reading','quiz','live','file'] as $type)
+                                                    <option value="{{ $type }}" @selected($lesson->type === $type)>{{ ucfirst($type) }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="button" class="module-delete lesson-delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="lesson-extra mt-4 space-y-3">
+                                            <input type="text" class="lesson-video hidden w-full rounded-xl border border-gray-200 p-3"
+                                                   placeholder="URL del video" value="{{ $lesson->video_url }}">
+                                            <input type="text" class="lesson-resource hidden w-full rounded-xl border border-gray-200 p-3"
+                                                   placeholder="URL del recurso" value="{{ $lesson->resource_url }}">
+                                            <div class="lesson-editor hidden rounded-xl border border-gray-200 p-3 text-sm" contenteditable="true">{!! nl2br(e($lesson->content)) !!}</div>
+                                            <textarea class="lesson-content hidden w-full rounded-xl border border-gray-200 p-3" rows="3" placeholder="Contenido">{{ $lesson->content }}</textarea>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                    @if($curso->modules->isEmpty())
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay m?dulos todav?a</h3>
+                            <p class="text-gray-500 mb-6">Agrega tu primera estructura para empezar</p>
+                            <button type="button" class="btn-primary" id="add-first-module">
+                                <i class="fas fa-plus mr-2"></i>Agregar primer m?dulo
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+            <aside class="editor-card space-y-8">
+                <div>
+                    <h3>Checklist de Completado</h3>
+                    <ul class="checklist mt-6" id="checklist">
+                        <li>
+                            <span class="check-dot" data-check="basics"></span>
+                            <span>Informaci?n b?sica completa</span>
+                        </li>
+                        <li>
+                            <span class="check-dot" data-check="modules"></span>
+                            <span>Al menos un m?dulo</span>
+                        </li>
+                        <li>
+                            <span class="check-dot" data-check="lessons"></span>
+                            <span>M?dulos con lecciones</span>
+                        </li>
+                        <li>
+                            <span class="check-dot" data-check="objectives"></span>
+                            <span>Objetivos definidos</span>
+                        </li>
+                        <li>
+                            <span class="check-dot" data-check="requirements"></span>
+                            <span>Requisitos definidos</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tips-card">
+                    <h4 class="font-bold text-blue-900 mb-4">?? Consejos R?pidos</h4>
+                    <ul class="space-y-3 text-sm text-blue-800">
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                            <span>Guarda contenido clave en objetivos para que el panel admin lo lea</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-amber-500 flex-shrink-0"></span>
+                            <span>Usa quizzes para bloquear el siguiente m?dulo y asegurar el aprendizaje</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                            <span>Adjunta recursos en formato file para materiales descargables bonus</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="space-y-6">
+                    <h3>Progreso del Curso</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm font-semibold text-gray-600">
+                                <span>Borrador</span>
+                                <span>{{ $modulesCount ? 'Completado' : 'Pendiente' }}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <span style="width: {{ $modulesCount ? '70%' : '30%' }}"></span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm font-semibold text-gray-600">
+                                <span>Revisi?n</span>
+                                <span>{{ $curso->status === 'pendiente' ? 'Enviado' : 'Por enviar' }}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <span style="width: {{ $curso->status === 'pendiente' ? '80%' : '35%' }}"></span>
+                            </div>
                         </div>
                     </div>
-                @endforeach
-                @if($curso->modules->isEmpty())
-                    <p class="rounded-3xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm text-slate-400">
-                        Todavía no has agregado módulos. Usa el botón "Agregar módulo" para iniciar.
-                    </p>
-                @endif
-            </div>
-        </section>
-
-        <aside class="editor-card space-y-4">
-            <div>
-                <p class="text-xs font-extrabold uppercase tracking-[0.35em] text-secondary">Checklist</p>
-                <ul class="checklist mt-3 space-y-3 text-sm text-slate-600" id="checklist">
-                    <li><span class="check-dot" data-check="basics"></span>Información básica completa</li>
-                    <li><span class="check-dot" data-check="modules"></span>Al menos un módulo</li>
-                    <li><span class="check-dot" data-check="lessons"></span>Módulos con lecciones</li>
-                    <li><span class="check-dot" data-check="objectives"></span>Objetivos definidos</li>
-                    <li><span class="check-dot" data-check="requirements"></span>Requisitos definidos</li>
-                </ul>
-            </div>
-            <div class="rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3">
-                <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Notas rápidas</p>
-                <ul class="mt-3 space-y-2 text-sm text-slate-600">
-                    <li class="flex items-start gap-2">
-                        <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
-                        Guarda contenido clave en objetivos para que el panel admin lo lea.
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="mt-1 h-2 w-2 rounded-full bg-amber-500"></span>
-                        Usa quizzes para bloquear el siguiente módulo.
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>
-                        Adjunta recursos en formato file para bonus descargables.
-                    </li>
-                </ul>
-            </div>
-            <div class="space-y-3">
-                <p class="text-xs uppercase tracking-[0.35em] text-secondary">Línea de progreso</p>
-                <div>
-                    <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
-                        <span>Borrador</span>
-                        <span>{{ $modulesCount ? 'Completado' : 'Pendiente' }}</span>
-                    </div>
-                    <div class="progress-bar"><span style="width: {{ $modulesCount ? '70%' : '30%' }}"></span></div>
                 </div>
-                <div>
-                    <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
-                        <span>Revisión</span>
-                        <span>{{ $curso->status === 'pendiente' ? 'Enviado' : 'Por enviar' }}</span>
-                    </div>
-                    <div class="progress-bar"><span style="width: {{ $curso->status === 'pendiente' ? '80%' : '35%' }}"></span></div>
-                </div>
-            </div>
-        </aside>
+            </aside>
         </div>
     </div>
 @endsection
+
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
@@ -585,7 +897,7 @@
                 template.dataset.lessonId = lesson.id;
                 template.innerHTML = `
                     <div class="lesson-row">
-                        <button type="button" class="lesson-handle" title="Arrastrar lección">
+                        <button type="button" class="module-handle lesson-handle" title="Arrastrar lección">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h4m-4 6h4M5 9h.01M5 15h.01M18.99 9H19m-.01 6H19"/>
                             </svg>
@@ -594,7 +906,7 @@
                         <select class="lesson-type">
                             ${['video','reading','quiz','live','file'].map(type => `<option value="${type}" ${lesson.type === type ? 'selected' : ''}>${type.charAt(0).toUpperCase() + type.slice(1)}</option>`).join('')}
                         </select>
-                        <button type="button" class="lesson-delete">Eliminar</button>
+                        <button type="button" class="module-delete lesson-delete">Eliminar</button>
                     </div>
                     <div class="lesson-extra mt-3 space-y-2 text-sm text-slate-600">
                         <input type="text" class="lesson-video hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del video" value="${lesson.video_url ?? ''}">
@@ -670,7 +982,10 @@
                 });
             };
 
-            document.getElementById('add-module-btn').addEventListener('click', () => {
+            const addModuleBtn = document.getElementById('add-module-btn');
+            const addFirstModuleBtn = document.getElementById('add-first-module');
+
+            const handleCreateModule = () => {
                 const title = prompt('Nombre del módulo', 'Nuevo módulo');
                 if (!title) return;
                 fetchJson(`{{ url('/cursos') }}/${courseId}/modules`, {
@@ -708,7 +1023,10 @@
                     console.error(err);
                     showToast('Error creando módulo', 'error');
                 });
-            });
+            };
+
+            addModuleBtn?.addEventListener('click', handleCreateModule);
+            addFirstModuleBtn?.addEventListener('click', handleCreateModule);
 
             new Sortable(modulesCanvas, {
                 handle: '.module-handle',

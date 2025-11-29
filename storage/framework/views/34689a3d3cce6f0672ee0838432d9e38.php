@@ -1,10 +1,8 @@
-@extends('layouts.dashboard')
-
-@php
+<?php
     $currentView = request()->query('view', 'solicitudes');
-@endphp
+?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         :root {
             --primary: #6c47ff;
@@ -65,31 +63,32 @@
         @media (max-width:1024px){.table-header{flex-direction:column;align-items:stretch}.filter-form{justify-content:flex-start}}
         @media (max-width:768px){.filter-form{flex-direction:column;align-items:stretch}.table-container{border-radius:var(--radius)}.action-buttons{flex-direction:column}.btn-table{text-align:center}}
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('dashboard-content')
+<?php $__env->startSection('dashboard-content'); ?>
     <div class="dashboard-card space-y-6">
         <div class="table-header">
             <div class="header-content">
                 <div class="section-badge">Gestión de cursos</div>
                 <h2 class="section-title">
-                    {{ $currentView === 'tabla' ? 'Listado general' : 'Centro de solicitudes' }}
+                    <?php echo e($currentView === 'tabla' ? 'Listado general' : 'Centro de solicitudes'); ?>
+
                 </h2>
                 <p class="section-description">
-                    @if($currentView === 'tabla')
+                    <?php if($currentView === 'tabla'): ?>
                         Consulta cursos publicados, rechazados y en revisión en formato tabla.
-                    @else
+                    <?php else: ?>
                         Aprueba, rechaza o solicita cambios en un solo lugar.
-                    @endif
+                    <?php endif; ?>
                 </p>
             </div>
 
             <form method="GET" class="filter-form">
-                <input type="hidden" name="view" value="{{ $currentView === 'tabla' ? 'tabla' : 'solicitudes' }}">
+                <input type="hidden" name="view" value="<?php echo e($currentView === 'tabla' ? 'tabla' : 'solicitudes'); ?>">
                 <select name="status" class="filter-select">
-                    <option value="pendiente" @selected($currentStatus === 'pendiente')>Pendientes</option>
-                    <option value="aprobado" @selected($currentStatus === 'aprobado')>Aprobados</option>
-                    <option value="rechazado" @selected($currentStatus === 'rechazado')>Rechazados</option>
+                    <option value="pendiente" <?php if($currentStatus === 'pendiente'): echo 'selected'; endif; ?>>Pendientes</option>
+                    <option value="aprobado" <?php if($currentStatus === 'aprobado'): echo 'selected'; endif; ?>>Aprobados</option>
+                    <option value="rechazado" <?php if($currentStatus === 'rechazado'): echo 'selected'; endif; ?>>Rechazados</option>
                 </select>
                 <button class="filter-button">Filtrar</button>
             </form>
@@ -108,40 +107,41 @@
                 </tr>
                 </thead>
                 <tbody>
-                @forelse($courses as $course)
+                <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td>
-                            <div class="course-title">{{ $course->title }}</div>
-                            <div class="course-category">{{ $course->category ?? 'Sin categoría' }}</div>
+                            <div class="course-title"><?php echo e($course->title); ?></div>
+                            <div class="course-category"><?php echo e($course->category ?? 'Sin categoría'); ?></div>
                         </td>
-                        <td>{{ $course->mentor->name ?? 'Sin asignar' }}</td>
+                        <td><?php echo e($course->mentor->name ?? 'Sin asignar'); ?></td>
                         <td>
-                            <span class="status-badge status-{{ $course->status }}">
-                                {{ $course->status }}
+                            <span class="status-badge status-<?php echo e($course->status); ?>">
+                                <?php echo e($course->status); ?>
+
                             </span>
                         </td>
-                        <td>{{ $course->modules_count ?? 0 }}</td>
-                        <td class="text-xs text-slate-500">{{ optional($course->updated_at)->diffForHumans() ?? 'N/A' }}</td>
+                        <td><?php echo e($course->modules_count ?? 0); ?></td>
+                        <td class="text-xs text-slate-500"><?php echo e(optional($course->updated_at)->diffForHumans() ?? 'N/A'); ?></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="{{ route('admin.courses.show', $course->id) }}" class="btn-table btn-view">Ver</a>
-                                @if($course->status === 'pendiente')
-                                    <form action="{{ route('admin.courses.approve', $course->id) }}" method="POST">
-                                        @csrf
-                                        @method('PATCH')
+                                <a href="<?php echo e(route('admin.courses.show', $course->id)); ?>" class="btn-table btn-view">Ver</a>
+                                <?php if($course->status === 'pendiente'): ?>
+                                    <form action="<?php echo e(route('admin.courses.approve', $course->id)); ?>" method="POST">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('PATCH'); ?>
                                         <button class="btn-table btn-approve">Aprobar</button>
                                     </form>
-                                    <form action="{{ route('admin.courses.reject', $course->id) }}" method="POST">
-                                        @csrf
-                                        @method('PATCH')
+                                    <form action="<?php echo e(route('admin.courses.reject', $course->id)); ?>" method="POST">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('PATCH'); ?>
                                         <input type="hidden" name="rejection_reason" value="Curso rechazado desde la vista de tabla">
                                         <button class="btn-table btn-reject">Rechazar</button>
                                     </form>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6">
                             <div class="empty-state">
@@ -149,13 +149,16 @@
                             </div>
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div>
-            {{ $courses->links() }}
+            <?php echo e($courses->links()); ?>
+
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/admin/courses/index.blade.php ENDPATH**/ ?>
