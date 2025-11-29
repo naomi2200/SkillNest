@@ -280,13 +280,13 @@
                 </div>
                 <nav class="dashboard-nav">
                     <a href="{{ route('admin.dashboard') }}" class="nav-item active">
-                        <span>📊</span> <span>Resumen</span>
+                        <span>�Y"S</span> <span>Resumen</span>
                     </a>
                     <a href="{{ route('admin.courses.index', ['status' => 'aprobado', 'view' => 'tabla']) }}" class="nav-item">
-                        <span>📚</span> <span>Cursos</span>
+                        <span>�Y"s</span> <span>Cursos</span>
                     </a>
                     <a href="#" class="nav-item">
-                        <span>⚙️</span> <span>Configuración</span>
+                        <span>�sT��?</span> <span>Configuraci��n</span>
                     </a>
                 </nav>
             </aside>
@@ -297,7 +297,7 @@
                     <div class="hero-content">
                         <div class="hero-text">
                             <h1>Panel general de SkillNest</h1>
-                            <p>Supervisa los cursos enviados a revisión, el estado de la comunidad y las mentorías activas.</p>
+                            <p>Supervisa los cursos enviados a revisi��n, el estado de la comunidad y las mentor��as activas.</p>
                         </div>
                         <div class="hero-user">
                             <div class="user-info">
@@ -320,7 +320,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">{{ number_format($stats['courses_pending'] ?? 0) }}</div>
-                        <div class="stat-label">En revisión</div>
+                        <div class="stat-label">En revisi��n</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">{{ number_format($stats['courses_drafts'] ?? 0) }}</div>

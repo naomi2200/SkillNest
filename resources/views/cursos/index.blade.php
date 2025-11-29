@@ -363,13 +363,8 @@
                                 <div class="flex gap-2">
                                     @if($model)
                                         <a href="{{ route('cursos.show', $model) }}" class="btn-secondary" style="border-radius:999px;">Ver más</a>
-                                        <form action="{{ route('cursos.enroll', $model) }}" method="POST">
-                                            @csrf
-                                            <button class="btn-primary" style="border-radius:999px;">Inscribirme</button>
-                                        </form>
                                     @else
                                         <a href="{{ route('cursos.index') }}" class="btn-secondary" style="border-radius:999px;">Ver más</a>
-                                        <button type="button" class="btn-primary" style="border-radius:999px;">Inscribirme</button>
                                     @endif
                                 </div>
                             </footer>

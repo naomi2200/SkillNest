@@ -362,7 +362,6 @@
                         <div class="mentor-actions">
                             @if($mentorUser)
                                 <a href="{{ route('mentor.public.show', $mentorUser->id) }}" class="btn btn-primary">Ver perfil</a>
-                                <a href="{{ route('mentor.book.form', $mentorUser->id) }}" class="btn btn-outline">Agendar mentoría</a>
                             @else
                                 <span class="text-xs text-gray-400">Mentor no disponible</span>
                             @endif
@@ -378,3 +377,5 @@
         </div>
     </div>
 @endsection
+
+
