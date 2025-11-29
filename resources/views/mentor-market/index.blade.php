@@ -59,12 +59,12 @@
             color: var(--gray-500);
         }
         .mentor-market .filter-section {
-            background: var(--white);
+            background: linear-gradient(180deg, #ede9fe 0%, #ddd6fe 100%);
             border-radius: var(--radius-xl);
-            padding: clamp(24px, 3vw, 32px);
+            padding: clamp(20px, 3vw, 28px);
             margin-bottom: 48px;
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--gray-200);
+            box-shadow: 0 20px 50px rgba(124,58,237,0.18);
+            border: 1px solid rgba(124,58,237,0.2);
             backdrop-filter: blur(10px);
         }
         .mentor-market .filter-grid {
@@ -79,26 +79,26 @@
         }
         .mentor-market .filter-label {
             font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.3em;
+            font-weight: 800;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
-            color: var(--gray-500);
+            color: #43315f;
             margin-bottom: 8px;
         }
         .mentor-market .form-input,
         .mentor-market .form-select {
             padding: 12px 16px;
-            border: 1px solid var(--gray-300);
+            border: 1px solid rgba(124,58,237,0.22);
             border-radius: var(--radius);
             font-size: 1rem;
             transition: all 0.2s ease;
-            background-color: var(--white);
+            background-color: #fff;
         }
         .mentor-market .form-input:focus,
         .mentor-market .form-select:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
         }
         .mentor-market .filter-actions {
             display: flex;
@@ -119,9 +119,9 @@
             border: none;
         }
         .mentor-market .btn-gradient {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
             color: #fff;
-            box-shadow: 0 10px 20px rgba(58, 87, 232, 0.25);
+            box-shadow: 0 12px 28px rgba(124, 58, 237, 0.25);
         }
         .mentor-market .btn-gradient:hover {
             transform: translateY(-2px);

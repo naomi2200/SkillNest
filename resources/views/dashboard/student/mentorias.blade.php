@@ -1,6 +1,6 @@
 @extends('layouts.student')
 
-@section('student-title', 'Mis Mentorías')
+@section('student-title', 'Mis mentorías')
 @section('student-subtitle', 'Explora y gestiona todo tu ecosistema SkillNest')
 
 @push('styles')
@@ -10,7 +10,7 @@
         .student-main .mentorias-page .tab-btn { background:transparent; color:#6b7280; border:none; padding:.65rem 1.25rem; border-radius:.65rem; font-weight:600; font-size:.9rem; cursor:pointer; }
         .student-main .mentorias-page .tab-btn.active { background:#6366f1; color:#fff; box-shadow:0 2px 8px rgba(99,102,241,0.3); }
 
-        .student-main .mentorias-page .btn-nueva-sesion { background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none; padding:.75rem 1.5rem; border-radius:.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:.5rem; }
+        .student-main .mentorias-page .btn-nueva-sesion { background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none; padding:.75rem 1.5rem; border-radius:.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:.5rem; text-decoration:none; }
 
         .student-main .mentorias-page .mentorship-table { background:#fff; border-radius:1.25rem; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:3rem; }
         .student-main .mentorias-page table { width:100%; border-collapse:collapse; }
@@ -46,11 +46,6 @@
 
 @section('student-content')
     <div class="mentorias-page">
-        <div class="page-header">
-            <h1 class="page-title">Mis Mentorías</h1>
-            <p class="page-subtitle">Explora y gestiona todo tu ecosistema SkillNest</p>
-        </div>
-
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <div class="tabs" role="tablist">
                 <button class="tab-btn active" data-filter="all">Todas</button>
@@ -94,10 +89,10 @@
                                 <td>
                                     <div class="mentor-info">
                                         <div class="mentor-avatar {{ $loop->index % 3 == 0 ? 'blue' : ($loop->index % 3 == 1 ? 'pink' : 'purple') }}">{{ strtoupper(substr($mentor->name ?? 'M',0,2)) }}</div>
-                                        <span class="mentor-name">{{ $mentor->name ?? '—' }}</span>
+                                        <span class="mentor-name">{{ $mentor->name ?? 'Mentor' }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? '—') }}</td>
+                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? 'General') }}</td>
                                 <td>{{ optional($mentoria)->fecha_programada ?? '—' }}</td>
                                 <td>{{ optional($mentoria)->hora_programada ?? '—' }}</td>
                                 <td><span class="badge {{ $estado === 'confirmada' ? 'confirmada' : 'pendiente' }}">{{ ucfirst($estado) }}</span></td>
@@ -123,21 +118,21 @@
             <h2 class="section-title">Busca un Mentor</h2>
             <div class="mentors-grid">
                 <div class="mentor-card">
-                    <div class="mentor-card-avatar blue">👩‍💻</div>
+                    <div class="mentor-card-avatar blue">AG</div>
                     <h3 class="mentor-card-name">Ana García</h3>
                     <p class="mentor-card-role">Full Stack Developer</p>
                     <button class="btn-contact">Contactar</button>
                 </div>
 
                 <div class="mentor-card">
-                    <div class="mentor-card-avatar pink">👨‍🎨</div>
+                    <div class="mentor-card-avatar pink">CR</div>
                     <h3 class="mentor-card-name">Carlos Ruiz</h3>
                     <p class="mentor-card-role">UX/UI Designer</p>
                     <button class="btn-contact">Contactar</button>
                 </div>
 
                 <div class="mentor-card">
-                    <div class="mentor-card-avatar purple">👩‍🔬</div>
+                    <div class="mentor-card-avatar purple">LM</div>
                     <h3 class="mentor-card-name">Laura Martínez</h3>
                     <p class="mentor-card-role">Data Scientist</p>
                     <button class="btn-contact">Contactar</button>
@@ -169,4 +164,3 @@
         })();
     </script>
 @endpush
-
