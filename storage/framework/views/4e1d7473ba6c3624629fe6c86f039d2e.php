@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         * {
             margin: 0;
@@ -266,13 +264,13 @@
             }
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@php
+<?php
     $studentUser = auth()->user();
-@endphp
+?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="student-shell">
         <!-- SIDEBAR LATERAL IZQUIERDO -->
         <aside class="student-sidebar">
@@ -281,27 +279,27 @@
                 <h2>SkillNest</h2>
             </div>
             <nav class="student-nav">
-                <a href="{{ route('student.dashboard') }}" class="student-nav-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
+                <a href="<?php echo e(route('student.dashboard')); ?>" class="student-nav-link <?php echo e(request()->routeIs('student.dashboard') ? 'active' : ''); ?>">
                     <span>📊</span>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('student.courses') }}" class="student-nav-link {{ request()->routeIs('student.courses') ? 'active' : '' }}">
+                <a href="<?php echo e(route('student.courses')); ?>" class="student-nav-link <?php echo e(request()->routeIs('student.courses') ? 'active' : ''); ?>">
                     <span>📘</span>
                     <span>Mis cursos</span>
                 </a>
-                <a href="{{ route('student.mentorias') }}" class="student-nav-link {{ request()->routeIs('student.mentorias') ? 'active' : '' }}">
+                <a href="<?php echo e(route('student.mentorias')); ?>" class="student-nav-link <?php echo e(request()->routeIs('student.mentorias') ? 'active' : ''); ?>">
                     <span>👥</span>
                     <span>Mis mentorías</span>
                 </a>
-                <a href="{{ route('student.profile') }}" class="student-nav-link {{ request()->routeIs('student.profile') ? 'active' : '' }}">
+                <a href="<?php echo e(route('student.profile')); ?>" class="student-nav-link <?php echo e(request()->routeIs('student.profile') ? 'active' : ''); ?>">
                     <span>👤</span>
                     <span>Mi perfil</span>
                 </a>
             </nav>
             <div class="student-info">
                 <p>SESIÓN</p>
-                <p>{{ $studentUser->name ?? 'Estudiante' }}</p>
-                <p>{{ $studentUser->email ?? '' }}</p>
+                <p><?php echo e($studentUser->name ?? 'Estudiante'); ?></p>
+                <p><?php echo e($studentUser->email ?? ''); ?></p>
             </div>
         </aside>
 
@@ -310,23 +308,25 @@
             <div class="student-header">
                 <div>
                     <p class="header-label">Panel estudiante</p>
-                    <h1>@yield('student-title')</h1>
-                    <p class="header-subtitle">@yield('student-subtitle')</p>
+                    <h1><?php echo $__env->yieldContent('student-title'); ?></h1>
+                    <p class="header-subtitle"><?php echo $__env->yieldContent('student-subtitle'); ?></p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    @yield('student-actions')
+                    <?php echo $__env->yieldContent('student-actions'); ?>
                 </div>
             </div>
 
             <div class="student-content">
                 <section class="stats-grid">
-                    @yield('student-widgets')
+                    <?php echo $__env->yieldContent('student-widgets'); ?>
                 </section>
 
                 <section class="mt-6">
-                    @yield('student-content')
+                    <?php echo $__env->yieldContent('student-content'); ?>
                 </section>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/layouts/student.blade.php ENDPATH**/ ?>

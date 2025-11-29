@@ -12,7 +12,7 @@ class EnsureStudent
     {
         $user = $request->user();
 
-        abort_if(! $user || ! $user->isStudent(), Response::HTTP_FORBIDDEN, 'Solo estudiantes pueden acceder a esta sección.');
+        abort_if(! $user || ! $user->isStudent(), Response::HTTP_FORBIDDEN, 'Solo estudiantes pueden acceder a esta seccion.');
 
         return $next($request);
     }

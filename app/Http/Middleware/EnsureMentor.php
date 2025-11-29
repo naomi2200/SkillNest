@@ -12,7 +12,7 @@ class EnsureMentor
     {
         $user = $request->user();
 
-        abort_if(! $user || ! $user->isMentor(), Response::HTTP_FORBIDDEN, 'Solo mentores pueden acceder a esta sección.');
+        abort_if(! $user || ! $user->isMentor(), Response::HTTP_FORBIDDEN, 'Solo mentores pueden acceder a esta seccion.');
 
         return $next($request);
     }
