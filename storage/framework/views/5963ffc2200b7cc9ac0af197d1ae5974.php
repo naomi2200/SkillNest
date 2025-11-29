@@ -1,4 +1,4 @@
-<?php $__env->startSection('student-title', 'Mi perfil'); ?>
+<?php $__env->startSection('student-title', 'Mi Perfil'); ?>
 <?php $__env->startSection('student-subtitle', 'Actualiza tus datos personales para mantener tu experiencia personalizada'); ?>
 
 <?php $__env->startSection('student-content'); ?>
@@ -10,157 +10,166 @@
             : 'https://ui-avatars.com/api/?name='.urlencode($user->name ?? 'SkillNest').'&background=6366f1&color=fff';
     ?>
 
-    <div class="space-y-6">
-        <section class="rounded-[32px] bg-gradient-to-r from-indigo-500 via-sky-500 to-cyan-400 p-[1px] shadow-2xl">
-            <div class="rounded-[28px] bg-white/95 px-8 py-6 backdrop-blur">
-                <div class="flex flex-wrap items-center justify-between gap-6">
-                    <div class="flex items-center gap-4">
-                        <img src="<?php echo e($avatar); ?>" alt="Avatar" class="h-16 w-16 rounded-3xl object-cover shadow-lg">
-                        <div>
-                            <p class="text-xs uppercase tracking-[0.5em] text-slate-400">Hola, <?php echo e($user->name ?? 'estudiante'); ?></p>
-                            <h1 class="text-3xl font-semibold text-secondary">Mi perfil</h1>
-                            <p class="text-sm text-slate-500">Personaliza tu experiencia y mantén tu cuenta al día.</p>
+<?php $__env->startPush('styles'); ?>
+    <style>
+        /* Profile page scoped styles (adapted to mentorías palette) */
+        .student-main .profile-page .page-header { margin-bottom: 1rem; }
+        .student-main .profile-page .page-title { font-size: 2rem; font-weight:800; color:#111827; }
+
+        .student-main .profile-page .profile-header-card {
+            background:#fff; border:1px solid #e5e7eb; border-radius:1rem; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:1.5rem;
+            display:flex; gap:1.25rem; align-items:center;
+        }
+        .student-main .profile-page .profile-avatar { width:96px; height:96px; border-radius:12px; object-fit:cover; box-shadow:0 8px 25px rgba(99,102,241,0.18); }
+        .student-main .profile-page .btn-change-photo { background:#fff; color:#6366f1; border:2px solid #6366f1; padding:.5rem .75rem; border-radius:.5rem; font-weight:700; }
+
+        .student-main .profile-page .profile-name { font-size:1.5rem; font-weight:800; color:#111827; }
+        .student-main .profile-page .profile-subtitle { color:#6b7280; margin-bottom:.75rem; }
+        .student-main .profile-page .profile-stats { display:flex; gap:1.5rem; }
+        .student-main .profile-page .stat-label { color:#9ca3af; font-size:.75rem; font-weight:700; text-transform:uppercase; }
+        .student-main .profile-page .stat-value { font-size:1.25rem; font-weight:800; color:#111827; }
+
+        .student-main .profile-page .tabs { display:flex; gap:.5rem; margin-bottom:.75rem; }
+        .student-main .profile-page .tab-btn { background:transparent; color:#6b7280; border:none; padding:.6rem 1rem; font-weight:700; cursor:pointer; border-radius:.6rem; }
+        .student-main .profile-page .tab-btn.active { color:#fff; background:linear-gradient(135deg,#6366f1,#8b5cf6); box-shadow:0 4px 15px rgba(99,102,241,0.2); }
+
+        .student-main .profile-page .form-section { background:#fff; border:1px solid #e5e7eb; border-radius:0 0 1rem 1rem; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .student-main .profile-page .form-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+        .student-main .profile-page .form-label { font-weight:700; color:#374151; margin-bottom:.5rem; }
+        .student-main .profile-page .form-input, .student-main .profile-page .form-select, .student-main .profile-page .form-textarea { background:#f9fafb; border:2px solid #e5e7eb; border-radius:.75rem; padding:.75rem 1rem; color:#374151; }
+        .student-main .profile-page .form-input:focus, .student-main .profile-page .form-select:focus, .student-main .profile-page .form-textarea:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,0.06); background:#fff; }
+
+        .student-main .profile-page .btn-save { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none; padding:.85rem 1.75rem; border-radius:.75rem; font-weight:800; }
+
+        @media (max-width:1024px){ .student-main .profile-page .form-grid { grid-template-columns:1fr; } }
+    </style>
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('student-content'); ?>
+    <div class="profile-page">
+        
+
+        <?php
+            $avatar = $user->avatar_url
+                ? (\Illuminate\Support\Str::startsWith($user->avatar_url, ['http://','https://'])
+                    ? $user->avatar_url
+                    : asset($user->avatar_url))
+                : 'https://ui-avatars.com/api/?name='.urlencode($user->name ?? 'SkillNest').'&background=6366f1&color=fff';
+        ?>
+
+        <div class="profile-header-card">
+            <div style="display:flex; gap:1rem; align-items:center">
+                <img src="<?php echo e($avatar); ?>" alt="Avatar" class="profile-avatar">
+                <div style="display:flex; flex-direction:column">
+                    <h2 class="profile-name"><?php echo e($user->name ?? 'Estudiante'); ?></h2>
+                    <p class="profile-subtitle"><?php echo e($user->profile_title ?? 'Estudiante en SkillNest'); ?></p>
+                    <div class="profile-stats" style="margin-top:.5rem">
+                        <div class="stat-item">
+                            <div class="stat-label">Miembro desde</div>
+                            <div class="stat-value"><?php echo e(optional($user->created_at)->format('d M Y') ?? '—'); ?></div>
                         </div>
-                    </div>
-                    <label for="avatar-input" class="cursor-pointer rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-600 transition hover:border-primary hover:text-primary">
-                        Cambiar foto
-                    </label>
-                </div>
-                <div class="mt-6 grid gap-4 md:grid-cols-3">
-                    <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                        <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Cursos activos</p>
-                        <p class="mt-1 text-2xl font-bold text-secondary"><?php echo e($user->cursosInscritos?->count() ?? 0); ?></p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                        <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Mentorías reservadas</p>
-                        <p class="mt-1 text-2xl font-bold text-secondary"><?php echo e($user->mentoriasComoEstudiante?->count() ?? 0); ?></p>
-                    </div>
-                    <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                        <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Nivel de experiencia</p>
-                        <p class="mt-1 text-2xl font-bold text-secondary"><?php echo e(ucfirst($user->profile_level ?? 'principiante')); ?></p>
+                        <div class="stat-item">
+                            <div class="stat-label">Cursos</div>
+                            <div class="stat-value"><?php echo e($user->cursosInscritos?->count() ?? 0); ?></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Mentorías</div>
+                            <div class="stat-value"><?php echo e($user->mentoriasComoEstudiante?->count() ?? 0); ?></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+            <div style="margin-left:auto; display:flex; flex-direction:column; gap:.5rem; align-items:flex-end">
+                <label for="avatar-input" class="btn-change-photo">Cambiar Foto</label>
+                <a href="#" class="btn-save" style="padding:.5rem .85rem; font-size:.85rem">Ver mi perfil público</a>
+            </div>
+        </div>
 
-        <form action="<?php echo e(route('student.profile.update')); ?>" method="POST" enctype="multipart/form-data" class="grid gap-6 md:grid-cols-2">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+            <div class="tabs" role="tablist">
+                <button class="tab-btn active" data-tab="info">Información Personal</button>
+                <button class="tab-btn" data-tab="prefs">Preferencias</button>
+                <button class="tab-btn" data-tab="social">Redes Sociales</button>
+            </div>
+        </div>
+
+        <form action="<?php echo e(route('student.profile.update')); ?>" method="POST" enctype="multipart/form-data">
             <?php echo csrf_field(); ?>
             <?php echo method_field('PUT'); ?>
             <input type="file" id="avatar-input" name="avatar" class="hidden" accept="image/*">
 
-            <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card space-y-4">
-                <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Información principal</p>
-                <div class="space-y-4 text-sm text-slate-600">
-                    <label class="block">
-                        <span class="text-xs uppercase tracking-[0.3em] text-slate-400">Nombre completo</span>
-                        <input type="text" name="name" value="<?php echo e(old('name', $user->name)); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" required>
-                    </label>
-                    <label class="block">
-                        <span class="text-xs uppercase tracking-[0.3em] text-slate-400">Correo electrónico</span>
-                        <input type="email" name="email" value="<?php echo e(old('email', $user->email)); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" required>
-                    </label>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <label class="block">
-                            <span class="text-xs uppercase tracking-[0.3em] text-slate-400">Zona horaria</span>
-                            <input type="text" name="timezone" value="<?php echo e(old('timezone', $user->timezone)); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" placeholder="Ej: America/Lima">
-                        </label>
-                        <label class="block">
-                            <span class="text-xs uppercase tracking-[0.3em] text-slate-400">Notificaciones</span>
-                            <select name="notification_channel" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm">
-                                <option value="email" <?php if(old('notification_channel', $user->notification_channel ?? 'email') === 'email'): echo 'selected'; endif; ?>>Email</option>
-                                <option value="push" <?php if(old('notification_channel', $user->notification_channel ?? 'email') === 'push'): echo 'selected'; endif; ?>>Push</option>
-                            </select>
-                        </label>
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" name="name" class="form-input" value="<?php echo e(old('name', $user->name)); ?>" required>
                     </div>
-                    <label class="block">
-                        <span class="text-xs uppercase tracking-[0.3em] text-slate-400">Nivel de experiencia</span>
-                        <select name="profile_level" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm">
+
+                    <div class="form-group">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" name="email" class="form-input" value="<?php echo e(old('email', $user->email)); ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Teléfono</label>
+                        <input type="tel" name="phone" class="form-input" value="<?php echo e(old('phone', $user->phone)); ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">País</label>
+                        <select name="country" class="form-select">
+                            <option value="">Selecciona un país</option>
+                            <?php $__currentLoopData = ['colombia'=>'Colombia','peru'=>'Perú','mexico'=>'México','argentina'=>'Argentina','chile'=>'Chile']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $k=>$v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($k); ?>" <?php if(old('country', $user->country) == $k): echo 'selected'; endif; ?>><?php echo e($v); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Especialidad Actual</label>
+                        <select name="specialty" class="form-select">
+                            <option value="">Selecciona una especialidad</option>
+                            <option value="fullstack" <?php if(old('specialty', $user->specialty)=='fullstack'): echo 'selected'; endif; ?>>Full Stack Development</option>
+                            <option value="frontend" <?php if(old('specialty', $user->specialty)=='frontend'): echo 'selected'; endif; ?>>Frontend Development</option>
+                            <option value="backend" <?php if(old('specialty', $user->specialty)=='backend'): echo 'selected'; endif; ?>>Backend Development</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nivel de Experiencia</label>
+                        <select name="profile_level" class="form-select">
                             <?php $__currentLoopData = ['principiante','intermedio','avanzado']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $level): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <option value="<?php echo e($level); ?>" <?php if(old('profile_level', $user->profile_level ?? 'principiante') === $level): echo 'selected'; endif; ?>><?php echo e(ucfirst($level)); ?></option>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                    </label>
-                </div>
-            </div>
-
-            <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card space-y-4">
-                <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Preferencias</p>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3">
-                        <div>
-                            <p class="text-sm font-semibold text-secondary">Resúmenes semanales</p>
-                            <p class="text-xs text-slate-400">Recibe tips y avances en tu correo.</p>
-                        </div>
-                        <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Próximamente</span>
                     </div>
-                    <div class="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3">
-                        <div>
-                            <p class="text-sm font-semibold text-secondary">Recordatorios de mentorías</p>
-                            <p class="text-xs text-slate-400">Activa alertas 24h antes de cada sesión.</p>
-                        </div>
-                        <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Próximamente</span>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Biografía</label>
+                        <textarea name="bio" class="form-textarea"><?php echo e(old('bio', $user->bio)); ?></textarea>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-dashed border-slate-200 px-4 py-5 text-center text-sm text-slate-500">
-                    Próximamente podrás conectar tus redes profesionales y recibir recomendaciones personalizadas.
+                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:1rem">
+                    <a href="#" class="btn-change-photo" style="background:#fff; border:2px solid #e5e7eb; color:#374151">Cancelar</a>
+                    <button type="submit" class="btn-save">Guardar Cambios</button>
                 </div>
-            </div>
-
-            <div class="md:col-span-2 flex justify-end">
-                <button type="submit" class="btn-primary rounded-full px-8 py-3">Guardar cambios</button>
             </div>
         </form>
 
-        <section class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Actividad reciente</p>
-                    <h2 class="text-lg font-semibold text-secondary">Tu evolución en SkillNest</h2>
-                </div>
-                <span class="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500">Modo vista previa</span>
-            </div>
-            <div class="mt-5 space-y-3">
-                <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3"/>
-                        </svg>
-                    </span>
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-secondary">Completa tu primer módulo</p>
-                        <p class="text-xs text-slate-400">Obtén medallas de consistencia al finalizar tus bloques.</p>
-                    </div>
-                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500">Objetivo disponible</span>
-                </div>
-                <div class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-                        </svg>
-                    </span>
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-secondary">Mantén tus datos actualizados</p>
-                        <p class="text-xs text-slate-400">Estamos preparando formularios editables para personalizar tu experiencia.</p>
-                    </div>
-                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs text-emerald-600">Muy pronto</span>
-                </div>
-            </div>
-        </section>
-    </div>
+        <script>
+            (function(){
+                const tabs = document.querySelectorAll('.student-main .profile-page .tab-btn');
+                tabs.forEach(tab => tab.addEventListener('click', function(){ tabs.forEach(t=>t.classList.remove('active')); this.classList.add('active'); }));
 
-    <script>
-        document.getElementById('avatar-input')?.addEventListener('change', (event) => {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            const preview = document.querySelector('img[alt="Avatar"]');
-            if (preview) {
-                const url = URL.createObjectURL(file);
-                preview.src = url;
-                setTimeout(() => URL.revokeObjectURL(url), 5000);
-            }
-        });
-    </script>
+                document.getElementById('avatar-input')?.addEventListener('change', (event) => {
+                    const file = event.target.files?.[0]; if(!file) return;
+                    const preview = document.querySelector('.student-main .profile-page img[alt="Avatar"]');
+                    if(preview){ const url = URL.createObjectURL(file); preview.src = url; setTimeout(()=>URL.revokeObjectURL(url),5000); }
+                });
+            })();
+        </script>
+    </div>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.student', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/student/profile.blade.php ENDPATH**/ ?>
