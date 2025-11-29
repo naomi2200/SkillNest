@@ -6,6 +6,7 @@ use App\Models\Curso;
 use App\Models\Mentoria;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MentorController extends Controller
 {
@@ -58,11 +59,22 @@ class MentorController extends Controller
             'precio_hora' => 'nullable|numeric|min:0',
             'nivel_experiencia' => 'nullable|string|max:255',
             'categorias' => 'nullable|string|max:255',
+            'avatar' => ['nullable', 'image', 'max:4096'],
         ]);
 
-        $user->update([
+        $userData = [
             'name' => $data['name'],
-        ]);
+        ];
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar_url && str_starts_with($user->avatar_url, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar_url));
+            }
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $userData['avatar_url'] = Storage::url($path);
+        }
+
+        $user->update($userData);
 
         $skills = $data['skills'] ?? null;
         $skillSet = $skills

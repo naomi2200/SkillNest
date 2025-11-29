@@ -1,0 +1,81 @@
+@extends('layouts.dashboard')
+
+@section('dashboard-title', 'Editor de curso')
+
+@section('dashboard-actions')
+    <div class="flex w-full flex-wrap items-center gap-4 rounded-[28px] border border-white/70 bg-white/90 px-6 py-4 shadow-lg shadow-primary/5 backdrop-blur">
+        <div class="flex flex-1 flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+            <span class="rounded-full bg-secondary/10 px-4 py-1 text-secondary">Estado: <span class="text-secondary" id="course-status">{{ $curso->status }}</span></span>
+            <span class="text-xs normal-case tracking-normal text-slate-400" id="last-saved-indicator">Último guardado hace instantes</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
+            <a href="{{ route('cursos.show', $curso) }}" class="rounded-full border border-slate-200 bg-white px-5 py-2 text-secondary transition hover:border-secondary hover:text-secondary">Vista previa</a>
+            <form action="{{ route('cursos.send-to-review', $curso) }}" method="POST" class="flex">
+                @csrf
+                <button type="submit" class="rounded-full bg-gradient-to-r from-secondary to-primary px-6 py-2 text-white shadow-lg shadow-primary/30 transition hover:from-secondary/90 hover:to-primary/90">
+                    Enviar a revisión
+                </button>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@php
+    $modulesCount = $curso->modules->count();
+    $lessonsCount = $curso->modules->sum(fn($module) => $module->lessons->count());
+@endphp
+
+@section('dashboard-content')
+    <style>
+        .editor-gradient {
+            background: linear-gradient(145deg, #f5f3ff 0%, #e0e7ff 45%, #ede9fe 100%);
+            border-radius: 40px;
+            padding: 32px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        .editor-card {
+            border-radius: 28px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(226,232,240,0.7);
+            box-shadow: 0 25px 60px rgba(99,102,241,0.08);
+        }
+        .editor-chip {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-weight: 700;
+        }
+        .module-card.is-dragging,
+        .lesson-block.is-dragging {
+            border-color: #6366f1 !important;
+            box-shadow: 0 25px 35px rgba(79, 70, 229, 0.18);
+        }
+    </style>
+
+    <div class="editor-gradient space-y-6">
+        <div class="grid gap-4 md:grid-cols-3">
+            <div class="editor-card p-5">
+                <p class="editor-chip text-slate-400">Módulos</p>
+                <div class="mt-2 flex items-end gap-2">
+                    <span class="text-4xl font-black text-secondary">{{ $modulesCount }}</span>
+                    <span class="text-sm text-slate-500">estructuras creadas</span>
+                </div>
+            </div>
+            <div class="editor-card p-5">
+                <p class="editor-chip text-slate-400">Lecciones</p>
+                <div class="mt-2 flex items-end gap-2">
+                    <span class="text-4xl font-black text-secondary">{{ $lessonsCount }}</span>
+                    <span class="text-sm text-slate-500">bloques interactivos</span>
+                </div>
+            </div>
+            <div class="editor-card p-5">
+                <p class="editor-chip text-slate-400">Progreso</p>
+                <div class="mt-3 space-y-2">
+                    <div class="text-xs font-semibold text-slate-500">Borrador {{ $modulesCount ? 'completado' : 'pendiente' }}</div>
+                    <div class="h-2 rounded-full bg-slate-100">
+                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500" style="width: {{ $modulesCount ? '70%' : '30%' }}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+

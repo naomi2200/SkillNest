@@ -1,0 +1,44 @@
+*** Begin Patch
+*** Update File: resources/views/layouts/dashboard.blade.php
+@@
+-        if (Route::has('cursos.create')) {
+-            $navLinks[] = [
+-                'label' => 'Crear curso',
+-                'icon' => '?z\a',
+-                'url' => route('cursos.create'),
+-                'active' => request()->routeIs('cursos.create'),
+-            ];
+-        }
++        if (Route::has('cursos.create-draft')) {
++            $navLinks[] = [
++                'label' => 'Crear curso',
++                'icon' => '?z\a',
++                'url' => route('cursos.create-draft'),
++                'active' => false,
++                'method' => 'post',
++            ];
++        }
+@@
+-            <div class="dashboard-nav">
+-                @foreach($navLinks as $link)
+-                    <a href="{{ $link['url'] }}" class="{{ $link['active'] ? 'active' : '' }}">
+-                        <span class="nav-icon">{{ $link['icon'] }}</span>
+-                        <span>{{ $link['label'] }}</span>
+-                    </a>
+-                @endforeach
+-            </div>
++            <div class="dashboard-nav">
++                @foreach($navLinks as $link)
++                    @if(($link['method'] ?? 'get') === 'post')
++                        <form action="{{ $link['url'] }}" method="POST">
++                            @csrf
++                            <button type="submit" class="{{ $link['active'] ? 'active' : '' }}">
++                                <span class="nav-icon">{{ $link['icon'] }}</span>
++                                <span>{{ $link['label'] }}</span>
++                            </button>
++                        </form>
++                    @else
++                        <a href="{{ $link['url'] }}" class="{{ $link['active'] ? 'active' : '' }}">
++                            <span class="nav-icon">{{ $link['icon'] }}</span>
++                            <span>{{ $link's label'??}}
++*** End Patch

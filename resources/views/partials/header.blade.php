@@ -8,30 +8,29 @@
         </a>
 
         <nav class="hidden flex-1 justify-center gap-8 text-sm font-semibold text-slate-500 lg:flex">
-            <a href="{{ route('cursos.index') }}" class="{{ request()->routeIs('cursos.*') ? 'text-secondary' : 'hover:text-secondary' }}">Cursos</a>
-            <a href="{{ route('mentor-market.index') }}" class="{{ request()->routeIs('mentor-market.*') ? 'text-secondary' : 'hover:text-secondary' }}">Mentorías</a>
-            <a href="{{ route('mentor.students') }}" class="{{ request()->routeIs('mentor.*') ? 'text-secondary' : 'hover:text-secondary' }}">Conviértete en Mentor</a>
+            <a href="{{ route('cursos.index') }}"
+               class="{{ request()->routeIs('cursos.*') ? 'text-secondary' : 'hover:text-secondary' }}">Cursos</a>
+            <a href="{{ route('mentor-market.index') }}"
+               class="{{ request()->routeIs('mentor-market.*') ? 'text-secondary' : 'hover:text-secondary' }}">Mentorías</a>
+            <a href="{{ route('mentor.students') }}"
+               class="{{ request()->routeIs('mentor.*') ? 'text-secondary' : 'hover:text-secondary' }}">Conviértete en Mentor</a>
         </nav>
 
-        @php
-            $webUser = auth()->user();
-            $adminUser = auth('admin')->user();
-        @endphp
+        @php $webUser = auth()->user(); @endphp
 
         <div class="flex items-center gap-3">
             @if($webUser)
                 @php
-                    $panelRoute = $webUser->isMentor()
-                        ? route('mentor.courses')
-                        : ($webUser->isStudent() ? route('student.dashboard') : route('dashboard'));
+                    $panelRoute = match (true) {
+                        ($webUser->role ?? null) === 'admin' => route('admin.dashboard'),
+                        method_exists($webUser, 'isMentor') && $webUser->isMentor() => route('mentor.courses'),
+                        method_exists($webUser, 'isStudent') && $webUser->isStudent() => route('student.dashboard'),
+                        default => route('dashboard'),
+                    };
                 @endphp
-                <a href="{{ $panelRoute }}" class="btn-secondary rounded-full px-5">Panel</a>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn-gradient">Salir</button>
-                </form>
-            @elseif($adminUser)
-                <a href="{{ route('admin.dashboard') }}" class="btn-secondary rounded-full px-5">Panel admin</a>
+                <a href="{{ $panelRoute }}" class="btn-secondary rounded-full px-5">
+                    {{ ($webUser->role ?? null) === 'admin' ? 'Panel admin' : 'Panel' }}
+                </a>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button class="btn-gradient">Salir</button>
@@ -43,7 +42,3 @@
         </div>
     </div>
 </header>
-
-
-
-

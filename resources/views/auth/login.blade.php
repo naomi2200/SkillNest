@@ -1,38 +1,40 @@
 @extends('layouts.guest')
 
-@section('title', 'Inicia sesión')
+@section('title', 'Inicia sesi&oacute;n')
 @section('subtitle', 'Accede con tu cuenta para continuar')
 
 @section('form')
-    <form method="POST" action="{{ route('login') }}" class="space-y-4">
+    <form method="POST" action="{{ route('login') }}">
         @csrf
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="email">Correo</label>
-            <input id="email" name="email" type="email" required autofocus
-                   class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary" />
+        <div class="auth-field">
+            <label for="email">Correo electr&oacute;nico</label>
+            <input id="email" name="email" type="email" value="{{ old('email') }}" autofocus required class="auth-input">
+            @error('email')
+                <p class="auth-error">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="password">Contraseña</label>
-            <input id="password" name="password" type="password" required
-                   class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary" />
+        <div class="auth-field">
+            <label for="password">Contrase&ntilde;a</label>
+            <input id="password" name="password" type="password" required class="auth-input">
+            @error('password')
+                <p class="auth-error">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="flex items-center justify-between text-sm">
-            <label class="inline-flex items-center gap-2 text-slate-500">
-                <input type="checkbox" name="remember" class="rounded border-slate-300 text-primary focus:ring-primary">
-                Recordarme
+        <div class="auth-options">
+            <label class="auth-checkbox">
+                <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                <span>Recordarme</span>
             </label>
-            <a href="{{ route('password.request') }}" class="font-medium text-primary hover:text-primary/80">
-                ¿Olvidaste tu contraseña?
-            </a>
+            <a href="{{ route('password.request') }}" class="auth-link">&iquest;Olvidaste tu contrase&ntilde;a?</a>
         </div>
 
-        <button class="btn-primary w-full">Ingresar</button>
+        <button class="btn-submit" type="submit">Ingresar</button>
 
-        <p class="text-center text-sm text-slate-500">
-            ¿Aún no tienes cuenta?
-            <a href="{{ route('register') }}" class="font-semibold text-primary">Crear cuenta</a>
+        <p class="text-sm" style="text-align: center; color: #6b7280; margin-top: 10px;">
+            &iquest;A&uacute;n no tienes cuenta?
+            <a href="{{ route('register') }}" class="auth-link">Crear cuenta</a>
         </p>
     </form>
 @endsection

@@ -131,15 +131,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/students', [MentorController::class, 'myStudents'])->name('students');
     });
 
-    Route::middleware('admin')
-        ->prefix('admin/courses')
-        ->name('admin.courses.')
+    Route::middleware(['auth', 'admin'])
+        ->prefix('admin')
+        ->name('admin.')
         ->group(function () {
-            Route::get('/', [CourseReviewController::class, 'index'])->name('index');
-            Route::get('/{id}', [CourseReviewController::class, 'show'])->name('show');
-            Route::patch('/{id}/approve', [CourseReviewController::class, 'approve'])->name('approve');
-            Route::patch('/{id}/reject', [CourseReviewController::class, 'reject'])->name('reject');
-            Route::patch('/{id}/reset', [CourseReviewController::class, 'resetReview'])->name('reset');
-            Route::delete('/{id}', [CourseReviewController::class, 'destroy'])->name('destroy');
+            Route::view('/dashboard', 'dashboard.admin.index')->name('dashboard');
+
+            Route::prefix('courses')->name('courses.')->group(function () {
+                Route::get('/', [CourseReviewController::class, 'index'])->name('index');
+                Route::get('/{id}', [CourseReviewController::class, 'show'])->name('show');
+                Route::patch('/{id}/approve', [CourseReviewController::class, 'approve'])->name('approve');
+                Route::patch('/{id}/reject', [CourseReviewController::class, 'reject'])->name('reject');
+                Route::patch('/{id}/reset', [CourseReviewController::class, 'resetReview'])->name('reset');
+                Route::delete('/{id}', [CourseReviewController::class, 'destroy'])->name('destroy');
+            });
         });
 });

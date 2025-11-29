@@ -3,318 +3,315 @@
 @php
     $user = auth()->user();
     $activeCourses = $stats['courses_active'] ?? 0;
-    $pendingCourses = $stats['courses_pending'] ?? 0;
+    $pendingCoursesCount = $stats['courses_pending'] ?? 0;
     $draftCourses = $stats['courses_drafts'] ?? 0;
-    $mentorshipsUpcoming = $stats['mentorships_upcoming'] ?? 0;
-    $totalPipeline = max(1, $activeCourses + $pendingCourses + $draftCourses);
+    $rejectedCourses = $stats['courses_rejected'] ?? 0;
+    $mentorshipsConfirmed = $stats['mentorships_upcoming'] ?? 0;
+    $mentorshipsPending = $stats['mentorships_pending'] ?? 0;
 @endphp
 
-@section('dashboard-title', 'Panel principal')
-
 @section('dashboard-actions')
-    <div class="flex flex-wrap gap-3">
-        <form action="{{ route('cursos.create-draft') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn-primary rounded-full px-5 py-3 text-sm font-semibold shadow-lg shadow-primary/20">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/>
-                </svg>
-                Nuevo curso
-            </button>
-        </form>
-        <a href="{{ route('mentorias.create') }}" class="btn-secondary px-5 py-3 text-sm font-semibold">
-            Programar mentoría
-        </a>
-        <a href="{{ route('cursos.index') }}" class="btn-secondary border border-slate-200 px-5 py-3 text-sm font-semibold">
-            Ver biblioteca
-        </a>
-    </div>
-@endsection
-
-@section('dashboard-widgets')
-    <div class="lg:col-span-2 rounded-[32px] bg-gradient-to-r from-indigo-500 via-sky-500 to-cyan-400 p-[1px] shadow-2xl">
-        <div class="rounded-[30px] bg-white/95 px-8 py-7 backdrop-blur">
-            <div class="flex flex-wrap items-center justify-between gap-6">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.6em] text-slate-400">Hola, {{ $user->name }}</p>
-                    <h2 class="text-3xl font-semibold text-secondary">Bienvenido(a) al panel creativo</h2>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-600">
-                        Revisa el estado de tus cursos, mentorías y pendientes en un solo lugar. Cada acción se sincroniza con tu nuevo editor visual.
-                    </p>
-                </div>
-                <div class="rounded-3xl border border-slate-100 bg-white px-6 py-4 shadow-inner">
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Última sincronización</p>
-                    <p class="mt-1 text-2xl font-semibold text-secondary">{{ now()->format('d M · H:i') }}</p>
-                    <p class="text-xs text-slate-400">Todo al día</p>
-                </div>
-            </div>
-            <div class="mt-6 grid gap-4 md:grid-cols-4">
-                <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Activos</p>
-                    <p class="mt-1 text-2xl font-bold text-secondary">{{ $activeCourses }}</p>
-                    <p class="text-xs text-emerald-500">+2 esta semana</p>
-                </div>
-                <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">En revisión</p>
-                    <p class="mt-1 text-2xl font-bold text-secondary">{{ $pendingCourses }}</p>
-                    <p class="text-xs text-amber-500">Listos para aprobación</p>
-                </div>
-                <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Borradores</p>
-                    <p class="mt-1 text-2xl font-bold text-secondary">{{ $draftCourses }}</p>
-                    <p class="text-xs text-slate-400">Edita en el modo Canva</p>
-                </div>
-                <div class="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-inner">
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Mentorías</p>
-                    <p class="mt-1 text-2xl font-bold text-secondary">{{ $mentorshipsUpcoming }}</p>
-                    <p class="text-xs text-slate-400">Próximos 7 días</p>
-                </div>
-            </div>
+    @if(!$user?->isAdmin())
+        <div class="flex flex-wrap gap-3">
+            <form action="{{ route('cursos.create-draft') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-primary rounded-full px-5 py-3 text-sm font-semibold shadow-lg shadow-primary/20">
+                    ➕ Nuevo curso
+                </button>
+            </form>
+            <a href="{{ route('mentorias.create') }}" class="btn-secondary rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold">
+                Crear mentoría
+            </a>
         </div>
-    </div>
-
-    <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-        <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Focus semanal</p>
-        <ul class="mt-4 space-y-3 text-sm text-slate-600">
-            <li class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3">
-                <span class="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3"/>
-                    </svg>
-                </span>
-                Lanza al menos un curso a revisión.
-            </li>
-            <li class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3">
-                <span class="flex h-8 w-8 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </span>
-                Sube recursos visuales a tus borradores.
-            </li>
-            <li class="flex items-center gap-3 rounded-2xl border border-slate-100 px-4 py-3">
-                <span class="flex h-8 w-8 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18M3 17h18"/>
-                    </svg>
-                </span>
-                Confirma las mentorías críticas para mentores VIP.
-            </li>
-        </ul>
-    </div>
-
-    <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-        <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Insights de comunidad</p>
-        <div class="mt-4 space-y-4">
-            <div>
-                <div class="flex items-center justify-between text-xs font-semibold text-secondary">
-                    <span>Feedback positivo</span>
-                    <span>92%</span>
-                </div>
-                <div class="mt-1 h-2 rounded-full bg-slate-100">
-                    <div class="h-2 w-[92%] rounded-full bg-emerald-400"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex items-center justify-between text-xs font-semibold text-secondary">
-                    <span>Respuestas a foros</span>
-                    <span>64%</span>
-                </div>
-                <div class="mt-1 h-2 rounded-full bg-slate-100">
-                    <div class="h-2 w-[64%] rounded-full bg-indigo-400"></div>
-                </div>
-            </div>
-            <div>
-                <div class="flex items-center justify-between text-xs font-semibold text-secondary">
-                    <span>Mentorías completadas</span>
-                    <span>78%</span>
-                </div>
-                <div class="mt-1 h-2 rounded-full bg-slate-100">
-                    <div class="h-2 w-[78%] rounded-full bg-sky-400"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @endif
 @endsection
 
 @section('dashboard-content')
-    <div class="grid gap-6 xl:grid-cols-3">
-        <div class="space-y-6 xl:col-span-2">
-            <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Estado de tus cursos</p>
-                        <h2 class="text-lg font-semibold text-secondary">Pipeline creativo</h2>
-                    </div>
-                    <span class="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500">Total {{ $totalPipeline }}</span>
+    @if($user?->isAdmin())
+        <style>
+            .admin-hero {
+                border-radius: 32px;
+                background: linear-gradient(135deg, #fdfcff 0%, #eef2ff 45%, #ede9fe 100%);
+                border: 1px solid rgba(226,232,240,0.8);
+                padding: 32px;
+                box-shadow: 0 20px 60px rgba(79,70,229,0.12);
+                display: flex;
+                flex-wrap: wrap;
+                gap: 32px;
+                justify-content: space-between;
+            }
+            .admin-hero h2 {
+                font-size: 30px;
+                font-weight: 800;
+                color: #312e81;
+                margin-bottom: 12px;
+            }
+            .admin-hero p {
+                color: #4b5563;
+                font-size: 15px;
+                max-width: 520px;
+            }
+            .admin-hero .hero-actions {
+                margin-top: 20px;
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            .admin-hero .hero-actions a {
+                padding: 12px 22px;
+                border-radius: 999px;
+                font-weight: 600;
+                font-size: 14px;
+            }
+            .hero-metrics {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(160px, 1fr));
+                gap: 12px;
+                min-width: 260px;
+            }
+            .hero-metric {
+                background: rgba(255,255,255,0.9);
+                border-radius: 22px;
+                padding: 16px 18px;
+                border: 1px solid rgba(229,231,235,0.8);
+                text-align: left;
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+            }
+            .hero-metric span {
+                display: block;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #94a3b8;
+                margin-bottom: 6px;
+            }
+            .hero-metric strong {
+                font-size: 26px;
+                font-weight: 800;
+                color: #312e81;
+            }
+            .admin-stat-grid {
+                margin-top: 28px;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+            }
+            .admin-stat-card {
+                border-radius: 24px;
+                padding: 24px;
+                border: 1px solid rgba(226,232,240,0.9);
+                background: rgba(255,255,255,0.96);
+                box-shadow: 0 10px 35px rgba(79,70,229,0.1);
+            }
+            .admin-stat-card h3 {
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: #9ca3af;
+                margin-bottom: 10px;
+            }
+            .admin-stat-card p {
+                font-size: 34px;
+                font-weight: 800;
+                color: #312e81;
+                margin-bottom: 6px;
+            }
+            .admin-stat-card small {
+                font-size: 12px;
+                color: #6b7280;
+            }
+            .admin-grid {
+                margin-top: 32px;
+                display: grid;
+                gap: 24px;
+            }
+            @media (min-width: 1100px) {
+                .admin-grid {
+                    grid-template-columns: 2fr 1fr;
+                }
+            }
+            .admin-card {
+                border-radius: 28px;
+                border: 1px solid rgba(226,232,240,0.9);
+                background: rgba(255,255,255,0.98);
+                padding: 28px;
+                box-shadow: 0 18px 50px rgba(99,102,241,0.12);
+            }
+            .admin-card h4 {
+                font-size: 20px;
+                font-weight: 800;
+                color: #1f2937;
+                margin-bottom: 18px;
+            }
+            .list-entry {
+                border-radius: 18px;
+                border: 1px solid rgba(226,232,240,0.9);
+                padding: 16px 18px;
+                background: rgba(249,250,251,0.95);
+                display: flex;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .list-entry + .list-entry {
+                margin-top: 12px;
+            }
+            .list-entry span {
+                font-size: 14px;
+                font-weight: 600;
+                color: #1f2937;
+            }
+            .list-entry small {
+                display: block;
+                margin-top: 4px;
+                color: #6b7280;
+                font-size: 12px;
+            }
+            .badge {
+                padding: 6px 14px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 600;
+                background: rgba(99,102,241,0.12);
+                color: #4338ca;
+            }
+            .admin-secondary-grid {
+                margin-top: 24px;
+                display: grid;
+                gap: 24px;
+            }
+            @media (min-width: 1100px) {
+                .admin-secondary-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+        </style>
+
+        <div class="admin-hero">
+            <div>
+                <p class="text-xs uppercase tracking-[0.5em] text-slate-400">Hola, {{ $user->name }}</p>
+                <h2>Panel general de SkillNest</h2>
+                <p>Supervisa los cursos enviados a revisión, el estado de la comunidad y las mentorías activas. Desde aquí puedes tomar decisiones rápidas sin perder coherencia con el diseño principal.</p>
+                <div class="hero-actions">
+                    <a href="{{ route('admin.courses.index', ['status' => 'pendiente']) }}" class="btn-primary">Ver cursos pendientes</a>
+                    <a href="{{ route('admin.dashboard') }}" class="btn-secondary border border-slate-200">Abrir panel clásico</a>
                 </div>
-                <div class="mt-5 space-y-4">
-                    <div>
-                        <div class="flex items-center justify-between text-xs font-semibold text-secondary">
-                            <span>Borradores</span>
-                            <span>{{ $draftCourses }}</span>
-                        </div>
-                        <div class="mt-1 h-2 rounded-full bg-slate-100">
-                            <div class="h-2 rounded-full bg-slate-400" style="width: {{ ($draftCourses / $totalPipeline) * 100 }}%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-between text-xs font-semibold text-secondary">
-                            <span>En revisión</span>
-                            <span>{{ $pendingCourses }}</span>
-                        </div>
-                        <div class="mt-1 h-2 rounded-full bg-slate-100">
-                            <div class="h-2 rounded-full bg-amber-400" style="width: {{ ($pendingCourses / $totalPipeline) * 100 }}%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-between text-xs font-semibold text-secondary">
-                            <span>Publicados</span>
-                            <span>{{ $activeCourses }}</span>
-                        </div>
-                        <div class="mt-1 h-2 rounded-full bg-slate-100">
-                            <div class="h-2 rounded-full bg-emerald-400" style="width: {{ ($activeCourses / $totalPipeline) * 100 }}%"></div>
-                        </div>
-                    </div>
-                </div>
-                <p class="mt-4 text-xs text-slate-400">Actualiza los borradores en el editor visual y envíalos cuando estén listos.</p>
             </div>
-
-            <div class="grid gap-6 lg:grid-cols-2">
-                <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-secondary">Últimos cursos</h2>
-                        <a href="{{ route('cursos.index') }}" class="text-sm font-medium text-primary">Ver todos</a>
-                    </div>
-                    <ul class="mt-5 space-y-4">
-                        @forelse($recentCourses ?? [] as $course)
-                            <li class="rounded-2xl border border-slate-100 px-4 py-3 shadow-inner">
-                                <p class="font-semibold text-secondary">{{ $course->title }}</p>
-                                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">{{ $course->category }} · {{ $course->level }}</p>
-                                <div class="mt-2 flex items-center gap-3 text-xs text-slate-500">
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
-                                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                                        {{ ucfirst($course->status ?? 'borrador') }}
-                                    </span>
-                                    <span>{{ $course->updated_at?->diffForHumans() }}</span>
-                                </div>
-                            </li>
-                        @empty
-                            <li class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
-                                Aún no tienes cursos registrados.
-                            </li>
-                        @endforelse
-                    </ul>
+            <div class="hero-metrics">
+                <div class="hero-metric">
+                    <span>Cursos activos</span>
+                    <strong>{{ number_format($activeCourses) }}</strong>
                 </div>
-
-                <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-secondary">Próximas mentorías</h2>
-                        <a href="{{ route('mentorias.index') }}" class="text-sm font-medium text-primary">Ver agenda</a>
-                    </div>
-                    <ul class="mt-5 space-y-4">
-                        @forelse($upcomingMentorships ?? [] as $session)
-                            <li class="flex items-start justify-between rounded-2xl border border-slate-100 px-4 py-3 shadow-inner">
-                                <div>
-                                    <p class="font-semibold text-secondary">{{ $session->title }}</p>
-                                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">{{ $session->mentor?->name ?? 'Mentoría' }}</p>
-                                    <p class="mt-1 text-sm text-slate-500">
-                                        @if($session->scheduled_at)
-                                            {{ $session->scheduled_at->format('d M, H:i') }}
-                                        @else
-                                            Sin fecha programada
-                                        @endif
-                                    </p>
-                                </div>
-                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
-                                    {{ strtoupper($session->status ?? 'pendiente') }}
-                                </span>
-                            </li>
-                        @empty
-                            <li class="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
-                                No hay sesiones programadas todavía.
-                            </li>
-                        @endforelse
-                    </ul>
+                <div class="hero-metric">
+                    <span>En revisión</span>
+                    <strong>{{ number_format($pendingCoursesCount) }}</strong>
+                </div>
+                <div class="hero-metric">
+                    <span>Mentorías confirmadas</span>
+                    <strong>{{ number_format($mentorshipsConfirmed) }}</strong>
+                </div>
+                <div class="hero-metric">
+                    <span>Mentorías pendientes</span>
+                    <strong>{{ number_format($mentorshipsPending) }}</strong>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-6">
-            <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-secondary">Checklist de lanzamiento</h2>
-                    <span class="text-xs font-semibold text-emerald-500">Actualizado</span>
-                </div>
-                <ul class="mt-4 space-y-3 text-sm text-slate-600">
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </span>
-                        Añade objetivos claros al curso.
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </span>
-                        Revisa recursos descargables.
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2 2m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </span>
-                        Agenda mentorías complementarias.
-                    </li>
-                </ul>
+        <div class="admin-stat-grid">
+            <div class="admin-stat-card">
+                <h3>Cursos aprobados</h3>
+                <p>{{ number_format($activeCourses) }}</p>
+                <small>Publicados y visibles</small>
             </div>
-
-            <div class="rounded-[28px] border border-slate-100 bg-white/90 p-6 shadow-card">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-secondary">Actividad reciente</h2>
-                    <button class="text-xs font-semibold text-primary">Descargar reporte</button>
-                </div>
-                <div class="mt-4 space-y-4">
-                    <div class="flex items-start gap-3">
-                        <div class="rounded-2xl bg-indigo-50 p-3 text-indigo-600">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-secondary">Has actualizado un módulo desde el editor visual.</p>
-                            <p class="text-xs text-slate-400">Hace 8 minutos</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <div class="rounded-2xl bg-sky-50 p-3 text-sky-600">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-secondary">Nuevo estudiante inscrito en “{{ $recentCourses[0]->title ?? 'Curso destacado' }}”.</p>
-                            <p class="text-xs text-slate-400">Hace 2 horas</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <div class="rounded-2xl bg-emerald-50 p-3 text-emerald-600">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-secondary">Una mentoría ha sido confirmada para esta semana.</p>
-                            <p class="text-xs text-slate-400">Hace 1 día</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="admin-stat-card">
+                <h3>En revisión</h3>
+                <p>{{ number_format($pendingCoursesCount) }}</p>
+                <small>Esperando tu decisión</small>
+            </div>
+            <div class="admin-stat-card">
+                <h3>Borradores</h3>
+                <p>{{ number_format($draftCourses) }}</p>
+                <small>Listos para enviar</small>
+            </div>
+            <div class="admin-stat-card">
+                <h3>Rechazados</h3>
+                <p>{{ number_format($rejectedCourses) }}</p>
+                <small>Requieren revisión de mentor</small>
             </div>
         </div>
-    </div>
+
+        <div class="admin-grid">
+            <div class="admin-card">
+                <h4>En revisión ({{ number_format($pendingCoursesCount) }})</h4>
+                @forelse($pendingCourses ?? [] as $course)
+                    <div class="list-entry">
+                        <div>
+                            <span>{{ $course->title }}</span>
+                            <small>Mentor: {{ $course->mentor?->name ?? 'Sin asignar' }}</small>
+                        </div>
+                        <span class="badge">Pendiente</span>
+                    </div>
+                @empty
+                    <div class="list-entry" style="justify-content:center;">
+                        <span class="text-sm text-slate-500">No hay cursos pendientes en este momento.</span>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="admin-card">
+                <h4>Nuevos usuarios</h4>
+                @forelse($recentUsers ?? [] as $recentUser)
+                    <div class="list-entry">
+                        <div>
+                            <span>{{ $recentUser->name }}</span>
+                            <small>{{ ucfirst($recentUser->role ?? 'usuario') }}</small>
+                        </div>
+                    </div>
+                @empty
+                    <div class="list-entry" style="justify-content:center;">
+                        <span class="text-sm text-slate-500">Sin registros recientes.</span>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="admin-secondary-grid">
+            <div class="admin-card">
+                <h4>Cursos actualizados</h4>
+                @forelse($recentCourses ?? [] as $course)
+                    <div class="list-entry">
+                        <div>
+                            <span>{{ $course->title }}</span>
+                            <small>{{ $course->updated_at?->diffForHumans() }}</small>
+                        </div>
+                        <span class="badge" style="background:rgba(16,185,129,0.12);color:#047857;">
+                            {{ ucfirst($course->status ?? 'borrador') }}
+                        </span>
+                    </div>
+                @empty
+                    <div class="list-entry" style="justify-content:center;">
+                        <span class="text-sm text-slate-500">Aún no hay cursos registrados.</span>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="admin-card">
+                <h4>Mentorías próximas</h4>
+                @forelse($upcomingMentorships ?? [] as $session)
+                    <div class="list-entry">
+                        <div>
+                            <span>{{ $session->titulo ?? $session->title ?? 'Mentoría' }}</span>
+                            <small>{{ $session->fecha_mentoria?->format('d M · H:i') ?? 'Sin fecha definida' }}</small>
+                        </div>
+                        <span class="badge">{{ strtoupper($session->estado ?? 'pendiente') }}</span>
+                    </div>
+                @empty
+                    <div class="list-entry" style="justify-content:center;">
+                        <span class="text-sm text-slate-500">No hay sesiones programadas.</span>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    @else
+        <p class="text-sm text-slate-500">Este panel está disponible únicamente para administradores.</p>
+    @endif
 @endsection

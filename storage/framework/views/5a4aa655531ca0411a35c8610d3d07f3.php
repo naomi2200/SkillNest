@@ -1,21 +1,19 @@
+﻿
+
 <?php $__env->startSection('dashboard-title', 'Editor de curso'); ?>
 
 <?php $__env->startSection('dashboard-actions'); ?>
-    <div class="flex w-full flex-wrap items-center gap-4 rounded-[32px] border border-slate-100 bg-white/80 px-5 py-4 shadow-card">
-        <div class="flex flex-1 flex-wrap items-center gap-3">
-            <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                Estado
-                <span class="rounded-full bg-secondary/10 px-3 py-0.5 text-secondary capitalize" id="course-status"><?php echo e($curso->status); ?></span>
-            </div>
-            <span class="text-xs text-slate-400" id="last-saved-indicator">Ultimo guardado hace instantes</span>
-            <span class="hidden text-xs text-slate-400 md:inline">El editor guarda todo en segundo plano</span>
+    <div class="flex w-full flex-wrap items-center gap-4 rounded-[32px] border border-white/70 bg-white/95 px-6 py-4 shadow-lg shadow-primary/5 backdrop-blur">
+        <div class="flex flex-1 flex-wrap items-center gap-3 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+            <span class="rounded-full bg-secondary/10 px-4 py-1 text-secondary">Estado: <span class="text-secondary" id="course-status"><?php echo e($curso->status); ?></span></span>
+            <span class="text-xs normal-case tracking-normal text-slate-400" id="last-saved-indicator">Último guardado hace instantes</span>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <a href="<?php echo e(route('cursos.show', $curso)); ?>" class="btn-secondary rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold">Vista previa</a>
+        <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
+            <a href="<?php echo e(route('cursos.show', $curso)); ?>" class="rounded-full border border-slate-200 bg-white px-5 py-2 text-secondary transition hover:border-secondary hover:text-secondary">Vista previa</a>
             <form action="<?php echo e(route('cursos.send-to-review', $curso)); ?>" method="POST" class="flex">
                 <?php echo csrf_field(); ?>
-                <button type="submit" class="btn-primary rounded-full px-6 py-2 text-sm font-semibold shadow-lg shadow-primary/30">
-                    Enviar a revision
+                <button type="submit" class="rounded-full bg-gradient-to-r from-secondary to-primary px-6 py-2 text-white shadow-lg shadow-primary/30 transition hover:from-secondary/90 hover:to-primary/90">
+                    Enviar a revisión
                 </button>
             </form>
         </div>
@@ -30,59 +28,210 @@
 <?php $__env->startSection('dashboard-content'); ?>
     <div id="editor-toast" class="pointer-events-none fixed right-6 top-24 hidden rounded-2xl bg-secondary px-4 py-2 text-sm font-semibold text-white shadow-card"></div>
     <style>
+        .editor-shell {
+            background: linear-gradient(135deg, #f6f4ff 0%, #e8e5ff 40%, #e0dbff 100%);
+            border-radius: 44px;
+            padding: 36px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            border-radius: 28px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(229,231,235,0.8);
+            box-shadow: 0 20px 55px rgba(108,71,255,0.12);
+            padding: 26px;
+        }
+        .stat-card h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            color: #a5a6d6;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .stat-card strong {
+            font-size: 34px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #6c47ff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 360px minmax(0,1fr) 300px;
+            gap: 24px;
+        }
+        @media (max-width: 1400px) {
+            .editor-layout { grid-template-columns: 320px minmax(0,1fr); }
+            .editor-layout aside:last-of-type { grid-column: span 2; }
+        }
+        @media (max-width: 1024px) {
+            .editor-shell { padding: 24px; }
+            .editor-layout { grid-template-columns: 1fr; }
+            .editor-layout aside:last-of-type { grid-column: auto; }
+        }
+        .editor-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid rgba(229,231,235,0.8);
+            box-shadow: 0 22px 60px rgba(99,102,241,0.15);
+        }
+        .form-stack label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+        .form-stack input,
+        .form-stack textarea,
+        .form-stack select {
+            width: 100%;
+            border-radius: 16px;
+            border: 2px solid rgba(226,232,240,0.85);
+            padding: 12px 16px;
+            font-size: 14px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        .form-stack input:focus,
+        .form-stack textarea:focus,
+        .form-stack select:focus {
+            outline: none;
+            border-color: #6c47ff;
+            box-shadow: 0 0 0 4px rgba(108,71,255,0.12);
+        }
+        .modules-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .module-card {
+            border-radius: 28px;
+            border: 2px solid rgba(226,232,240,0.9);
+            background: #fff;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(108,71,255,0.1);
+        }
         .module-card.sortable-ghost,
-        .lesson-block.sortable-ghost {
-            opacity: 0.55;
-            transform: scale(0.98);
-        }
+        .lesson-block.sortable-ghost { opacity: 0.6; transform: scale(0.98); }
         .module-card.is-dragging,
-        .lesson-block.is-dragging {
-            border-color: #6366f1;
-            box-shadow: 0 25px 35px rgba(79, 70, 229, 0.18);
+        .lesson-block.is-dragging { border-color: #6c47ff; }
+        .module-top { display: flex; gap: 16px; margin-bottom: 18px; }
+        .module-fields input,
+        .module-fields textarea {
+            width: 100%;
+            border-radius: 18px;
+            border: 2px solid rgba(226,232,240,0.85);
+            padding: 12px 16px;
+            font-size: 15px;
+            background: #fff;
         }
-        .module-handle,
-        .lesson-handle {
-            cursor: grab;
+        .module-fields textarea { margin-top: 10px; min-height: 70px; resize: vertical; }
+        .module-actions button {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            cursor: pointer;
         }
-        .module-handle:active,
-        .lesson-handle:active {
-            cursor: grabbing;
+        .module-handle { background: rgba(108,71,255,0.08); border: 2px solid rgba(108,71,255,0.25); cursor: grab; }
+        .module-add-lesson { background: rgba(16,185,129,0.15); color: #047857; }
+        .module-delete { background: rgba(239,68,68,0.15); color: #dc2626; }
+        .lesson-block {
+            border-radius: 20px;
+            border: 1px solid rgba(226,232,240,0.8);
+            background: linear-gradient(135deg, #fafbff 0%, #f3f5ff 100%);
+            padding: 16px;
+            margin-top: 12px;
+        }
+        .lesson-row { display: flex; flex-wrap: wrap; gap: 10px; }
+        .lesson-row input,
+        .lesson-row select {
+            border-radius: 14px;
+            border: 2px solid transparent;
+            padding: 10px 14px;
+            background: #fff;
+            font-weight: 600;
+        }
+        .lesson-row input:focus,
+        .lesson-row select:focus {
+            border-color: #6c47ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108,71,255,0.1);
+        }
+        .lesson-delete { background: rgba(239,68,68,0.15); color: #dc2626; }
+        .checklist li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .check-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid rgba(226,232,240,0.9);
+        }
+        .check-dot.fill {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: transparent;
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(226,232,240,0.8);
+            overflow: hidden;
+        }
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #6c47ff, #8b5cf6);
         }
     </style>
 
-    <div class="mb-6 grid gap-4 lg:grid-cols-3">
-        <div class="rounded-[28px] border border-slate-100 bg-gradient-to-r from-indigo-500 via-sky-500 to-cyan-400 p-[1px] text-white shadow-2xl">
-            <div class="rounded-[26px] bg-white/10 px-6 py-5 backdrop-blur">
-                <p class="text-xs uppercase tracking-[0.4em] text-white/70">Modo visual</p>
-                <h3 class="mt-2 text-2xl font-semibold">Construye como en Canva</h3>
-                <p class="mt-1 text-sm text-white/80">Arrastra modulos, agrega bloques y mantente inspirado con un lienzo limpio.</p>
+    <div class="editor-shell space-y-6">
+        <div class="stats-row">
+            <div class="stat-card">
+                <h4>Estado</h4>
+                <div class="flex items-center gap-2 text-sm font-semibold text-secondary">
+                    <span class="rounded-full bg-secondary/10 px-3 py-1 capitalize" id="course-status"><?php echo e($curso->status); ?></span>
+                    <span class="text-slate-400" id="last-saved-indicator">Último guardado hace instantes</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h4>Módulos</h4>
+                <strong><?php echo e($modulesCount); ?></strong>
+                <p class="text-sm text-slate-500">Estructuras creadas</p>
+            </div>
+            <div class="stat-card">
+                <h4>Lecciones</h4>
+                <strong><?php echo e($lessonsCount); ?></strong>
+                <p class="text-sm text-slate-500">Bloques interactivos</p>
             </div>
         </div>
-        <div class="rounded-[28px] border border-slate-100 bg-white/90 px-6 py-5 shadow-card">
-            <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Modulos</p>
-            <div class="mt-2 flex items-center gap-3">
-                <p class="text-3xl font-bold text-secondary"><?php echo e($modulesCount); ?></p>
-                <p class="text-sm text-slate-500">estructuras creadas</p>
-            </div>
-            <p class="text-xs text-slate-400">Objetivo recomendado: minimo 3 modulos por curso.</p>
-        </div>
-        <div class="rounded-[28px] border border-slate-100 bg-white/90 px-6 py-5 shadow-card">
-            <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Lecciones</p>
-            <div class="mt-2 flex items-center gap-3">
-                <p class="text-3xl font-bold text-secondary"><?php echo e($lessonsCount); ?></p>
-                <p class="text-sm text-slate-500">bloques interactivos</p>
-            </div>
-            <p class="text-xs text-slate-400">Combina video, lectura, archivos y retos.</p>
-        </div>
-    </div>
 
-    <div id="course-editor"
-         data-course-id="<?php echo e($curso->id); ?>"
-         data-basics-endpoint="<?php echo e(route('cursos.update-basics', $curso)); ?>"
-         data-order-endpoint="<?php echo e(route('cursos.order', $curso)); ?>"
-         data-image-endpoint="<?php echo e(route('cursos.update-image', $curso)); ?>"
-         class="grid gap-6 xl:grid-cols-[360px,1fr,300px]">
-
+        <div id="course-editor"
+             data-course-id="<?php echo e($curso->id); ?>"
+             data-basics-endpoint="<?php echo e(route('cursos.update-basics', $curso)); ?>"
+             data-order-endpoint="<?php echo e(route('cursos.order', $curso)); ?>"
+             data-image-endpoint="<?php echo e(route('cursos.update-image', $curso)); ?>"
+             class="editor-layout">
         <?php
             $initialImage = $curso->image_url
                 ? (\Illuminate\Support\Str::startsWith($curso->image_url, ['http://', 'https://'])
@@ -91,108 +240,98 @@
                 : 'https://picsum.photos/seed/' . $curso->id . '/800/600';
         ?>
 
-        <aside class="space-y-5 rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-card">
-            <div class="space-y-3">
-                <h2 class="text-sm font-semibold uppercase tracking-[0.4em] text-secondary">Imagen del curso</h2>
-                <div class="relative overflow-hidden rounded-[28px] border border-slate-100 bg-slate-50">
-                    <img id="course-image-preview" src="<?php echo e($initialImage); ?>" alt="Imagen del curso" class="h-48 w-full object-cover">
-                    <span class="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-secondary shadow">Portada</span>
-                </div>
-                <label class="block">
-                    <span class="text-xs font-semibold text-secondary">Actualizar imagen</span>
-                    <input type="file" accept="image/*" id="course-image-input" class="mt-2 w-full cursor-pointer rounded-2xl border border-dashed border-slate-300 px-3 py-2 text-sm">
-                </label>
-                <p class="text-xs text-slate-400">Formatos permitidos: JPG o PNG (max 4 MB).</p>
+        <aside class="editor-card form-stack">
+            <h3 class="mb-4 text-xs font-extrabold uppercase tracking-[0.35em] text-secondary">Imagen del curso</h3>
+            <div class="relative overflow-hidden rounded-[28px] border border-slate-100">
+                <img id="course-image-preview" src="<?php echo e($initialImage); ?>" alt="Imagen del curso" class="h-48 w-full object-cover">
+                <span class="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-secondary shadow">Portada</span>
             </div>
+            <label class="mt-3 block">
+                <input type="file" accept="image/*" id="course-image-input" class="w-full cursor-pointer rounded-2xl border border-dashed border-slate-300 px-3 py-2 text-sm">
+            </label>
+            <span class="text-xs text-slate-400">Formatos permitidos: JPG o PNG (máx 4 MB).</span>
 
-            <div class="rounded-[28px] border border-slate-100 bg-slate-50/70 px-4 py-3">
-                <h2 class="text-sm font-semibold uppercase tracking-[0.4em] text-secondary">Informacion basica</h2>
-            </div>
-            <div class="space-y-4 text-sm text-slate-600">
+            <div class="mt-6 space-y-4">
                 <?php
                     $basicFields = [
-                        ['name' => 'title', 'label' => 'Titulo', 'type' => 'text'],
-                        ['name' => 'category', 'label' => 'Categoria', 'type' => 'text'],
+                        ['name' => 'title', 'label' => 'Título', 'type' => 'text'],
+                        ['name' => 'category', 'label' => 'Categoría', 'type' => 'text'],
                         ['name' => 'level', 'label' => 'Nivel', 'type' => 'select', 'options' => ['principiante','intermedio','avanzado']],
-                        ['name' => 'price', 'label' => 'Precio', 'type' => 'number', 'step' => '0.01'],
-                        ['name' => 'duration', 'label' => 'Duracion (horas)', 'type' => 'number', 'min' => 1],
-                        ['name' => 'description', 'label' => 'Descripcion corta', 'type' => 'textarea'],
+                        ['name' => 'price', 'label' => 'Precio (S/)', 'type' => 'number', 'step' => '0.01'],
+                        ['name' => 'duration', 'label' => 'Duración (horas)', 'type' => 'number', 'min' => 1],
+                        ['name' => 'description', 'label' => 'Descripción corta', 'type' => 'textarea'],
                         ['name' => 'objectives', 'label' => 'Objetivos', 'type' => 'textarea'],
                         ['name' => 'requirements', 'label' => 'Requisitos', 'type' => 'textarea'],
                     ];
                 ?>
 
                 <?php $__currentLoopData = $basicFields; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <label class="block text-xs font-semibold text-secondary">
-                        <?php echo e($field['label']); ?>
-
+                    <div>
+                        <label><?php echo e($field['label']); ?></label>
                         <?php if($field['type'] === 'select'): ?>
-                            <select data-basic-field="<?php echo e($field['name']); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm">
+                            <select data-basic-field="<?php echo e($field['name']); ?>">
                                 <?php $__currentLoopData = $field['options']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($option); ?>" <?php if($curso->{$field['name']} === $option): echo 'selected'; endif; ?>><?php echo e(ucfirst($option)); ?></option>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         <?php elseif($field['type'] === 'textarea'): ?>
-                            <textarea data-basic-field="<?php echo e($field['name']); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" rows="3"><?php echo e($curso->{$field['name']}); ?></textarea>
+                            <textarea data-basic-field="<?php echo e($field['name']); ?>" rows="3"><?php echo e($curso->{$field['name']}); ?></textarea>
                         <?php else: ?>
                             <input type="<?php echo e($field['type']); ?>"
                                    step="<?php echo e($field['step'] ?? ''); ?>"
                                    min="<?php echo e($field['min'] ?? ''); ?>"
                                    data-basic-field="<?php echo e($field['name']); ?>"
-                                   value="<?php echo e($curso->{$field['name']}); ?>"
-                                   class="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm">
+                                   value="<?php echo e($curso->{$field['name']}); ?>">
                         <?php endif; ?>
-                    </label>
+                    </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </aside>
 
-        <section class="space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3 rounded-[32px] border border-slate-200 bg-white px-6 py-4 shadow-card">
+        <section class="editor-card">
+            <div class="modules-head">
                 <div>
-                    <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Modulos</p>
-                    <h2 class="text-xl font-semibold text-secondary">Estructura visual del curso</h2>
+                    <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Módulos</p>
+                    <h2 class="text-xl font-bold text-secondary">Estructura visual del curso</h2>
                 </div>
-                <button type="button" id="add-module-btn" class="btn-primary rounded-full bg-secondary px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-secondary/20">
-                    Agregar modulo
-                </button>
+                <button type="button" id="add-module-btn" class="rounded-full bg-gradient-to-r from-secondary to-primary px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/30">+ Agregar módulo</button>
             </div>
 
             <div id="modules-canvas" class="space-y-4">
                 <?php $__currentLoopData = $curso->modules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div class="module-card rounded-[32px] border border-slate-200 bg-white px-5 py-6 shadow-card" data-module-id="<?php echo e($module->id); ?>">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex-1 space-y-3">
-                                <input type="text" class="module-title w-full rounded-2xl border border-slate-200 px-3 py-2 text-lg font-semibold text-secondary" value="<?php echo e($module->title); ?>">
-                                <textarea class="module-description w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" rows="2" placeholder="Descripcion del modulo (opcional)"><?php echo e($module->description); ?></textarea>
+                    <div class="module-card" data-module-id="<?php echo e($module->id); ?>">
+                        <div class="module-top">
+                            <div class="module-fields">
+                                <input type="text" class="module-title" value="<?php echo e($module->title); ?>">
+                                <textarea class="module-description" placeholder="Descripción del módulo (opcional)"><?php echo e($module->description); ?></textarea>
                             </div>
-                            <div class="flex flex-col gap-2">
-                                <button type="button" class="module-handle rounded-2xl border border-slate-200 p-2 text-slate-400 hover:border-primary hover:text-primary" title="Arrastrar modulo">
+                            <div class="module-actions">
+                                <button type="button" class="module-handle" title="Arrastrar módulo">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 9h14M5 15h14"/>
                                     </svg>
                                 </button>
-                                <button type="button" class="module-add-lesson text-xs font-semibold text-primary">Agregar leccion</button>
-                                <button type="button" class="module-delete text-xs font-semibold text-rose-500">Eliminar</button>
+                                <button type="button" class="module-add-lesson">+ Lección</button>
+                                <button type="button" class="module-delete">Eliminar</button>
                             </div>
                         </div>
 
-                        <div class="lessons-wrapper mt-4 space-y-3" data-lessons-container>
+                        <div class="lessons-wrapper" data-lessons-container>
                             <?php $__currentLoopData = $module->lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="lesson-block rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4" data-lesson-id="<?php echo e($lesson->id); ?>">
-                                    <div class="flex flex-wrap items-center gap-3">
-                                        <button type="button" class="lesson-handle rounded-2xl border border-transparent bg-white p-2 text-slate-400 hover:border-primary hover:text-primary" title="Arrastrar leccion">
+                                <div class="lesson-block" data-lesson-id="<?php echo e($lesson->id); ?>">
+                                    <div class="lesson-row">
+                                        <button type="button" class="lesson-handle" title="Arrastrar lección">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h4m-4 6h4M5 9h.01M5 15h.01M18.99 9H19m-.01 6H19"/>
                                             </svg>
                                         </button>
-                                        <input type="text" class="lesson-title flex-1 rounded-2xl border border-transparent bg-white px-3 py-2 text-sm font-semibold text-secondary" value="<?php echo e($lesson->title); ?>">
-                                        <select class="lesson-type rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold uppercase text-slate-500">
+                                        <input type="text" class="lesson-title" value="<?php echo e($lesson->title); ?>">
+                                        <select class="lesson-type">
                                             <?php $__currentLoopData = ['video','reading','quiz','live','file']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <option value="<?php echo e($type); ?>" <?php if($lesson->type === $type): echo 'selected'; endif; ?>><?php echo e(ucfirst($type)); ?></option>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
-                                        <button class="lesson-delete text-xs font-semibold text-rose-500" type="button">Eliminar</button>
+                                        <button type="button" class="lesson-delete">Eliminar</button>
                                     </div>
                                     <div class="lesson-extra mt-3 space-y-2 text-sm text-slate-600">
                                         <input type="text" class="lesson-video hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del video" value="<?php echo e($lesson->video_url); ?>">
@@ -206,27 +345,26 @@
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <?php if($curso->modules->isEmpty()): ?>
-                    <p class="rounded-[32px] border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm text-slate-400">
-                        Todavia no has agregado modulos. Usa el boton "Agregar modulo" para iniciar.
+                    <p class="rounded-3xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm text-slate-400">
+                        Todavía no has agregado módulos. Usa el botón "Agregar módulo" para iniciar.
                     </p>
                 <?php endif; ?>
             </div>
         </section>
 
-        <aside class="space-y-5 rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-card">
+        <aside class="editor-card space-y-4">
             <div>
-                <h3 class="text-xs font-semibold uppercase tracking-[0.4em] text-secondary">Checklist</h3>
-                <ul class="mt-3 space-y-3 text-sm text-slate-600" id="checklist">
-                    <li class="flex items-center gap-2"><span class="check-dot" data-check="basics"></span>Informacion basica completa</li>
-                    <li class="flex items-center gap-2"><span class="check-dot" data-check="modules"></span>Al menos un modulo</li>
-                    <li class="flex items-center gap-2"><span class="check-dot" data-check="lessons"></span>Modulos con lecciones</li>
-                    <li class="flex items-center gap-2"><span class="check-dot" data-check="objectives"></span>Objetivos definidos</li>
-                    <li class="flex items-center gap-2"><span class="check-dot" data-check="requirements"></span>Requisitos definidos</li>
+                <p class="text-xs font-extrabold uppercase tracking-[0.35em] text-secondary">Checklist</p>
+                <ul class="checklist mt-3 space-y-3 text-sm text-slate-600" id="checklist">
+                    <li><span class="check-dot" data-check="basics"></span>Información básica completa</li>
+                    <li><span class="check-dot" data-check="modules"></span>Al menos un módulo</li>
+                    <li><span class="check-dot" data-check="lessons"></span>Módulos con lecciones</li>
+                    <li><span class="check-dot" data-check="objectives"></span>Objetivos definidos</li>
+                    <li><span class="check-dot" data-check="requirements"></span>Requisitos definidos</li>
                 </ul>
             </div>
-
-            <div class="rounded-[28px] border border-slate-100 bg-slate-50/80 px-4 py-3">
-                <p class="text-xs uppercase tracking-[0.4em] text-slate-400">Notas rapidas</p>
+            <div class="rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+                <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Notas rápidas</p>
                 <ul class="mt-3 space-y-2 text-sm text-slate-600">
                     <li class="flex items-start gap-2">
                         <span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>
@@ -234,7 +372,7 @@
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="mt-1 h-2 w-2 rounded-full bg-amber-500"></span>
-                        Usa quizzes para bloquear el siguiente modulo.
+                        Usa quizzes para bloquear el siguiente módulo.
                     </li>
                     <li class="flex items-start gap-2">
                         <span class="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -242,30 +380,27 @@
                     </li>
                 </ul>
             </div>
-
             <div class="space-y-3">
-                <h4 class="text-xs uppercase tracking-[0.4em] text-secondary">Linea de progreso</h4>
-                <div class="space-y-2 text-xs text-slate-500">
-                    <div class="flex items-center justify-between">
+                <p class="text-xs uppercase tracking-[0.35em] text-secondary">Línea de progreso</p>
+                <div>
+                    <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
                         <span>Borrador</span>
-                        <span><?php echo e($modulesCount > 0 ? 'Completado' : 'Pendiente'); ?></span>
+                        <span><?php echo e($modulesCount ? 'Completado' : 'Pendiente'); ?></span>
                     </div>
-                    <div class="h-2 rounded-full bg-slate-100">
-                        <div class="h-2 rounded-full bg-emerald-400" style="width: <?php echo e($modulesCount ? '70%' : '30%'); ?>"></div>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span>Revision</span>
+                    <div class="progress-bar"><span style="width: <?php echo e($modulesCount ? '70%' : '30%'); ?>"></span></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between text-xs font-semibold text-slate-500">
+                        <span>Revisión</span>
                         <span><?php echo e($curso->status === 'pendiente' ? 'Enviado' : 'Por enviar'); ?></span>
                     </div>
-                    <div class="h-2 rounded-full bg-slate-100">
-                        <div class="h-2 rounded-full bg-amber-400" style="width: <?php echo e($curso->status === 'pendiente' ? '80%' : '35%'); ?>"></div>
-                    </div>
+                    <div class="progress-bar"><span style="width: <?php echo e($curso->status === 'pendiente' ? '80%' : '35%'); ?>"></span></div>
                 </div>
             </div>
         </aside>
+        </div>
     </div>
 <?php $__env->stopSection(); ?>
-
 <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
@@ -317,7 +452,7 @@
             };
 
             const updateLastSaved = () => {
-                lastSavedIndicator.textContent = 'Ultimo guardado: ' + new Date().toLocaleTimeString();
+                lastSavedIndicator.textContent = 'Último guardado: ' + new Date().toLocaleTimeString();
             };
 
             const basics = editor.querySelectorAll('[data-basic-field]');
@@ -329,11 +464,11 @@
                     body: JSON.stringify(payload)
                 }).then(() => {
                     updateLastSaved();
-                    showToast('Informacion basica guardada');
+                    showToast('Información básica guardada');
                     refreshChecklist();
                 }).catch(err => {
                     console.error(err);
-                    showToast('Error guardando datos basicos', 'error');
+                    showToast('Error guardando datos básicos', 'error');
                 });
             });
             basics.forEach(el => el.addEventListener('input', handleBasicSave));
@@ -388,10 +523,10 @@
                         })
                     }).then(() => {
                         updateLastSaved();
-                        showToast('Modulo actualizado');
+                        showToast('Módulo actualizado');
                     }).catch(err => {
                         console.error(err);
-                        showToast('Error al actualizar modulo', 'error');
+                        showToast('Error al actualizar módulo', 'error');
                     });
                 });
 
@@ -399,13 +534,13 @@
                 descInput.addEventListener('input', saveModule);
 
                 deleteBtn.addEventListener('click', () => {
-                    if (!confirm('Eliminar modulo completo?')) return;
+                    if (!confirm('¿Eliminar módulo completo?')) return;
                     fetchJson(`<?php echo e(url('/modules')); ?>/${moduleId}`, { method: 'DELETE' })
                         .then(() => {
                             card.remove();
                             sendReorder();
                             refreshChecklist();
-                            showToast('Modulo eliminado');
+                            showToast('Módulo eliminado');
                         })
                         .catch(err => {
                             console.error(err);
@@ -414,7 +549,7 @@
                 });
 
                 addLessonBtn.addEventListener('click', () => {
-                    const title = prompt('Titulo de la leccion', 'Nueva leccion');
+                    const title = prompt('Título de la lección', 'Nueva lección');
                     if (!title) return;
                     fetchJson(`<?php echo e(url('/modules')); ?>/${moduleId}/lessons`, {
                         method: 'POST',
@@ -424,10 +559,10 @@
                         lessonsContainer.appendChild(lessonBlock);
                         registerLessonBlock(lessonBlock);
                         refreshChecklist();
-                        showToast('Leccion creada');
+                        showToast('Lección creada');
                     }).catch(err => {
                         console.error(err);
-                        showToast('Error creando leccion', 'error');
+                        showToast('Error creando lección', 'error');
                     });
                 });
 
@@ -449,17 +584,17 @@
                 template.className = 'lesson-block rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3';
                 template.dataset.lessonId = lesson.id;
                 template.innerHTML = `
-                    <div class="flex flex-wrap items-center gap-3">
-                        <button type="button" class="lesson-handle rounded-2xl border border-transparent bg-white p-2 text-slate-400 hover:border-primary hover:text-primary" title="Arrastrar leccion">
+                    <div class="lesson-row">
+                        <button type="button" class="lesson-handle" title="Arrastrar lección">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h4m-4 6h4M5 9h.01M5 15h.01M18.99 9H19m-.01 6H19"/>
                             </svg>
                         </button>
-                        <input type="text" class="lesson-title flex-1 rounded-2xl border border-transparent bg-white px-3 py-2 text-sm font-semibold text-secondary" value="${lesson.title}">
-                        <select class="lesson-type rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold uppercase text-slate-500">
+                        <input type="text" class="lesson-title" value="${lesson.title}">
+                        <select class="lesson-type">
                             ${['video','reading','quiz','live','file'].map(type => `<option value="${type}" ${lesson.type === type ? 'selected' : ''}>${type.charAt(0).toUpperCase() + type.slice(1)}</option>`).join('')}
                         </select>
-                        <button type="button" class="lesson-delete text-xs font-semibold text-rose-500">Eliminar</button>
+                        <button type="button" class="lesson-delete">Eliminar</button>
                     </div>
                     <div class="lesson-extra mt-3 space-y-2 text-sm text-slate-600">
                         <input type="text" class="lesson-video hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del video" value="${lesson.video_url ?? ''}">
@@ -505,10 +640,10 @@
                         })
                     }).then(() => {
                         updateLastSaved();
-                        showToast('Leccion actualizada');
+                        showToast('Lección actualizada');
                     }).catch(err => {
                         console.error(err);
-                        showToast('No se pudo guardar la leccion', 'error');
+                        showToast('No se pudo guardar la lección', 'error');
                     });
                 });
 
@@ -524,19 +659,19 @@
                 });
 
                 deleteBtn.addEventListener('click', () => {
-                    if (!confirm('Eliminar esta leccion?')) return;
+                    if (!confirm('¿Eliminar esta lección?')) return;
                     fetchJson(`<?php echo e(url('/lessons')); ?>/${lessonId}`, { method: 'DELETE' })
                         .then(() => {
                             block.remove();
                             sendReorder();
                             refreshChecklist();
-                            showToast('Leccion eliminada');
+                            showToast('Lección eliminada');
                         }).catch(console.error);
                 });
             };
 
             document.getElementById('add-module-btn').addEventListener('click', () => {
-                const title = prompt('Nombre del modulo', 'Nuevo modulo');
+                const title = prompt('Nombre del módulo', 'Nuevo módulo');
                 if (!title) return;
                 fetchJson(`<?php echo e(url('/cursos')); ?>/${courseId}/modules`, {
                     method: 'POST',
@@ -544,23 +679,23 @@
                 }).then(({ module }) => {
                     const wrapper = document.createElement('div');
                     wrapper.innerHTML = `
-                        <div class="module-card rounded-[32px] border border-slate-200 bg-white px-5 py-6 shadow-card" data-module-id="${module.id}">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex-1 space-y-3">
-                                    <input type="text" class="module-title w-full rounded-2xl border border-slate-200 px-3 py-2 text-lg font-semibold text-secondary" value="${module.title}">
-                                    <textarea class="module-description w-full rounded-2xl border border-slate-200 px-3 py-2 text-sm" rows="2" placeholder="Descripcion del modulo (opcional)"></textarea>
+                        <div class="module-card" data-module-id="${module.id}">
+                            <div class="module-top">
+                                <div class="module-fields">
+                                    <input type="text" class="module-title" value="${module.title}">
+                                    <textarea class="module-description" placeholder="Descripción del módulo (opcional)"></textarea>
                                 </div>
-                                <div class="flex flex-col gap-2">
-                                    <button type="button" class="module-handle rounded-2xl border border-slate-200 p-2 text-slate-400 hover:border-primary hover:text-primary" title="Arrastrar modulo">
+                                <div class="module-actions">
+                                    <button type="button" class="module-handle" title="Arrastrar módulo">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 9h14M5 15h14"/>
                                         </svg>
                                     </button>
-                                    <button type="button" class="module-add-lesson text-xs font-semibold text-primary">Agregar leccion</button>
-                                    <button type="button" class="module-delete text-xs font-semibold text-rose-500">Eliminar</button>
+                                    <button type="button" class="module-add-lesson">+ Lección</button>
+                                    <button type="button" class="module-delete">Eliminar</button>
                                 </div>
                             </div>
-                            <div class="lessons-wrapper mt-4 space-y-3" data-lessons-container></div>
+                            <div class="lessons-wrapper" data-lessons-container></div>
                         </div>
                     `;
                     const card = wrapper.firstElementChild;
@@ -568,10 +703,10 @@
                     registerModuleCard(card);
                     sendReorder();
                     refreshChecklist();
-                    showToast('Modulo creado');
+                    showToast('Módulo creado');
                 }).catch(err => {
                     console.error(err);
-                    showToast('Error creando modulo', 'error');
+                    showToast('Error creando módulo', 'error');
                 });
             });
 
@@ -611,7 +746,7 @@
             modulesCanvas.querySelectorAll('.module-card').forEach(registerModuleCard);
 
             const refreshChecklist = () => {
-                const hasBasics = basics[0].value.trim().length > 3;
+                const hasBasics = basics[0]?.value.trim().length > 3;
                 const modulesCount = modulesCanvas.querySelectorAll('.module-card').length;
                 const lessonsCount = modulesCanvas.querySelectorAll('.lesson-block').length;
                 const objectives = editor.querySelector('[data-basic-field="objectives"]').value.trim().length > 0;
@@ -620,7 +755,7 @@
                 const updateDot = (key, filled) => {
                     const dot = document.querySelector(`.check-dot[data-check="${key}"]`);
                     if (!dot) return;
-                    dot.className = `check-dot h-3 w-3 rounded-full border ${filled ? 'border-emerald-400 bg-emerald-400' : 'border-slate-300'}`;
+                    dot.classList.toggle('fill', filled);
                 };
 
                 updateDot('basics', hasBasics);
@@ -634,5 +769,6 @@
         })();
     </script>
 <?php $__env->stopPush(); ?>
+
 
 <?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/cursos/editor.blade.php ENDPATH**/ ?>

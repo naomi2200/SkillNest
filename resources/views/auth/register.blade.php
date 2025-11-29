@@ -1,48 +1,53 @@
 @extends('layouts.guest')
 
 @section('title', 'Crea tu cuenta')
-@section('subtitle', 'Únete a SkillNest y comienza a aprender o enseñar')
+@section('subtitle', '&Uacute;nete a SkillNest y comienza a aprender o ense&ntilde;ar')
 
 @section('form')
-    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+    <form method="POST" action="{{ route('register') }}">
         @csrf
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="name">Nombre completo</label>
-            <input id="name" name="name" type="text" required
-                   class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary" />
+        <div class="auth-field">
+            <label for="name">Nombre completo</label>
+            <input id="name" name="name" type="text" value="{{ old('name') }}" required class="auth-input">
+            @error('name')
+                <p class="auth-error">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="email">Correo</label>
-            <input id="email" name="email" type="email" required
-                   class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary" />
+        <div class="auth-field">
+            <label for="email">Correo electr&oacute;nico</label>
+            <input id="email" name="email" type="email" value="{{ old('email') }}" required class="auth-input">
+            @error('email')
+                <p class="auth-error">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="password">Contraseña</label>
-            <input id="password" name="password" type="password" required
-                   class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary" />
+        <div class="auth-field">
+            <label for="password">Contrase&ntilde;a</label>
+            <input id="password" name="password" type="password" required class="auth-input">
+            @error('password')
+                <p class="auth-error">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="password_confirmation">Confirma tu contraseña</label>
-            <input id="password_confirmation" name="password_confirmation" type="password" required
-                   class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary" />
+        <div class="auth-field">
+            <label for="password_confirmation">Confirma tu contrase&ntilde;a</label>
+            <input id="password_confirmation" name="password_confirmation" type="password" required class="auth-input">
         </div>
 
-        <div>
-            <label class="text-sm font-medium text-slate-600" for="role">Soy</label>
-            <select id="role" name="role" class="mt-1 w-full rounded-lg border-slate-200 text-slate-700 focus:border-primary focus:ring-primary">
-                <option value="student">Estudiante</option>
-                <option value="mentor">Mentor</option>
+        <div class="auth-field">
+            <label for="role">Soy</label>
+            <select id="role" name="role" class="auth-input">
+                <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Estudiante</option>
+                <option value="mentor" {{ old('role') === 'mentor' ? 'selected' : '' }}>Mentor</option>
             </select>
         </div>
 
-        <button class="btn-primary w-full">Crear cuenta</button>
+        <button class="btn-submit" type="submit">Crear cuenta</button>
 
-        <p class="text-center text-sm text-slate-500">
-            ¿Ya tienes cuenta?
-            <a href="{{ route('login') }}" class="font-semibold text-primary">Inicia sesión</a>
+        <p class="text-sm" style="text-align: center; color: #6b7280; margin-top: 10px;">
+            &iquest;Ya tienes cuenta?
+            <a href="{{ route('login') }}" class="auth-link">Inicia sesi&oacute;n</a>
         </p>
     </form>
 @endsection

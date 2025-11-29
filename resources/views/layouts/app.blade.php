@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
@@ -17,14 +17,14 @@
     @endif
     <style>
         :root {
-            --color-primary: #6C47FF;
-            --color-primary-hover: #8B5CF6;
-            --color-background: #F6F6F6;
-            --color-text: #333333;
+            --color-primary: #6c47ff;
+            --color-primary-hover: #5a38e6;
+            --color-background: #f7f6ff;
+            --color-text: #1f2233;
             --color-success: #4CAF50;
             --color-danger: #FF5252;
-            --radius-base: 8px;
-            --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --radius-base: 12px;
+            --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
 
         *, *::before, *::after {
@@ -49,182 +49,459 @@
             background: var(--color-background);
         }
 
-        .app-header {
+        .navbar-modern {
             position: sticky;
             top: 0;
-            z-index: 50;
-            background: #FFFFFF;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            z-index: 60;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+            backdrop-filter: blur(12px);
         }
 
+        .navbar-container,
         .app-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+            padding: 18px 24px;
+        }
+
+        .navbar-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 22px;
+            color: var(--color-primary);
+        }
+
+        .navbar-logo .logo-text {
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 32px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .navbar-links a {
+            font-weight: 600;
+            color: #4b5563;
+            font-size: 15px;
+            position: relative;
+            padding: 8px 0;
+            transition: color 0.2s ease;
+        }
+
+        .navbar-links a::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-primary), #8b5cf6);
+            transition: width 0.3s ease;
+            border-radius: 999px;
+        }
+
+        .navbar-links a:hover {
+            color: var(--color-primary);
+        }
+
+        .navbar-links a:hover::after {
+            width: 100%;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-nav-secondary,
+        .btn-nav-primary {
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-nav-secondary {
+            background: transparent;
+            color: var(--color-primary);
+        }
+
+        .btn-nav-secondary:hover {
+            background: rgba(108,71,255,0.08);
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            color: #fff;
+            border: none;
+            box-shadow: 0 4px 15px rgba(108,71,255,0.3);
+        }
+
+        .btn-nav-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108,71,255,0.4);
+        }
+
+        .app-main {
+            padding: 48px 0 64px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: var(--radius-base);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .auth-page {
+            margin-top: -24px;
+            margin-bottom: -32px;
+            padding: 64px 0 96px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-shell {
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 24px;
         }
 
-        .app-nav {
+        .auth-wrapper {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 0;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: stretch;
         }
 
-        .app-logo {
+        .auth-card {
+            background: #fff;
+            border-radius: 32px;
+            padding: 48px;
+            box-shadow: 0 40px 120px rgba(12, 10, 37, 0.18);
+            flex: 1 1 360px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--color-primary), #8b5cf6, #a855f7);
+        }
+
+        .auth-card-side {
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            color: #fff;
+            box-shadow: 0 50px 140px rgba(108, 71, 255, 0.35);
+        }
+
+        .auth-card-side::before {
+            display: none;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .auth-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #fff;
+            box-shadow: 0 25px 60px rgba(108, 71, 255, 0.35);
+        }
+
+        .auth-title {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1f2937;
+        }
+
+        .auth-subtitle {
+            margin-top: 12px;
+            font-size: 1rem;
+            color: #6b7280;
+        }
+
+        .auth-alert {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--color-primary);
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.1));
+            border: 1px solid rgba(16,185,129,0.25);
+            color: #065f46;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
         }
 
-        .app-logo span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-base);
-            background: var(--color-primary);
-            color: #FFF;
+        .auth-alert.error {
+            background: linear-gradient(135deg, rgba(248,113,113,0.18), rgba(239,68,68,0.14));
+            border-color: rgba(239,68,68,0.4);
+            color: #7f1d1d;
         }
 
-        .main-nav {
+        .auth-card-main form {
             display: flex;
-            align-items: center;
-            gap: 24px;
-            font-size: 15px;
-            font-weight: 500;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        .main-nav a:hover {
-            color: var(--color-primary);
+        .auth-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .app-main {
-            padding: 96px 0 48px;
-        }
-
-        .app-footer {
-            background: #FFFFFF;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            text-align: center;
-            padding: 32px 0;
-            font-size: 14px;
-            color: rgba(51,51,51,0.7);
-        }
-
-        .btn-primary,
-        .btn-secondary {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 48px;
-            padding: 0 32px;
-            border-radius: var(--radius-base);
-            font-size: 15px;
+        .auth-field label {
+            font-size: 0.9rem;
             font-weight: 600;
-            transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+            color: #374151;
         }
 
-        .btn-primary {
-            background: var(--color-primary);
-            border: none;
-            color: #FFF;
-            box-shadow: var(--shadow-card);
-        }
-
-        .btn-primary:hover {
-            background: var(--color-primary-hover);
-        }
-
-        .btn-secondary {
-            background: #FFF;
-            border: 1px solid rgba(0,0,0,0.12);
-            color: var(--color-text);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
-
-        .card {
-            background: #FFF;
-            border-radius: var(--radius-base);
-            padding: 24px;
-            box-shadow: var(--shadow-card);
-        }
-
-        .input {
+        .auth-input,
+        .auth-field select {
             width: 100%;
-            height: 44px;
-            padding: 0 16px;
-            border-radius: var(--radius-base);
-            border: 1px solid rgba(0,0,0,0.12);
-            background: #FFF;
-            font-size: 15px;
-            color: var(--color-text);
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            background: #f9fafb;
+            transition: all 0.3s ease;
         }
 
-        .input:focus {
+        .auth-input:focus,
+        .auth-field select:focus {
             outline: none;
             border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(108,71,255,0.15);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(108,71,255,0.12);
         }
 
-        .badge-success,
-        .badge-danger {
+        .auth-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            font-size: 0.9rem;
+        }
+
+        .auth-checkbox {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #4b5563;
+        }
+
+        .auth-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--color-primary);
+        }
+
+        .auth-link {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .auth-link:hover {
+            color: var(--color-primary-hover);
+        }
+
+        .auth-error {
+            font-size: 0.85rem;
+            color: #ef4444;
+            margin: -4px 0 0;
+        }
+
+        .auth-card-side h3 {
+            margin: 0 0 12px;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .auth-card-side p {
+            color: rgba(255,255,255,0.85);
+            line-height: 1.6;
+            margin: 0 0 20px;
+        }
+
+        .auth-side-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .auth-side-list li {
+            position: relative;
+            padding-left: 32px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .auth-side-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 1px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 4px 12px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: var(--radius-base);
+            font-size: 0.9rem;
         }
 
-        .badge-success {
-            background: rgba(76,175,80,0.12);
-            color: var(--color-success);
+        .auth-side-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 30px;
+            border-radius: 14px;
+            background: #fff;
+            color: var(--color-primary);
+            font-weight: 700;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
 
-        .badge-danger {
-            background: rgba(255,82,82,0.12);
-            color: var(--color-danger);
+        .auth-side-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 28px 60px rgba(0,0,0,0.25);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 15px 40px rgba(108,71,255,0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 60px rgba(108,71,255,0.35);
+        }
+
+        @media (max-width: 1024px) {
+            .auth-card {
+                padding: 40px 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-page {
+                padding: 48px 0 72px;
+            }
+
+            .auth-card {
+                padding: 32px 24px;
+            }
+
+            .auth-wrapper {
+                gap: 24px;
+            }
+
+            .auth-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 32px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .navbar-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-actions {
+                display: none;
+            }
         }
     </style>
     @stack('styles')
 </head>
 <body>
     <div class="app-shell">
-        <header class="app-header">
-            <div class="app-container">
-                <div class="app-nav">
-                    <a class="app-logo" href="{{ url('/') }}">
-                        <span>SN</span>
-                        SkillNest
-                    </a>
-                    <nav class="main-nav">
-                        <a href="{{ url('/cursos') }}">Cursos</a>
-                        <a href="{{ url('/mentor-market') }}">Mentorías</a>
-                        <a href="{{ url('/mentorias/create') }}">Conviértete en mentor</a>
-                    </nav>
-                    <div class="flex items-center gap-3">
-                        @auth
-                            <a href="{{ route('dashboard') }}" class="btn-secondary">Panel</a>
-                            <form method="POST" action="{{ route('logout') }}" style="display:inline;">
-                                @csrf
-                                <button type="submit" class="btn-primary">Salir</button>
-                            </form>
-                        @else
-                            <a href="{{ route('login') }}" class="btn-secondary">Ingresar</a>
-                            <a href="{{ route('register') }}" class="btn-primary">Crear cuenta</a>
-                        @endauth
-                    </div>
+        <header class="navbar-modern">
+            <div class="navbar-container">
+                <a class="navbar-logo" href="{{ url('/') }}">
+                    <span class="logo-icon">&#127891;</span>
+                    <span class="logo-text">SkillNest</span>
+                </a>
+                <nav class="navbar-links">
+                    <a href="{{ url('/cursos') }}">Cursos</a>
+                    <a href="{{ route('mentor-market.index') }}">Mentor&iacute;as</a>
+                    <a href="{{ url('/mentorias/create') }}">Convi&eacute;rtete en mentor</a>
+                </nav>
+                <div class="navbar-actions">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="btn-nav-secondary">Panel</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn-nav-primary" style="background: linear-gradient(135deg,#ef4444,#f97316); box-shadow: 0 4px 15px rgba(239,68,68,0.3);">Salir</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="btn-nav-secondary">Ingresar</a>
+                        <a href="{{ route('register') }}" class="btn-nav-primary">Crear cuenta</a>
+                    @endauth
                 </div>
             </div>
         </header>
@@ -236,11 +513,7 @@
             </div>
         </main>
 
-        <footer class="app-footer">
-            <div class="app-container">
-                © {{ date('Y') }} SkillNest. Todos los derechos reservados.
-            </div>
-        </footer>
+        @includeIf('partials.footer')
     </div>
 
     @stack('scripts')
