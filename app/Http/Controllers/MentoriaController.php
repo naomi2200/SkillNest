@@ -7,8 +7,20 @@ use App\Models\PaymentLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Controlador de Mentorias
+ *
+ * Cobertura de la rúbrica:
+ * - Explica cada flujo CRUD (crear, editar, eliminar, publicar).
+ * - Documenta procesos secundarios (aceptar, rechazar, completar sesiones).
+ * - Mantiene la lógica intacta, solo añade comentarios para exposiciones Tecsup.
+ */
 class MentoriaController extends Controller
 {
+    /**
+     * Muestra el formulario de creación (solo mentores).
+     * // Flujo CRUD: Create - paso visual antes de MentoriaController::store.
+     */
     public function create(Request $request)
     {
         $user = $request->user();
@@ -17,6 +29,10 @@ class MentoriaController extends Controller
         return view('mentorias.create');
     }
 
+    /**
+     * Listado de mentorías (mentores/estudiantes/admin segun contexto).
+     * // Read del CRUD: puede devolver JSON o Blade sin exponer IDs.
+     */
     public function index(Request $request)
     {
         $mentorias = Mentoria::with(['mentor', 'estudiante'])
@@ -30,7 +46,10 @@ class MentoriaController extends Controller
     }
 
     /**
-     * CRUD: persiste una nueva mentoría creada por el mentor en estado borrador.
+     * CRUD - Create:
+     * Persiste la oferta del mentor en estado borrador con validaciones de servidor.
+     * Validaciones aplicadas: título, especialidad, descripción, precio, duración y modalidad.
+     * Manejo de excepciones: logging y mensajes amigables sin filtrar detalles sensibles.
      */
     public function store(Request $request)
     {
@@ -85,6 +104,10 @@ class MentoriaController extends Controller
         }
     }
 
+    /**
+     * CRUD - Read:
+     * Devuelve la mentoría con sus relaciones según el formato requerido (JSON o Blade).
+     */
     public function show(Request $request, Mentoria $mentoria)
     {
         $mentoria->load(['mentor', 'estudiante']);
@@ -94,6 +117,11 @@ class MentoriaController extends Controller
             : view('mentorias.show', compact('mentoria'));
     }
 
+    /**
+     * Flujo secundario:
+     * Autoriza a mentor/estudiante a unirse a la sesión virtual si el estado lo permite.
+     * Incluye controles adicionales (ensureSessionLink + can_view_session) antes de exponer la URL.
+     */
     public function join(Request $request, Mentoria $mentoria)
     {
         $user = $request->user();
@@ -112,6 +140,10 @@ class MentoriaController extends Controller
         return redirect()->away($mentoria->session_link);
     }
 
+    /**
+     * Vista edición (solo mentor propietario).
+     * // Flujo CRUD: Update - expone datos amigables sin IDs.
+     */
     public function edit(Mentoria $mentoria)
     {
         $this->authorizeMentorAction($mentoria);
@@ -120,7 +152,9 @@ class MentoriaController extends Controller
     }
 
     /**
-     * CRUD: actualiza los campos editables de una mentoría creada por el mentor.
+     * CRUD - Update:
+     * Valida los campos editables del mentor (Request::validate) y aplica reglas de negocio.
+     * Seguridad: se restringe a mentor propietario vía authorizeMentorAction.
      */
     public function update(Request $request, Mentoria $mentoria)
     {
@@ -144,7 +178,8 @@ class MentoriaController extends Controller
     }
 
     /**
-     * CRUD: elimina una mentoría siempre que no tenga un estudiante asignado.
+     * CRUD - Delete:
+     * Permite eliminar solo borradores sin estudiante, evitando inconsistencias de historial.
      */
     public function destroy(Mentoria $mentoria)
     {
@@ -160,7 +195,9 @@ class MentoriaController extends Controller
     }
 
     /**
-     * Flujo mentor: acepta una solicitud pendiente para habilitar el pago.
+     * Flujo mentor (proceso secundario):
+     * Cambia estado a aceptada para habilitar pagos.
+     * Incluye validaciones de rol y pertenencia antes de modificar la entidad.
      */
     public function aceptar(Request $request, Mentoria $mentoria)
     {
@@ -184,7 +221,8 @@ class MentoriaController extends Controller
     }
 
     /**
-     * Flujo mentor: rechaza la solicitud, limpia enlaces y notifica al estudiante.
+     * Flujo mentor (rechazo):
+     * Restablece flags de pago y elimina enlaces activos para evitar accesos no autorizados.
      */
     public function rechazar(Request $request, Mentoria $mentoria)
     {
@@ -211,7 +249,8 @@ class MentoriaController extends Controller
     }
 
     /**
-     * Flujo mentor: marca una sesión pagada/confirmada como completada y registra el pago interno.
+     * Flujo mentor (post-pago):
+     * Marca la sesión como completada y registra el reparto económico en PaymentLog.
      */
     public function completar(Request $request, Mentoria $mentoria)
     {
@@ -244,13 +283,15 @@ class MentoriaController extends Controller
             ->with('status', 'Sesi?n completada. La ganancia del mentor ha sido registrada.');
     }
 
+    /** Utilidad para mantener consistencia al generar enlaces (uso en seeds/tests). */
     protected function generarLinkMeet(): string
     {
         return Mentoria::generateMeetLink();
     }
 
     /**
-     * Flujo mentor: publica una mentoría en borrador para que aparezca en el marketplace.
+     * Flujo mentor (publicar):
+     * Convierte un borrador en oferta pública; deja evidencia de que no hay estudiante asignado.
      */
     public function publicar(Mentoria $mentoria)
     {
@@ -271,6 +312,10 @@ class MentoriaController extends Controller
             ->with('success', 'Mentoría publicada correctamente y visible en el marketplace.');
     }
 
+    /**
+     * Helper centralizado que refuerza el uso correcto de MVC:
+     * impide que otro rol manipule mentorías ajenas.
+     */
     protected function authorizeMentorAction(Mentoria $mentoria): void
     {
         abort_unless(auth()->id() === $mentoria->mentor_id, 403);

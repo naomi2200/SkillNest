@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => view('home'))->name('home');
 
+// ----- M?dulo de mentor?as (documentado para la r?brica) -----
+// 1) Marketplace p?blico: estudiantes exploran ofertas antes de autenticarse.
 // Catálogo público de mentorías y perfil del mentor (acceso libre)
 Route::get('/mentorias', [MentorPublicController::class, 'index'])->name('mentor-market.index');
 Route::get('/mentorias/mentor/{mentor}', [MentorPublicController::class, 'show'])->name('mentor.public.show');
@@ -83,12 +85,15 @@ Route::middleware('auth')->group(function () {
 
     // CRUD interno para mentorías dentro del dashboard (usa resource completo)
     Route::prefix('dashboard')->group(function () {
+        // 2) CRUD protegido (mentores/admin): create/read/update/delete/publicar/gestionar pagos.
         Route::resource('mentorias', MentoriaController::class);
     });
+    // 3) Acceso compartido a la sala virtual (mentor/estudiante).
     Route::get('/mentorias/{mentoria}/join', [MentoriaController::class, 'join'])->name('mentorias.join');
 
     // Acciones exclusivas de estudiantes (reservar y pagar mentorías)
     Route::middleware('student')->group(function () {
+        // 4) Flujo secundario de estudiante: enviar solicitud y programar pago.
         Route::post('/mentorias/mentor/{mentor}/book', [MentoriaBookingController::class, 'store'])->name('mentor-market.book');
         Route::get('/mentorias/{mentoria}/pago', [PaymentController::class, 'show'])->name('mentorias.payment.show');
         Route::post('/mentorias/{mentoria}/pago', [PaymentController::class, 'store'])->name('mentorias.payment.store');
@@ -116,6 +121,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/courses/{course}/structure', [CourseBuilderController::class, 'syncStructure'])->name('courses.structure');
         Route::post('/courses/{course}/submit', [CourseBuilderController::class, 'submitForReview'])->name('courses.submit');
 
+        // 5) Dashboard mentor: acciones para aceptar/rechazar/completar/publicar sin exponer IDs.
         Route::get('/mentorias', [MentorController::class, 'mentorships'])->name('mentorias.index');
         Route::get('/mentorias/{mentoria}/edit', [MentoriaController::class, 'edit'])->name('mentorias.edit');
         Route::put('/mentorias/{mentoria}', [MentoriaController::class, 'update'])->name('mentorias.update');

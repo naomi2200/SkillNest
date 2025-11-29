@@ -29,11 +29,12 @@
         .student-main .mentorias-page .badge.confirmada { background: rgba(16,185,129,0.15); color:#10b981; }
         .student-main .mentorias-page .badge.pendiente { background: rgba(245,158,11,0.15); color:#f59e0b; }
 
-        .student-main .mentorias-page .action-buttons { display:flex; gap:.75rem; }
-        .student-main .mentorias-page .btn-action { padding:.5rem 1rem; border-radius:.5rem; font-size:.85rem; font-weight:600; cursor:pointer; border:none; }
-        .student-main .mentorias-page .btn-unirse { background: rgba(59,130,246,0.15); color:#3b82f6; }
-        .student-main .mentorias-page .btn-aceptar { background: rgba(16,185,129,0.15); color:#10b981; }
+        .student-main .mentorias-page .action-buttons { display:flex; gap:.75rem; flex-wrap:wrap; }
+        .student-main .mentorias-page .btn-action { padding:.5rem 1rem; border-radius:.65rem; font-size:.85rem; font-weight:600; border:none; cursor:pointer; transition:all .2s ease; }
+        .student-main .mentorias-page .btn-unirse { background: rgba(59,130,246,0.15); color:#2563eb; }
+        .student-main .mentorias-page .btn-pay { background: linear-gradient(135deg,#6c47ff,#8b5cf6); color:#fff; box-shadow:0 10px 25px rgba(108,71,255,.25); }
         .student-main .mentorias-page .btn-reagendar { background: rgba(107,114,128,0.15); color:#6b7280; }
+        .student-main .mentorias-page .btn-disabled { background: rgba(226,232,240,0.8); color:#94a3b8; cursor:not-allowed; }
 
         .student-main .mentorias-page .mentors-section { margin-top:3rem; }
         .student-main .mentorias-page .mentors-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:2rem; }
@@ -45,6 +46,7 @@
 @endpush
 
 @section('student-content')
+    {{-- Sección: flujo secundario del estudiante (seguimiento de mentorías reservadas). --}}
     <div class="mentorias-page">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <div class="tabs" role="tablist">
@@ -58,6 +60,7 @@
             </a>
         </div>
 
+        {{-- Read del CRUD: tabla responsive que evita mostrar IDs autogenerados. --}}
         @if($mentorias->isEmpty())
             <div class="mentorship-table">
                 <div class="empty-state">
@@ -84,27 +87,31 @@
                             @php
                                 $mentor = $mentoria->mentor;
                                 $estado = $mentoria->estado ?? 'pendiente';
+                                $puedePagar = $estado === 'aceptada' && $mentoria->payment_status !== 'paid';
+                                $puedeUnirse = in_array($estado, ['pagada', 'confirmada', 'completada'], true) && $mentoria->session_link;
+                                $estadoBadge = in_array($estado, ['pagada','confirmada','completada'], true) ? 'confirmada' : 'pendiente';
                             @endphp
                             <tr data-estado="{{ $estado }}">
                                 <td>
                                     <div class="mentor-info">
                                         <div class="mentor-avatar {{ $loop->index % 3 == 0 ? 'blue' : ($loop->index % 3 == 1 ? 'pink' : 'purple') }}">{{ strtoupper(substr($mentor->name ?? 'M',0,2)) }}</div>
-                                        <span class="mentor-name">{{ $mentor->name ?? 'Mentor' }}</span>
+                                        <span class="mentor-name">{{ $mentor->name ?? '—' }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? 'General') }}</td>
+                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? '—') }}</td>
                                 <td>{{ optional($mentoria)->fecha_programada ?? '—' }}</td>
                                 <td>{{ optional($mentoria)->hora_programada ?? '—' }}</td>
                                 <td><span class="badge {{ $estado === 'confirmada' ? 'confirmada' : 'pendiente' }}">{{ ucfirst($estado) }}</span></td>
                                 <td>
                                     <div class="action-buttons">
-                                        @if($estado === 'confirmada')
+                                        @if($puedePagar)
+                                            <a href="{{ route('mentorias.payment.show', $mentoria->id) }}" class="btn-action btn-pay">Pagar mentor?a</a>
+                                        @elseif($puedeUnirse)
                                             <a href="{{ route('mentorias.join', $mentoria->id) }}" class="btn-action btn-unirse">Unirse</a>
-                                            <button class="btn-action btn-reagendar">Reagendar</button>
                                         @else
-                                            <button class="btn-action btn-aceptar">Aceptar</button>
-                                            <button class="btn-action btn-reagendar">Reagendar</button>
+                                            <button class="btn-action btn-disabled" type="button" disabled>Esperando</button>
                                         @endif
+                                        <button class="btn-action btn-reagendar" type="button">Reagendar</button>
                                     </div>
                                 </td>
                             </tr>
@@ -145,6 +152,7 @@
 @push('scripts')
     <script>
         (function(){
+            // Filtro en vivo para que el estudiante explore mentorías según estado (proceso secundario documentado).
             const tabs = document.querySelectorAll('.student-main .mentorias-page .tab-btn');
             const rows = document.querySelectorAll('.student-main .mentorias-page tbody tr');
             tabs.forEach(tab => {

@@ -7,16 +7,16 @@
     $mentoria = $mentoria ?? null;
     $skills = array_filter(array_map('trim', explode(',', (string) ($profile->skills ?? ''))));
     $categories = array_filter(array_map('trim', explode(',', (string) ($profile->categorias ?? ''))));
-    $mentoriaPrice = optional($mentoria)->precio ?? 0;
+    $mentoriaPrice = optional($mentoria)->precio ?? optional($mentoria)->monto ?? ($profile->precio_hora ?? 0);
     $mentoriaDuration = optional($mentoria)->duracion_minutos ?? 60;
-    $mentoriaSpecialty = optional($mentoria)->especialidad ?? 'Generalista';
-    $mentoriaModalidad = $mentoria && $mentoria->modalidad ? ucfirst($mentoria->modalidad) : 'Modalidad no definida';
+    $specialty = optional($mentoria)->especialidad ?? ($profile->profesion ?? 'Mentor SkillNest');
+    $modalidad = optional($mentoria)->modalidad ? ucfirst(optional($mentoria)->modalidad) : 'Modalidad no definida';
     $experienceLabels = [
         'junior' => 'Junior (0-2 años)',
         'mid' => 'Intermedio (3-6 años)',
         'senior' => 'Senior (7+ años)',
     ];
-    $experienceLabel = $profile->nivel_experiencia
+    $experienceLabel = $profile?->nivel_experiencia
         ? ($experienceLabels[$profile->nivel_experiencia] ?? ucfirst($profile->nivel_experiencia))
         : 'Nivel no especificado';
 @endphp
@@ -220,11 +220,11 @@
                                 <p class="mt-2 text-sm text-slate-600 line-clamp-3">{{ $course->description ?? 'Detalles no disponibles.' }}</p>
                             </article>
                         @empty
-                            <p class="text-sm text-slate-500">Este mentor aún no tiene cursos públicos.</p>
+                            <div class="card-description">Este mentor aún no tiene cursos públicos.</div>
                         @endforelse
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
             <aside id="booking" class="section-card space-y-4">
                 <h2>Agenda tu mentoría</h2>
@@ -233,23 +233,27 @@
                 @if(!auth()->check())
                     <a href="{{ route('login') }}" class="btn-gradient w-full justify-center">Inicia sesión para agendar</a>
                 @elseif(auth()->user()->isMentor())
-                    <div class="rounded-2xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+                    <div class="card-description text-sm">
                         Inicia sesión como estudiante para reservar una sesión.
                     </div>
+                @elseif(!$mentoria || $mentoria->estado !== 'publicada')
+                    <div class="card-description text-sm">
+                        Este mentor no tiene sesiones disponibles por ahora.
+                    </div>
                 @else
-                    <form method="POST" action="{{ route('mentor-market.book', $mentor) }}" class="space-y-4">
+                    <form method="POST" action="{{ route('mentor-market.book', $mentor) }}" class="booking-form">
                         @csrf
                         <div>
                             <label class="form-label">Fecha</label>
-                            <input type="date" name="date" class="form-input" min="{{ now()->toDateString() }}" required>
+                            <input type="date" class="form-input" name="date" min="{{ now()->toDateString() }}" required>
                         </div>
                         <div>
                             <label class="form-label">Hora</label>
-                            <input type="time" name="time" class="form-input" required>
+                            <input type="time" class="form-input" name="time" required>
                         </div>
                         <div>
                             <label class="form-label">Notas para el mentor</label>
-                            <textarea name="notes" class="form-input" rows="3" placeholder="Cuéntale tus objetivos o contexto."></textarea>
+                            <textarea class="form-input" rows="3" name="notes" placeholder="Cuéntale tus objetivos o contexto..."></textarea>
                         </div>
 
                         @php

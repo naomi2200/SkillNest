@@ -1,3 +1,5 @@
+
+
 <?php $__env->startSection('student-title', 'Mis Mentorías'); ?>
 <?php $__env->startSection('student-subtitle', 'Explora y gestiona todo tu ecosistema SkillNest'); ?>
 
@@ -27,11 +29,12 @@
         .student-main .mentorias-page .badge.confirmada { background: rgba(16,185,129,0.15); color:#10b981; }
         .student-main .mentorias-page .badge.pendiente { background: rgba(245,158,11,0.15); color:#f59e0b; }
 
-        .student-main .mentorias-page .action-buttons { display:flex; gap:.75rem; }
-        .student-main .mentorias-page .btn-action { padding:.5rem 1rem; border-radius:.5rem; font-size:.85rem; font-weight:600; cursor:pointer; border:none; }
-        .student-main .mentorias-page .btn-unirse { background: rgba(59,130,246,0.15); color:#3b82f6; }
-        .student-main .mentorias-page .btn-aceptar { background: rgba(16,185,129,0.15); color:#10b981; }
+        .student-main .mentorias-page .action-buttons { display:flex; gap:.75rem; flex-wrap:wrap; }
+        .student-main .mentorias-page .btn-action { padding:.5rem 1rem; border-radius:.65rem; font-size:.85rem; font-weight:600; border:none; cursor:pointer; transition:all .2s ease; }
+        .student-main .mentorias-page .btn-unirse { background: rgba(59,130,246,0.15); color:#2563eb; }
+        .student-main .mentorias-page .btn-pay { background: linear-gradient(135deg,#6c47ff,#8b5cf6); color:#fff; box-shadow:0 10px 25px rgba(108,71,255,.25); }
         .student-main .mentorias-page .btn-reagendar { background: rgba(107,114,128,0.15); color:#6b7280; }
+        .student-main .mentorias-page .btn-disabled { background: rgba(226,232,240,0.8); color:#94a3b8; cursor:not-allowed; }
 
         .student-main .mentorias-page .mentors-section { margin-top:3rem; }
         .student-main .mentorias-page .mentors-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:2rem; }
@@ -43,6 +46,7 @@
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('student-content'); ?>
+    
     <div class="mentorias-page">
         <div class="page-header">
             <h1 class="page-title">Mis Mentorías</h1>
@@ -61,6 +65,7 @@
             </a>
         </div>
 
+        
         <?php if($mentorias->isEmpty()): ?>
             <div class="mentorship-table">
                 <div class="empty-state">
@@ -87,27 +92,31 @@
                             <?php
                                 $mentor = $mentoria->mentor;
                                 $estado = $mentoria->estado ?? 'pendiente';
+                                $puedePagar = $estado === 'aceptada' && $mentoria->payment_status !== 'paid';
+                                $puedeUnirse = in_array($estado, ['pagada', 'confirmada', 'completada'], true) && $mentoria->session_link;
+                                $estadoBadge = in_array($estado, ['pagada','confirmada','completada'], true) ? 'confirmada' : 'pendiente';
                             ?>
                             <tr data-estado="<?php echo e($estado); ?>">
                                 <td>
                                     <div class="mentor-info">
                                         <div class="mentor-avatar <?php echo e($loop->index % 3 == 0 ? 'blue' : ($loop->index % 3 == 1 ? 'pink' : 'purple')); ?>"><?php echo e(strtoupper(substr($mentor->name ?? 'M',0,2))); ?></div>
-                                        <span class="mentor-name"><?php echo e($mentor->name ?? '—'); ?></span>
+                                        <span class="mentor-name"><?php echo e($mentor->name ?? 'Mentor SkillNest'); ?></span>
                                     </div>
                                 </td>
-                                <td><?php echo e($mentor->specialty ?? ($mentoria->especialidad ?? '—')); ?></td>
-                                <td><?php echo e(optional($mentoria)->fecha_programada ?? '—'); ?></td>
-                                <td><?php echo e(optional($mentoria)->hora_programada ?? '—'); ?></td>
-                                <td><span class="badge <?php echo e($estado === 'confirmada' ? 'confirmada' : 'pendiente'); ?>"><?php echo e(ucfirst($estado)); ?></span></td>
+                                <td><?php echo e($mentor->specialty ?? ($mentoria->especialidad ?? 'Sin definir')); ?></td>
+                                <td><?php echo e(optional($mentoria)->fecha_programada ?? 'Por confirmar'); ?></td>
+                                <td><?php echo e(optional($mentoria)->hora_programada ?? 'Por confirmar'); ?></td>
+                                <td><span class="badge <?php echo e($estadoBadge); ?>"><?php echo e(ucfirst($estado)); ?></span></td>
                                 <td>
                                     <div class="action-buttons">
-                                        <?php if($estado === 'confirmada'): ?>
+                                        <?php if($puedePagar): ?>
+                                            <a href="<?php echo e(route('mentorias.payment.show', $mentoria->id)); ?>" class="btn-action btn-pay">Pagar mentor?a</a>
+                                        <?php elseif($puedeUnirse): ?>
                                             <a href="<?php echo e(route('mentorias.join', $mentoria->id)); ?>" class="btn-action btn-unirse">Unirse</a>
-                                            <button class="btn-action btn-reagendar">Reagendar</button>
                                         <?php else: ?>
-                                            <button class="btn-action btn-aceptar">Aceptar</button>
-                                            <button class="btn-action btn-reagendar">Reagendar</button>
+                                            <button class="btn-action btn-disabled" type="button" disabled>Esperando</button>
                                         <?php endif; ?>
+                                        <button class="btn-action btn-reagendar" type="button">Reagendar</button>
                                     </div>
                                 </td>
                             </tr>
@@ -148,6 +157,7 @@
 <?php $__env->startPush('scripts'); ?>
     <script>
         (function(){
+            // Filtro en vivo para que el estudiante explore mentorías según estado (proceso secundario documentado).
             const tabs = document.querySelectorAll('.student-main .mentorias-page .tab-btn');
             const rows = document.querySelectorAll('.student-main .mentorias-page tbody tr');
             tabs.forEach(tab => {
@@ -167,6 +177,5 @@
         })();
     </script>
 <?php $__env->stopPush(); ?>
-
 
 <?php echo $__env->make('layouts.student', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/dashboard/student/mentorias.blade.php ENDPATH**/ ?>

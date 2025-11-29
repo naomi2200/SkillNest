@@ -27,7 +27,7 @@
 @section('mentor-title', 'Mis mentorías')
 @section('mentor-subtitle', 'Define tus sesiones y tarifas personalizadas')
 
-@Push('styles')
+@push('styles')
 <style>
     .stats-grid {
         display: grid;
@@ -85,7 +85,7 @@
         display: grid;
         gap: 24px;
     }
-    .item-card, .request-card {
+    .item-card {
         background: #fff;
         border-radius: 24px;
         padding: 28px;
@@ -163,6 +163,111 @@
         border-color: #d1d5db;
         color: #6b7280;
         background: transparent;
+    }
+    .request-section {
+        margin-top: 48px;
+    }
+    .request-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 32px;
+        padding: 32px;
+        border: 1px solid rgba(108,71,255,0.1);
+        box-shadow: 0 20px 60px rgba(15,23,42,0.08);
+        background: #fff;
+    }
+    .request-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(108,71,255,0.08), rgba(139,92,246,0.12));
+        opacity: 0;
+        transition: opacity .3s ease;
+    }
+    .request-card:hover::before {
+        opacity: 1;
+    }
+    .request-card > * {
+        position: relative;
+        z-index: 1;
+    }
+    .request-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+    .request-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 4px 0;
+    }
+    .request-student {
+        color: #6b7280;
+        font-weight: 600;
+        font-size: .95rem;
+    }
+    .request-date {
+        color: #94a3b8;
+        font-size: .85rem;
+    }
+    .request-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        padding: 20px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(108,71,255,0.02), rgba(139,92,246,0.04));
+        border: 1px solid rgba(108,71,255,0.08);
+        margin-bottom: 20px;
+    }
+    .request-meta-item .label {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+    .request-meta-item .value {
+        margin-top: 4px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    .request-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .request-actions .btn {
+        border-radius: 14px;
+        font-weight: 600;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .request-status {
+        border-radius: 999px;
+        font-size: .85rem;
+        padding: .45rem 1.2rem;
+        font-weight: 700;
+    }
+    .btn-request-neutral {
+        background: rgba(108,71,255,0.12);
+        color: #6c47ff;
+    }
+    .btn-request-accept {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: #fff;
+        box-shadow: 0 12px 25px rgba(16,185,129,0.3);
+    }
+    .btn-request-reject {
+        background: rgba(248,113,113,0.15);
+        color: #dc2626;
+        border: 1px solid rgba(248,113,113,0.4);
     }
 </style>
 @endpush
@@ -279,9 +384,10 @@
         </div>
 
         <div class="request-section">
-            <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                     <h3 class="text-xl font-semibold text-secondary">Solicitudes recibidas</h3>
+                    <p class="text-sm text-slate-500">?ltimas solicitudes de tus mentor?as publicadas</p>
                 </div>
                 <span class="text-sm text-slate-500">{{ $stats['total'] ?? 0 }} registro(s)</span>
             </div>
@@ -293,65 +399,66 @@
                         $scheduleDate = $session->fecha_programada ?? $session->fecha_mentoria;
                         $scheduleTime = $session->hora_programada ?? optional($session->fecha_mentoria)?->format('H:i');
                         $amount = $session->monto ?? $session->precio;
-                        $canJoinNow = $session->session_link && in_array($session->estado, ['pagada', 'confirmada', 'completada']);
                     @endphp
                     <article class="request-card">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="request-header">
                             <div>
-                                <p class="text-sm text-slate-500">Estudiante: {{ $session->estudiante->name ?? 'No asignado' }}</p>
-                                <h4 class="text-lg font-semibold text-secondary">{{ $session->titulo }}</h4>
-                                <p class="text-xs text-slate-500">Solicitada {{ optional($session->fecha_solicitud)->format('d/m/Y H:i') ?? 'sin fecha' }}</p>
+                                <p class="request-student">Estudiante: {{ $session->estudiante->name ?? 'No asignado' }}</p>
+                                <h4 class="request-title">{{ $session->titulo }}</h4>
+                                <p class="request-date">Solicitada {{ optional($session->fecha_solicitud)->format('d/m/Y H:i') ?? 'sin fecha' }}</p>
                             </div>
-                            <span class="badge {{ $badge }}">{{ ucfirst($session->estado) }}</span>
+                            <span class="badge request-status {{ $badge }}">{{ ucfirst($session->estado) }}</span>
                         </div>
 
-                        <dl class="mt-4 grid gap-4 text-sm text-slate-500 sm:grid-cols-2 lg:grid-cols-4">
-                            <div>
-                                <dt class="font-medium text-slate-600">Fecha</dt>
-                                <dd>{{ optional($scheduleDate)->format('d/m/Y') ?? 'Por definir' }}</dd>
+                        <div class="request-meta">
+                            <div class="request-meta-item">
+                                <span class="label">Fecha</span>
+                                <span class="value">{{ optional($scheduleDate)->format('d/m/Y') ?? 'Por definir' }}</span>
                             </div>
-                            <div>
-                                <dt class="font-medium text-slate-600">Hora</dt>
-                                <dd>{{ $scheduleTime ?? 'Por definir' }}</dd>
+                            <div class="request-meta-item">
+                                <span class="label">Hora</span>
+                                <span class="value">{{ $scheduleTime ?? 'Por definir' }}</span>
                             </div>
-                            <div>
-                                <dt class="font-medium text-slate-600">Modalidad</dt>
-                                <dd class="capitalize">{{ $session->modalidad }}</dd>
+                            <div class="request-meta-item">
+                                <span class="label">Modalidad</span>
+                                <span class="value capitalize">{{ $session->modalidad }}</span>
                             </div>
-                            <div>
-                                <dt class="font-medium text-slate-600">Monto</dt>
-                                <dd>S/ {{ number_format($amount ?? 0, 2) }}</dd>
+                            <div class="request-meta-item">
+                                <span class="label">Monto</span>
+                                <span class="value">S/ {{ number_format($amount ?? 0, 2) }}</span>
                             </div>
-                        </dl>
+                        </div>
 
-                        <div class="actions-row" style="margin-top: 20px">
-                            <a href="{{ route('mentorias.show', $session) }}" class="btn btn-secondary">Ver detalles</a>
+                        <div class="request-actions">
+                            <a href="{{ route('mentorias.show', $session) }}" class="btn btn-request-neutral">Ver detalles</a>
 
                             @if ($session->estado === 'pendiente')
                                 <form method="POST" action="{{ route('mentor.mentorias.accept', $session) }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-primary" style="background:#10b981; border-color:#10b981;">Aceptar</button>
+                                    <button type="submit" class="btn btn-request-accept">Aceptar</button>
                                 </form>
                                 <form method="POST" action="{{ route('mentor.mentorias.reject', $session) }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-outline" style="color:#dc2626; border-color:#fecaca;">Rechazar</button>
+                                    <button type="submit" class="btn btn-request-reject">Rechazar</button>
                                 </form>
                             @endif
 
                             @if (in_array($session->estado, ['pagada', 'confirmada']))
                                 <form method="POST" action="{{ route('mentor.mentorias.completar', $session) }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-primary">Completar sesión</button>
+                                    <button type="submit" class="btn btn-request-accept" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);box-shadow:0 12px 25px rgba(99,102,241,.25);">Completar sesi?n</button>
                                 </form>
                             @endif
                         </div>
                     </article>
                 @empty
                     <div class="request-card text-center text-sm text-slate-500">
-                        Aún no tienes solicitudes de estudiantes.
+                        A?n no tienes solicitudes de estudiantes.
                     </div>
                 @endforelse
             </div>
+        </div>
+
         </div>
     </div>
 @endsection

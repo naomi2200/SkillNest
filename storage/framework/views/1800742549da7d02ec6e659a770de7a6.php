@@ -1,4 +1,375 @@
-﻿
+<?php $__env->startPush('styles'); ?>
+    <style>
+        :root {
+            --primary: #6c47ff;
+            --primary-light: #f0edff;
+            --secondary: #1f2937;
+            --accent: #8b5cf6;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --white: #ffffff;
+            --success: #10b981;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --shadow-card: 0 25px 60px rgba(13, 10, 44, 0.08);
+        }
+
+        .mentor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 64px;
+        }
+
+        .mentor-hero {
+            background: #fff;
+            border-radius: 32px;
+            padding: clamp(32px, 4vw, 48px);
+            box-shadow: 0 30px 80px rgba(108, 71, 255, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .mentor-hero::after {
+            content: "";
+            position: absolute;
+            inset: 12px 12px auto auto;
+            width: 160px;
+            height: 32px;
+            border-radius: 999px;
+            border: 2px solid rgba(108, 71, 255, 0.15);
+        }
+
+        .mentor-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            font-size: 48px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 55px rgba(108, 71, 255, 0.3);
+        }
+
+        .mentor-info {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .mentor-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            background: rgba(108, 71, 255, 0.08);
+            border: 1px solid rgba(108, 71, 255, 0.2);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .mentor-name {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .mentor-specialty {
+            font-size: 1.15rem;
+            color: var(--gray-600);
+            margin-bottom: 20px;
+        }
+
+        .mentor-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .mentor-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--gray-50);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .mentor-stat.highlight {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .mentor-pricing {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 24px;
+            border: 2px solid var(--gray-200);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            min-width: 260px;
+        }
+
+        .mentor-pricing .label {
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gray-500);
+        }
+
+        .mentor-pricing .amount {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-top: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mentor-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+            gap: 32px;
+        }
+
+        .mentor-content {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .content-card,
+        .booking-sidebar {
+            background: var(--white);
+            border-radius: 28px;
+            padding: clamp(24px, 3vw, 32px);
+            box-shadow: var(--shadow-card);
+            border: 2px solid transparent;
+            transition: all 0.25s ease;
+        }
+
+        .content-card:hover,
+        .booking-sidebar:hover {
+            border-color: rgba(108, 71, 255, 0.4);
+            box-shadow: 0 35px 90px rgba(108, 71, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+
+        .card-description {
+            color: var(--gray-600);
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 14px;
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--gray-400);
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-top: 6px;
+        }
+
+        .skills-container,
+        .categories-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .skill-tag,
+        .category-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .skill-tag {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .category-tag {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .courses-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .course-item {
+            background: var(--gray-50);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .course-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .course-description {
+            margin-top: 8px;
+            color: var(--gray-500);
+            line-height: 1.6;
+        }
+
+        .booking-sidebar {
+            position: sticky;
+            top: 24px;
+        }
+
+        .booking-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 12px;
+        }
+
+        .booking-description {
+            color: var(--gray-500);
+            margin-bottom: 24px;
+        }
+
+        .booking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-300);
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.1);
+        }
+
+        .pricing-breakdown {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            color: var(--gray-600);
+        }
+
+        .breakdown-total {
+            border-top: 1px solid var(--gray-300);
+            margin-top: 8px;
+            padding-top: 8px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .btn {
+            border-radius: var(--radius);
+            padding: 14px;
+            font-weight: 600;
+            border: none;
+            text-align: center;
+            display: inline-flex;
+            justify-content: center;
+            width: 100%;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            box-shadow: 0 15px 40px rgba(108, 71, 255, 0.35);
+        }
+
+        @media (max-width: 1024px) {
+            .mentor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .mentor-hero {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .mentor-stats {
+                justify-content: center;
+            }
+
+            .mentor-pricing {
+                width: 100%;
+            }
+        }
+    </style>
+<?php $__env->stopPush(); ?>
 
 <?php
     use Illuminate\Support\Str;
@@ -7,154 +378,152 @@
     $mentoria = $mentoria ?? null;
     $skills = array_filter(array_map('trim', explode(',', (string) ($profile->skills ?? ''))));
     $categories = array_filter(array_map('trim', explode(',', (string) ($profile->categorias ?? ''))));
-    $mentoriaPrice = optional($mentoria)->precio ?? 0;
+    $mentoriaPrice = optional($mentoria)->precio ?? optional($mentoria)->monto ?? ($profile->precio_hora ?? 0);
     $mentoriaDuration = optional($mentoria)->duracion_minutos ?? 60;
-    $mentoriaSpecialty = optional($mentoria)->especialidad ?? 'Generalista';
-    $mentoriaModalidad = $mentoria && $mentoria->modalidad ? ucfirst($mentoria->modalidad) : 'Modalidad no definida';
+    $specialty = optional($mentoria)->especialidad ?? ($profile->profesion ?? 'Mentor SkillNest');
+    $modalidad = optional($mentoria)->modalidad ? ucfirst(optional($mentoria)->modalidad) : 'Modalidad no definida';
     $experienceLabels = [
-       'junior' => 'Junior (0-2 años)',
+        'junior' => 'Junior (0-2 años)',
         'mid' => 'Intermedio (3-6 años)',
         'senior' => 'Senior (7+ años)',
     ];
-    $experienceLabel = $profile->nivel_experiencia
+    $experienceLabel = $profile?->nivel_experiencia
         ? ($experienceLabels[$profile->nivel_experiencia] ?? ucfirst($profile->nivel_experiencia))
         : 'Nivel no especificado';
 ?>
 
 <?php $__env->startSection('content'); ?>
-    <div class="mx-auto max-w-6xl space-y-8">
-        <section class="rounded-[40px] border border-slate-100 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 p-[1px] text-white shadow-card">
-            <div class="rounded-[38px] bg-slate-900/75 px-8 py-8 backdrop-blur">
-                <div class="flex flex-wrap items-center gap-8">
-                    <div class="flex h-28 w-28 items-center justify-center rounded-[30px] bg-white/10 text-4xl font-bold uppercase">
-                        <?php echo e(strtoupper(Str::substr($mentor->name, 0, 1))); ?>
+    <div class="mentor-container">
+        <section class="mentor-hero">
+            <div class="mentor-avatar">
+                <?php echo e(strtoupper(Str::substr($mentor->name ?? 'S', 0, 1))); ?>
 
-                    </div>
-                    <div class="flex-1 space-y-2">
-                        <p class="text-xs uppercase tracking-[0.6em] text-white/70">Mentor verificado</p>
-                        <h1 class="text-4xl font-semibold"><?php echo e($mentor->name); ?></h1>
-                        <p class="text-lg text-white/80"><?php echo e($mentoriaSpecialty); ?></p>
-                        <div class="flex flex-wrap gap-4 text-sm text-white/80">
-                            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1">
-                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09L5.4 12.545.8 8.41l6.09-.885L10 2l3.11 5.525 6.09.885-4.6 4.137 1.278 5.545z"/></svg>
-                                <strong class="text-white"><?php echo e(number_format($mentor->rating ?? 4.8, 1)); ?></strong>
-                                <span><?php echo e($mentor->sessions_count ?? 0); ?> sesiones</span>
-                            </span>
-                            <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2 2m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <?php echo e($profile->experiencia_anios ?? 0); ?> años de experiencia
-                            </span>
-                            <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100/20 px-4 py-1 text-emerald-200">
-                                Disponible para mentorías
-                            </span>
-                        </div>
-                    </div>
-                    <div class="rounded-[24px] border border-white/10 bg-white/5 px-6 py-5 text-right shadow-inner">
-                        <p class="text-xs uppercase tracking-[0.4em] text-white/70">Tarifa por sesión</p>
-                        <p class="mt-1 text-3xl font-semibold text-white">
-                            S/ <?php echo e(number_format($mentoriaPrice, 2)); ?>
+            </div>
+            <div class="mentor-info">
+                <div class="mentor-badge">Mentor verificado</div>
+                <h1 class="mentor-name"><?php echo e($mentor->name); ?></h1>
+                <p class="mentor-specialty"><?php echo e($specialty); ?></p>
+                <div class="mentor-stats">
+                    <span class="mentor-stat">
+                        ⭐ <?php echo e(number_format($mentor->rating ?? 4.8, 1)); ?>
 
-                            <span class="text-base font-normal text-white/70">/ <?php echo e($mentoriaDuration); ?> min</span>
-                        </p>
-                        <p class="text-sm text-white/70">Modalidad: <?php echo e($mentoriaModalidad); ?></p>
-                    </div>
+                        · <?php echo e($mentor->sessions_count ?? 0); ?> sesiones
+                    </span>
+                    <span class="mentor-stat">
+                        ⏱ <?php echo e($profile->experiencia_anios ?? 0); ?> años experiencia
+                    </span>
+                    <span class="mentor-stat highlight">
+                        <?php echo e(optional($mentoria)->estado === 'publicada' ? 'Disponible' : 'Agenda cerrada'); ?>
+
+                    </span>
                 </div>
+            </div>
+            <div class="mentor-pricing">
+                <p class="label">Tarifa por sesión</p>
+                <p class="amount">S/ <?php echo e(number_format($mentoriaPrice, 2)); ?></p>
+                <p class="label" style="margin-top: 4px;"><?php echo e($mentoriaDuration); ?> minutos · <?php echo e($modalidad); ?></p>
             </div>
         </section>
 
-        <div class="grid gap-6 lg:grid-cols-3">
-            <section class="space-y-6 rounded-[32px] border border-slate-100 bg-white/95 p-6 shadow-card lg:col-span-2">
-                <div>
-                    <h2 class="text-xl font-semibold text-secondary">Acerca de mí</h2>
-                    <p class="mt-3 text-slate-600"><?php echo e($profile->descripcion ?? 'Este mentor aún no ha completado su biografía.'); ?></p>
-                </div>
+        <div class="mentor-grid">
+            <div class="mentor-content">
+                <section class="content-card">
+                    <h2 class="card-title">Acerca de mí</h2>
+                    <p class="card-description">
+                        <?php echo e($profile->descripcion ?? 'Este mentor aún no ha completado su biografía.'); ?>
 
-                <div>
-                    <h3 class="text-lg font-semibold text-secondary">Especialidad principal</h3>
-                    <p class="mt-2 text-slate-600"><?php echo e($mentoriaSpecialty); ?></p>
-                    <div class="mt-4 grid gap-4 sm:grid-cols-3 text-sm text-slate-600">
-                        <div>
-                            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Precio</p>
-                            <p class="mt-1 text-base font-semibold text-secondary">S/ <?php echo e(number_format($mentoriaPrice, 2)); ?></p>
+                    </p>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <p class="stat-label">Especialidad</p>
+                            <p class="stat-value"><?php echo e($specialty); ?></p>
                         </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Duración</p>
-                            <p class="mt-1 font-semibold text-secondary"><?php echo e($mentoriaDuration); ?> min</p>
+                        <div class="stat-item">
+                            <p class="stat-label">Experiencia</p>
+                            <p class="stat-value"><?php echo e($experienceLabel); ?></p>
                         </div>
-                        <div>
-                            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Modalidad</p>
-                            <p class="mt-1 font-semibold text-secondary"><?php echo e($mentoriaModalidad); ?></p>
+                        <div class="stat-item">
+                            <p class="stat-label">Modalidad</p>
+                            <p class="stat-value"><?php echo e($modalidad); ?></p>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div>
-                    <h3 class="text-lg font-semibold text-secondary">Habilidades</h3>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        <?php $__empty_1 = true; $__currentLoopData = $skills; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $skill): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><?php echo e($skill); ?></span>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <p class="text-sm text-slate-500">Aún no hay habilidades registradas.</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                <section class="content-card">
+                    <h2 class="card-title">Habilidades técnicas</h2>
+                    <?php if($skills): ?>
+                        <div class="skills-container">
+                            <?php $__currentLoopData = $skills; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $skill): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <span class="skill-tag"><?php echo e($skill); ?></span>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="card-description">Aún no se registran habilidades.</div>
+                    <?php endif; ?>
+                </section>
 
-                <div>
-                    <h3 class="text-lg font-semibold text-secondary">Nivel de experiencia</h3>
-                    <p class="mt-2 text-slate-600"><?php echo e($experienceLabel); ?></p>
-                </div>
+                <section class="content-card">
+                    <h2 class="card-title">Categorías destacadas</h2>
+                    <?php if($categories): ?>
+                        <div class="categories-container">
+                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <span class="category-tag"><?php echo e($category); ?></span>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="card-description">Este mentor aún no define categorías.</div>
+                    <?php endif; ?>
+                </section>
 
-                <div>
-                    <h3 class="text-lg font-semibold text-secondary">Categorías destacadas</h3>
-                    <div class="mt-3 flex flex-wrap gap-2">
-                        <?php $__empty_1 = true; $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <span class="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary"><?php echo e($category); ?></span>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <p class="text-sm text-slate-500">Este mentor aún no define categorías.</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-lg font-semibold text-secondary">Cursos dictados</h3>
-                    <div class="mt-3 grid gap-3 md:grid-cols-2">
+                <section class="content-card">
+                    <h2 class="card-title">Cursos dictados</h2>
+                    <div class="courses-grid">
                         <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <article class="rounded-2xl border border-slate-100 p-4">
-                                <p class="text-xs uppercase tracking-[0.3em] text-slate-400"><?php echo e($course->category ?? 'Curso'); ?></p>
-                                <h4 class="mt-1 text-lg font-semibold text-secondary"><?php echo e($course->title ?? $course->name); ?></h4>
-                                <p class="mt-2 text-sm text-slate-500 line-clamp-3"><?php echo e($course->description ?? 'Detalles no disponibles.'); ?></p>
+                            <article class="course-item">
+                                <p class="course-category"><?php echo e($course->category ?? 'Curso'); ?></p>
+                                <h3 class="course-title"><?php echo e($course->title ?? $course->name); ?></h3>
+                                <p class="course-description">
+                                    <?php echo e($course->description ?? 'Detalles no disponibles.'); ?>
+
+                                </p>
                             </article>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <p class="text-sm text-slate-500">Este mentor aún no tiene cursos públicos.</p>
+                            <div class="card-description">Este mentor aún no tiene cursos públicos.</div>
                         <?php endif; ?>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <aside id="booking" class="space-y-4 rounded-[32px] border border-slate-100 bg-white/95 p-6 shadow-card">
-                <h3 class="text-xl font-semibold text-secondary">Agenda tu mentoría</h3>
-                <p class="text-sm text-slate-500">Sesiones personalizadas. Comparte tus objetivos y define un plan con tu mentor.</p>
+            <aside class="booking-sidebar" id="booking">
+                <h3 class="booking-title">Agenda tu mentoría</h3>
+                <p class="booking-description">
+                    Sesiones personalizadas 1:1. Comparte tus objetivos y define un plan junto a tu mentor.
+                </p>
 
                 <?php if(!auth()->check()): ?>
-                    <a href="<?php echo e(route('login')); ?>" class="btn-primary w-full justify-center">Inicia sesión para agendar</a>
+                    <a href="<?php echo e(route('login')); ?>" class="btn">Inicia sesión para agendar</a>
                 <?php elseif(auth()->user()->isMentor()): ?>
-                    <div class="rounded-2xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">
+                    <div class="card-description text-sm">
                         Inicia sesión como estudiante para reservar una sesión.
                     </div>
+                <?php elseif(!$mentoria || $mentoria->estado !== 'publicada'): ?>
+                    <div class="card-description text-sm">
+                        Este mentor no tiene sesiones disponibles por ahora.
+                    </div>
                 <?php else: ?>
-                    <form method="POST" action="<?php echo e(route('mentor-market.book', $mentor)); ?>" class="space-y-4">
+                    <form method="POST" action="<?php echo e(route('mentor-market.book', $mentor)); ?>" class="booking-form">
                         <?php echo csrf_field(); ?>
                         <div>
                             <label class="form-label">Fecha</label>
-                            <input type="date" name="date" class="form-input" min="<?php echo e(now()->toDateString()); ?>" required>
+                            <input type="date" class="form-input" name="date" min="<?php echo e(now()->toDateString()); ?>" required>
                         </div>
                         <div>
                             <label class="form-label">Hora</label>
-                            <input type="time" name="time" class="form-input" required>
+                            <input type="time" class="form-input" name="time" required>
                         </div>
                         <div>
                             <label class="form-label">Notas para el mentor</label>
-                            <textarea name="notes" class="form-input" rows="3" placeholder="Cuéntale tus objetivos o contexto."></textarea>
+                            <textarea class="form-input" rows="3" name="notes" placeholder="Cuéntale tus objetivos o contexto..."></textarea>
                         </div>
 
                         <?php
@@ -162,24 +531,22 @@
                             $total = $mentoriaPrice + $serviceFee;
                         ?>
 
-                        <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 text-sm text-slate-600">
-                            <dl class="space-y-2">
-                                <div class="flex justify-between">
-                                    <dt>Precio por sesión</dt>
-                                    <dd class="font-semibold text-secondary">S/ <?php echo e(number_format($mentoriaPrice, 2)); ?></dd>
-                                </div>
-                                <div class="flex justify-between">
-                                    <dt>Servicio SkillNest (5%)</dt>
-                                    <dd class="font-semibold text-secondary">S/ <?php echo e(number_format($serviceFee, 2)); ?></dd>
-                                </div>
-                                <div class="flex justify-between text-base font-semibold text-secondary">
-                                    <dt>Total estimado</dt>
-                                    <dd>S/ <?php echo e(number_format($total, 2)); ?></dd>
-                                </div>
-                            </dl>
+                        <div class="pricing-breakdown">
+                            <div class="breakdown-item">
+                                <span>Precio por sesión</span>
+                                <span>S/ <?php echo e(number_format($mentoriaPrice, 2)); ?></span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Servicio SkillNest (5%)</span>
+                                <span>S/ <?php echo e(number_format($serviceFee, 2)); ?></span>
+                            </div>
+                            <div class="breakdown-item breakdown-total">
+                                <span>Total estimado</span>
+                                <span>S/ <?php echo e(number_format($total, 2)); ?></span>
+                            </div>
                         </div>
 
-                        <button class="btn-gradient w-full justify-center">Agendar sesión</button>
+                        <button type="submit" class="btn">Agendar sesión</button>
                     </form>
                 <?php endif; ?>
             </aside>

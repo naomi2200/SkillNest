@@ -7,10 +7,19 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+/**
+ * Controlador encargado de que estudiantes agenden sesiones con mentores.
+ * Documenta el flujo secundario de reservas según la rúbrica Tecsup.
+ */
 class MentoriaBookingController extends Controller
 {
     /**
-     * Crea una mentoría personalizada para un estudiante a partir de la oferta publicada del mentor.
+     * Flujo Student -> Mentor:
+     * Crea una mentoría personalizada reutilizando la oferta pública del mentor.
+     * Validaciones aplicadas:
+     *  - Fecha y hora posteriores al día actual.
+     *  - Notas opcionales máximo 500 caracteres.
+     * Manejo de errores: abort_unless con códigos HTTP legibles.
      */
     public function store(Request $request, User $mentor)
     {
@@ -49,6 +58,7 @@ class MentoriaBookingController extends Controller
             ?? $baseAmount);
         $amount = round($amount, 2);
 
+        // CRUD Create (flujo secundario): se clona configuracion del mentor sin exponer IDs al front.
         Mentoria::create([
             'mentor_id' => $mentor->id,
             'estudiante_id' => $student->id,

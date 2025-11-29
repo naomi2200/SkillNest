@@ -8,6 +8,7 @@
 @endsection
 
 @section('mentor-content')
+    {{-- Sección: listado principal de mentorías (Read del CRUD para mentores). --}}
     <div class="rounded-3xl border border-slate-100 bg-white shadow-card">
         <table class="min-w-full divide-y divide-slate-100 text-sm">
             <thead class="text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -46,5 +47,5 @@
                 @endforelse
             </tbody>
         </table>
-    </div
+    </div>
 @endsection
