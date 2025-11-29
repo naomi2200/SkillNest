@@ -361,7 +361,7 @@
                         <div class="mentor-actions">
                             <?php if($mentorUser): ?>
                                 <a href="<?php echo e(route('mentor.public.show', $mentorUser->id)); ?>" class="btn btn-primary">Ver perfil</a>
-                                <a href="<?php echo e(route('mentor.book.form', $mentorUser->id)); ?>" class="btn btn-outline">Agendar mentoría</a>
+                                
                             <?php else: ?>
                                 <span class="text-xs text-gray-400">Mentor no disponible</span>
                             <?php endif; ?>

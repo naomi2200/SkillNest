@@ -81,41 +81,48 @@ class PaymentController extends Controller
                 'digits:16',
             ],
         ]);
+        try {
+            $receiptPath = null;
+            if ($request->hasFile('comprobante') && in_array($data['metodo'], ['yape', 'plin'], true)) {
+                $receiptPath = $request->file('comprobante')->store('payment_receipts', 'public');
+            }
 
-        $receiptPath = null;
-        if ($request->hasFile('comprobante') && in_array($data['metodo'], ['yape', 'plin'], true)) {
-            $receiptPath = $request->file('comprobante')->store('payment_receipts', 'public');
+            $monto = $mentoria->monto ?? $mentoria->precio ?? 0;
+            $mentorShare = round($monto * 0.95, 2);
+            $platformShare = round($monto - $mentorShare, 2);
+
+            $sessionLink = 'https://meet.jit.si/skillnest-mentoria-' . $mentoria->id;
+
+            $mentoria->update([
+                'estado' => 'pagada',
+                'payment_status' => 'paid',
+                'link_pago' => 'simulado-' . now()->timestamp,
+                'jitsi_room' => $sessionLink,
+                'link_sesion' => $sessionLink,
+            ]);
+
+            PaymentLog::create([
+                'mentoria_id' => $mentoria->id,
+                'estudiante_id' => $mentoria->estudiante_id,
+                'mentor_id' => $mentoria->mentor_id,
+                'monto_total' => $monto,
+                'monto_mentor' => $mentorShare,
+                'monto_plataforma' => $platformShare,
+                'metodo' => $data['metodo'],
+                'referencia' => $receiptPath
+                    ? 'comprobante:' . $receiptPath
+                    : ($data['metodo'] === 'tarjeta' ? 'tarjeta:' . substr($data['numero_tarjeta'], -4) : null),
+            ]);
+
+            return redirect()
+                ->route('mentorias.payment.show', $mentoria->id)
+                ->with('status', 'Pago registrado correctamente.');
+        } catch (\Throwable $th) {
+            report($th);
+
+            return back()
+                ->withInput()
+                ->withErrors(['metodo' => 'Ocurrió un problema al registrar el pago. Inténtalo nuevamente.']);
         }
-
-        $monto = $mentoria->monto ?? $mentoria->precio ?? 0;
-        $mentorShare = round($monto * 0.95, 2);
-        $platformShare = round($monto - $mentorShare, 2);
-
-        $sessionLink = 'https://meet.jit.si/skillnest-mentoria-' . $mentoria->id;
-
-        $mentoria->update([
-            'estado' => 'pagada',
-            'payment_status' => 'paid',
-            'link_pago' => 'simulado-' . now()->timestamp,
-            'jitsi_room' => $sessionLink,
-            'link_sesion' => $sessionLink,
-        ]);
-
-        PaymentLog::create([
-            'mentoria_id' => $mentoria->id,
-            'estudiante_id' => $mentoria->estudiante_id,
-            'mentor_id' => $mentoria->mentor_id,
-            'monto_total' => $monto,
-            'monto_mentor' => $mentorShare,
-            'monto_plataforma' => $platformShare,
-            'metodo' => $data['metodo'],
-            'referencia' => $receiptPath
-                ? 'comprobante:' . $receiptPath
-                : ($data['metodo'] === 'tarjeta' ? 'tarjeta:' . substr($data['numero_tarjeta'], -4) : null),
-        ]);
-
-        return redirect()
-            ->route('mentorias.payment.show', $mentoria->id)
-            ->with('status', 'Pago registrado correctamente.');
     }
 }

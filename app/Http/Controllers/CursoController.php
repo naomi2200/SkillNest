@@ -261,6 +261,10 @@ class CursoController extends Controller
 
     protected function authorizeCourseMentor(?User $user, Curso $curso): void
     {
+        if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
+            return;
+        }
+
         abort_unless(
             $user && method_exists($user, 'isMentor') && $user->isMentor() && $curso->mentor_id === $user->id,
             403

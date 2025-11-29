@@ -1,3 +1,5 @@
+
+
 <?php $__env->startPush('styles'); ?>
 <style>
     .courses-layout {
@@ -366,12 +368,10 @@
                                         <a href="<?php echo e(route('cursos.show', $model)); ?>" class="btn-secondary" style="border-radius:999px;">Ver más</a>
                                         <form action="<?php echo e(route('cursos.enroll', $model)); ?>" method="POST">
                                             <?php echo csrf_field(); ?>
-                                            <button class="btn-primary" style="border-radius:999px;">Inscribirme</button>
-                                        </form>
+                                                                            </form>
                                     <?php else: ?>
                                         <a href="<?php echo e(route('cursos.index')); ?>" class="btn-secondary" style="border-radius:999px;">Ver más</a>
-                                        <button type="button" class="btn-primary" style="border-radius:999px;">Inscribirme</button>
-                                    <?php endif; ?>
+                                                                    <?php endif; ?>
                                 </div>
                             </footer>
                         </div>

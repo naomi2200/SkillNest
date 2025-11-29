@@ -80,9 +80,13 @@
             z-index: 1;
             display: flex;
             gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
         }
         .dashboard-sidebar {
             width: 260px;
+            flex-shrink: 0;
             background: rgba(255,255,255,0.95);
             border-radius: 32px;
             border: 1px solid rgba(226,232,240,0.8);
@@ -152,6 +156,7 @@
         }
         .dashboard-main {
             flex: 1;
+            min-width: 0;
             background: rgba(255,255,255,0.97);
             border-radius: 36px;
             border: 1px solid rgba(226,232,240,0.8);
