@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - SkillNest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f1f4ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .shadow-soft {
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.25);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mentor-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(102, 126, 234, 0.35);
+        }
+
+        .mi-perfil-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .mi-perfil-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px;
+            padding: 26px 30px;
+            box-shadow: 0 18px 40px rgba(102, 126, 234, 0.4);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+
+        .mi-perfil-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 50%),
+                       radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            z-index: 1;
+        }
+
+        .mi-perfil-header-content {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .mi-perfil-greeting {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+        }
+
+        .mi-perfil-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .mi-perfil-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        .mi-perfil-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .mi-perfil-stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 18px;
+            padding: 20px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .mi-perfil-stat-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .mi-perfil-stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+        }
+
+        .mi-perfil-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .mi-perfil-avatar-section {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .mi-perfil-avatar-preview {
+            width: 160px;
+            height: 160px;
+            border-radius: 28px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .mi-perfil-avatar-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .mi-perfil-upload-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mi-perfil-upload-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .mi-perfil-upload-note {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 8px;
+        }
+
+        .mi-perfil-form-section {
+            background: #fff;
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .mi-perfil-section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .mi-perfil-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .mi-perfil-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mi-perfil-form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .mi-perfil-form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mi-perfil-form-input {
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            outline: none;
+        }
+
+        .mi-perfil-form-input:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .mi-perfil-form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        textarea.mi-perfil-form-input {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+        }
+
+        select.mi-perfil-form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 20px;
+            padding-right: 60px;
+        }
+
+        .mi-perfil-form-hint {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .mi-perfil-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 24px;
+            }
+
+            .mi-perfil-avatar-section {
+                order: -1;
+            }
+
+            .mi-perfil-stats {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .mi-perfil-form-section {
+                padding: 24px;
+                border-radius: 20px;
+            }
+
+            .mi-perfil-form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .mentor-actions {
+                justify-content: center;
+            }
+
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .mi-perfil-header {
+                padding: 20px;
+            }
+
+            .mi-perfil-title {
+                font-size: 28px;
+            }
+
+            .mi-perfil-avatar-preview {
+                width: 120px;
+                height: 120px;
+            }
+
+            .mi-perfil-form-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mentor-actions">
+        <button class="btn-primary shadow-soft">
+            <i class="fa-solid fa-save"></i> Guardar cambios
+        </button>
+    </div>
+
+    <div class="mi-perfil-page animate-fade-in-up">
+        <section class="mi-perfil-header shadow-soft">
+            <div class="mi-perfil-header-content">
+                <div class="mi-perfil-greeting">Hola, Adriana Camila</div>
+                <h1 class="mi-perfil-title font-poppins">Tu identidad pública</h1>
+                <p class="mi-perfil-subtitle">
+                    Sube una imagen cuadrada y actualiza tus datos para que los estudiantes 
+                    puedan reconocerte fácilmente.
+                </p>
+                
+                <div class="mi-perfil-stats">
+                    <div class="mi-perfil-stat-card">
+                        <div class="mi-perfil-stat-label">Rol actual</div>
+                        <div class="mi-perfil-stat-value" id="rolePreview">Product Designer, Frontend Lead</div>
+                    </div>
+                    <div class="mi-perfil-stat-card">
+                        <div class="mi-perfil-stat-label">Experiencia</div>
+                        <div class="mi-perfil-stat-value" id="experiencePreview">5 años</div>
+                    </div>
+                    <div class="mi-perfil-stat-card">
+                        <div class="mi-perfil-stat-label">Tarifa por hora</div>
+                        <div class="mi-perfil-stat-value" id="ratePreview">S/ 60.00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mi-perfil-avatar-section">
+                <div class="mi-perfil-avatar-preview" id="avatarPreview"></div>
+                <label for="avatar-input" class="mi-perfil-upload-btn">
+                    <i class="fa-solid fa-camera"></i>
+                    Cambiar foto
+                </label>
+                <div class="mi-perfil-upload-note">PNG o JPG - 800x800 px</div>
+            </div>
+        </section>
+
+        <section class="mi-perfil-form-section">
+            <h2 class="mi-perfil-section-title font-poppins">Información básica</h2>
+            <div class="mi-perfil-form-grid">
+                <div class="mi-perfil-form-group">
+                    <label for="name" class="mi-perfil-form-label">Nombre completo</label>
+                    <input id="name" class="mi-perfil-form-input" type="text" 
+                           value="Adriana Camila" 
+                           placeholder="Tu nombre completo">
+                </div>
+                
+                <div class="mi-perfil-form-group">
+                    <label for="profesion" class="mi-perfil-form-label">Profesión</label>
+                    <input id="profesion" class="mi-perfil-form-input" type="text" 
+                           value="Product Designer, Frontend Lead" 
+                           placeholder="Product Designer, Frontend Lead">
+                </div>
+                
+                <div class="mi-perfil-form-group full-width">
+                    <label for="descripcion" class="mi-perfil-form-label">Descripción</label>
+                    <textarea id="descripcion" class="mi-perfil-form-input" 
+                              placeholder="Cuéntales a los estudiantes sobre tu experiencia y logros.">Experta en diseño de productos digitales con 5 años de experiencia liderando equipos de frontend. Especializada en React, UX/UI y visualización de datos. Apasionada por crear experiencias de usuario intuitivas y escalables.</textarea>
+                </div>
+                
+                <div class="mi-perfil-form-group">
+                    <label for="skills" class="mi-perfil-form-label">Habilidades</label>
+                    <input id="skills" class="mi-perfil-form-input" type="text" 
+                           value="React, UX/UI, Data Viz, Figma, JavaScript" 
+                           placeholder="React, UX/UI, Data Viz">
+                    <div class="mi-perfil-form-hint">Separa cada habilidad con comas.</div>
+                </div>
+                
+                <div class="mi-perfil-form-group">
+                    <label for="categorias" class="mi-perfil-form-label">Categorías</label>
+                    <input id="categorias" class="mi-perfil-form-input" type="text" 
+                           value="Frontend, UX/UI, Product Design" 
+                           placeholder="Frontend, UX/UI">
+                    <div class="mi-perfil-form-hint">Usa etiquetas claras como "frontend", "datos" o "product design".</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mi-perfil-form-section">
+            <h2 class="mi-perfil-section-title font-poppins">Experiencia y tarifas</h2>
+            <div class="mi-perfil-form-grid">
+                <div class="mi-perfil-form-group">
+                    <label for="experiencia_anios" class="mi-perfil-form-label">Años de experiencia</label>
+                    <input id="experiencia_anios" class="mi-perfil-form-input" type="number" 
+                           min="0" step="1" value="5">
+                </div>
+                
+                <div class="mi-perfil-form-group">
+                    <label for="precio_hora" class="mi-perfil-form-label">Precio por hora (S/)</label>
+                    <input id="precio_hora" class="mi-perfil-form-input" type="number" 
+                           step="0.1" min="0" value="60.00">
+                </div>
+                
+                <div class="mi-perfil-form-group">
+                    <label for="nivel_experiencia" class="mi-perfil-form-label">Nivel de experiencia</label>
+                    <select id="nivel_experiencia" class="mi-perfil-form-input">
+                        <option value="">Selecciona el nivel</option>
+                        <option value="junior">Junior (0-2 años)</option>
+                        <option value="mid" selected>Intermedio (3-6 años)</option>
+                        <option value="senior">Senior (7+ años)</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Avatar upload simulation
+            const avatarPreview = document.getElementById('avatarPreview');
+            const avatarInput = document.createElement('input');
+            avatarInput.type = 'file';
+            avatarInput.id = 'avatar-input';
+            avatarInput.accept = 'image/*';
+            avatarInput.style.display = 'none';
+            document.body.appendChild(avatarInput);
+
+            const uploadBtn = document.querySelector('.mi-perfil-upload-btn');
+            uploadBtn.addEventListener('click', () => {
+                avatarInput.click();
+            });
+
+            avatarInput.addEventListener('change', (event) => {
+                const [file] = event.target.files;
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        avatarPreview.style.backgroundImage = `url(${e.target.result})`;
+                        avatarPreview.style.backgroundSize = 'cover';
+                        avatarPreview.style.backgroundPosition = 'center';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Real-time preview updates
+            const experienciaInput = document.getElementById('experiencia_anios');
+            const precioInput = document.getElementById('precio_hora');
+            const profesionInput = document.getElementById('profesion');
+            const nameInput = document.getElementById('name');
+            const statExperience = document.getElementById('experiencePreview');
+            const statRate = document.getElementById('ratePreview');
+            const statRole = document.getElementById('rolePreview');
+            const greetingElement = document.querySelector('.mi-perfil-greeting');
+
+            if (experienciaInput && statExperience) {
+                experienciaInput.addEventListener('input', () => {
+                    statExperience.textContent = `${experienciaInput.value || 0} años`;
+                });
+            }
+
+            if (precioInput && statRate) {
+                precioInput.addEventListener('input', () => {
+                    const value = parseFloat(precioInput.value) || 0;
+                    statRate.textContent = `S/ ${value.toFixed(2)}`;
+                });
+            }
+
+            if (profesionInput && statRole) {
+                profesionInput.addEventListener('input', () => {
+                    statRole.textContent = profesionInput.value || 'Mentor SkillNest';
+                });
+            }
+
+            if (nameInput && greetingElement) {
+                nameInput.addEventListener('input', () => {
+                    greetingElement.textContent = `Hola, ${nameInput.value || 'Usuario'}`;
+                });
+            }
+
+            // Save button action
+            const saveButton = document.querySelector('.btn-primary');
+            saveButton.addEventListener('click', () => {
+                saveButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+                saveButton.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    saveButton.innerHTML = '<i class="fa-solid fa-check"></i> Cambios guardados';
+                    saveButton.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    
+                    setTimeout(() => {
+                        saveButton.innerHTML = '<i class="fa-solid fa-save"></i> Guardar cambios';
+                        saveButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        saveButton.disabled = false;
+                        
+                        // Show success message
+                        const successMsg = document.createElement('div');
+                        successMsg.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: linear-gradient(135deg, #10b981, #059669);
+                            color: white;
+                            padding: 16px 24px;
+                            border-radius: 12px;
+                            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+                            z-index: 1000;
+                            animation: fadeInUp 0.5s ease-out;
+                        `;
+                        successMsg.innerHTML = '<i class="fa-solid fa-check-circle"></i> Perfil actualizado correctamente';
+                        document.body.appendChild(successMsg);
+                        
+                        setTimeout(() => {
+                            successMsg.style.animation = 'fadeInUp 0.5s ease-out reverse';
+                            setTimeout(() => successMsg.remove(), 500);
+                        }, 3000);
+                    }, 2000);
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

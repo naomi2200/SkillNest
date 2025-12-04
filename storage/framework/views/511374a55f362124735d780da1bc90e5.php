@@ -3,11 +3,25 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo e($title ?? config('app.name', 'SkillNest')); ?></title>
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos Personalizados -->
+    <link rel="stylesheet" href="<?php echo e(asset('css/skillnest-styles.css')); ?>">
+
+    <title><?php echo e($title ?? config('app.name', 'SkillNest')); ?></title>
     <?php ($viteManifest = public_path('build/manifest.json')); ?>
     <?php if(file_exists($viteManifest)): ?>
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
@@ -480,31 +494,26 @@
 </head>
 <body>
     <div class="app-shell">
-        <header class="navbar-modern">
-            <div class="navbar-container">
-                <a class="navbar-logo" href="<?php echo e(url('/')); ?>">
-                    <span class="logo-icon">&#127891;</span>
-                    <span class="logo-text">SkillNest</span>
-                </a>
-                <nav class="navbar-links">
-                    <a href="<?php echo e(url('/cursos')); ?>">Cursos</a>
-                    <a href="<?php echo e(route('mentor-market.index')); ?>">Mentor&iacute;as</a>
-                    <a href="<?php echo e(url('/mentorias/create')); ?>">Convi&eacute;rtete en mentor</a>
-                </nav>
-                <div class="navbar-actions">
-                    <?php if(auth()->guard()->check()): ?>
-                        <a href="<?php echo e(route('dashboard')); ?>" class="btn-nav-secondary">Panel</a>
-                        <form method="POST" action="<?php echo e(route('logout')); ?>">
-                            <?php echo csrf_field(); ?>
-                            <button type="submit" class="btn-nav-primary" style="background: linear-gradient(135deg,#ef4444,#f97316); box-shadow: 0 4px 15px rgba(239,68,68,0.3);">Salir</button>
-                        </form>
-                    <?php else: ?>
-                        <a href="<?php echo e(route('login')); ?>" class="btn-nav-secondary">Ingresar</a>
-                        <a href="<?php echo e(route('register')); ?>" class="btn-nav-primary">Crear cuenta</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </header>
+        <?php if (isset($component)) { $__componentOriginala591787d01fe92c5706972626cdf7231 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginala591787d01fe92c5706972626cdf7231 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.navbar','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('navbar'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginala591787d01fe92c5706972626cdf7231)): ?>
+<?php $attributes = $__attributesOriginala591787d01fe92c5706972626cdf7231; ?>
+<?php unset($__attributesOriginala591787d01fe92c5706972626cdf7231); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginala591787d01fe92c5706972626cdf7231)): ?>
+<?php $component = $__componentOriginala591787d01fe92c5706972626cdf7231; ?>
+<?php unset($__componentOriginala591787d01fe92c5706972626cdf7231); ?>
+<?php endif; ?>
 
         <main class="app-main">
             <div class="app-container">

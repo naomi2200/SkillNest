@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Estudiante - SkillNest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f1f4ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .shadow-soft {
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.25);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .user-welcome h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .user-welcome p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .date-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard-main {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Courses Section */
+        .section-card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .view-all {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .view-all:hover {
+            color: #764ba2;
+        }
+
+        /* Course Progress Cards */
+        .course-card {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: transform 0.3s ease, background 0.3s ease;
+            cursor: pointer;
+        }
+
+        .course-card:hover {
+            transform: translateY(-3px);
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .course-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .course-meta i {
+            margin-right: 5px;
+        }
+
+        .course-progress {
+            width: 120px;
+            text-align: center;
+        }
+
+        .progress-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(226, 232, 240, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        /* Mentorship Section */
+        .mentorship-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .mentorship-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .mentorship-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .mentor-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .mentor-info h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .mentor-specialty {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .mentorship-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .session-time {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .session-date {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .session-hour {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .session-status {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .status-confirmed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #047857;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #92400e;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: #1f2937;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        .action-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .course-header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .course-progress {
+                width: 100%;
+                text-align: left;
+            }
+
+            .mentorship-details {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .section-card {
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="user-welcome">
+                <h1 class="font-poppins">¡Hola, <span class="gradient-text">María Rodríguez</span>! 👋</h1>
+                <p>Continúa aprendiendo y alcanza tus metas educativas</p>
+            </div>
+            <div class="date-badge">
+                <i class="fa-solid fa-calendar-alt"></i>
+                <span id="currentDate"></span>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div class="stat-value">5</div>
+                <div class="stat-label">Cursos Activos</div>
+                <div class="stat-trend trend-up">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    <span>+2 este mes</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="stat-value">12</div>
+                <div class="stat-label">Completados</div>
+                <div class="stat-trend trend-up">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    <span>+3 este mes</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="stat-value">68%</div>
+                <div class="stat-label">Progreso Promedio</div>
+                <div class="stat-trend trend-up">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    <span>+8% este mes</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-value">124h</div>
+                <div class="stat-label">Horas Totales</div>
+                <div class="stat-trend trend-up">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    <span>+18h esta semana</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="dashboard-main">
+            <!-- Left Column - Courses -->
+            <div class="dashboard-left">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title font-poppins">Cursos en Progreso</h2>
+                        <a href="#" class="view-all">
+                            Ver todos <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="courses-list">
+                        <div class="course-card">
+                            <div class="course-header">
+                                <div class="course-info">
+                                    <h3>Desarrollo Full Stack con React</h3>
+                                    <div class="course-meta">
+                                        <span><i class="fa-solid fa-user"></i> Ana García</span>
+                                        <span><i class="fa-solid fa-layer-group"></i> 12 módulos</span>
+                                        <span><i class="fa-solid fa-clock"></i> 45 horas</span>
+                                    </div>
+                                </div>
+                                <div class="course-progress">
+                                    <div class="progress-value">65%</div>
+                                    <div class="progress-label">Completado</div>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="course-card">
+                            <div class="course-header">
+                                <div class="course-info">
+                                    <h3>Diseño UX/UI Avanzado</h3>
+                                    <div class="course-meta">
+                                        <span><i class="fa-solid fa-user"></i> Carlos Ruiz</span>
+                                        <span><i class="fa-solid fa-layer-group"></i> 8 módulos</span>
+                                        <span><i class="fa-solid fa-clock"></i> 32 horas</span>
+                                    </div>
+                                </div>
+                                <div class="course-progress">
+                                    <div class="progress-value">42%</div>
+                                    <div class="progress-label">Completado</div>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 42%; background: linear-gradient(135deg, #a855f7, #c084fc);"></div>
+                            </div>
+                        </div>
+
+                        <div class="course-card">
+                            <div class="course-header">
+                                <div class="course-info">
+                                    <h3>Machine Learning Fundamentals</h3>
+                                    <div class="course-meta">
+                                        <span><i class="fa-solid fa-user"></i> Laura Martínez</span>
+                                        <span><i class="fa-solid fa-layer-group"></i> 15 módulos</span>
+                                        <span><i class="fa-solid fa-clock"></i> 60 horas</span>
+                                    </div>
+                                </div>
+                                <div class="course-progress">
+                                    <div class="progress-value">28%</div>
+                                    <div class="progress-label">Completado</div>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 28%; background: linear-gradient(135deg, #7c3aed, #a78bfa);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="section-card">
+                    <h2 class="section-title font-poppins" style="margin-bottom: 24px;">Acciones Rápidas</h2>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn">
+                            <div class="action-icon">
+                                <i class="fa-solid fa-play-circle"></i>
+                            </div>
+                            <div class="action-label">Continuar Aprendiendo</div>
+                        </a>
+                        <a href="#" class="action-btn">
+                            <div class="action-icon">
+                                <i class="fa-solid fa-search"></i>
+                            </div>
+                            <div class="action-label">Buscar Cursos</div>
+                        </a>
+                        <a href="#" class="action-btn">
+                            <div class="action-icon">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+                            <div class="action-label">Agendar Mentoría</div>
+                        </a>
+                        <a href="#" class="action-btn">
+                            <div class="action-icon">
+                                <i class="fa-solid fa-certificate"></i>
+                            </div>
+                            <div class="action-label">Mis Certificados</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Mentorship & Upcoming -->
+            <div class="dashboard-right">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title font-poppins">Próximas Mentorías</h2>
+                        <a href="#" class="view-all">
+                            Ver todas <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="mentorship-list">
+                        <div class="mentorship-card">
+                            <div class="mentorship-header">
+                                <div class="mentor-avatar">AG</div>
+                                <div class="mentor-info">
+                                    <h4>Ana García</h4>
+                                    <div class="mentor-specialty">Full Stack Developer</div>
+                                </div>
+                            </div>
+                            <div class="mentorship-details">
+                                <div class="session-time">
+                                    <div class="session-date">15 Noviembre</div>
+                                    <div class="session-hour">10:00 AM - 11:30 AM</div>
+                                </div>
+                                <div class="session-status status-confirmed">Confirmada</div>
+                            </div>
+                        </div>
+
+                        <div class="mentorship-card">
+                            <div class="mentorship-header">
+                                <div class="mentor-avatar">CR</div>
+                                <div class="mentor-info">
+                                    <h4>Carlos Ruiz</h4>
+                                    <div class="mentor-specialty">UX/UI Designer</div>
+                                </div>
+                            </div>
+                            <div class="mentorship-details">
+                                <div class="session-time">
+                                    <div class="session-date">18 Noviembre</div>
+                                    <div class="session-hour">3:00 PM - 4:00 PM</div>
+                                </div>
+                                <div class="session-status status-confirmed">Confirmada</div>
+                            </div>
+                        </div>
+
+                        <div class="mentorship-card">
+                            <div class="mentorship-header">
+                                <div class="mentor-avatar">LM</div>
+                                <div class="mentor-info">
+                                    <h4>Laura Martínez</h4>
+                                    <div class="mentor-specialty">Data Scientist</div>
+                                </div>
+                            </div>
+                            <div class="mentorship-details">
+                                <div class="session-time">
+                                    <div class="session-date">22 Noviembre</div>
+                                    <div class="session-hour">2:00 PM - 3:00 PM</div>
+                                </div>
+                                <div class="session-status status-pending">Pendiente</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Deadlines -->
+                <div class="section-card">
+                    <h2 class="section-title font-poppins" style="margin-bottom: 24px;">Próximas Fechas</h2>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 16px; padding: 12px; background: rgba(102, 126, 234, 0.05); border-radius: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fa-solid fa-flag"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: #1f2937;">Entrega Proyecto Final</div>
+                                <div style="font-size: 14px; color: #6b7280;">Curso Full Stack • 20 Nov</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 16px; padding: 12px; background: rgba(102, 126, 234, 0.05); border-radius: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #a855f7, #c084fc); display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fa-solid fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: #1f2937;">Examen UX/UI</div>
+                                <div style="font-size: 14px; color: #6b7280;">Curso Diseño • 25 Nov</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set current date
+            const dateEl = document.getElementById('currentDate');
+            if (dateEl) {
+                const formatter = new Intl.DateTimeFormat('es-PE', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+                const formatted = formatter.format(new Date());
+                dateEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+            }
+
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.course-card, .mentorship-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Simulate progress animation
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 300);
+            });
+
+            // Quick actions feedback
+            const actionButtons = document.querySelectorAll('.action-btn');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const label = button.querySelector('.action-label').textContent;
+                    console.log(`Acción: ${label}`);
+                    
+                    // Visual feedback
+                    button.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        button.style.transform = '';
+                    }, 200);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

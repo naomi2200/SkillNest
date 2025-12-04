@@ -3,11 +3,25 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? config('app.name', 'SkillNest') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Estilos Personalizados -->
+    <link rel="stylesheet" href="{{ asset('css/skillnest-styles.css') }}">
+
+    <title>{{ $title ?? config('app.name', 'SkillNest') }}</title>
     @php($viteManifest = public_path('build/manifest.json'))
     @if (file_exists($viteManifest))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -480,31 +494,7 @@
 </head>
 <body>
     <div class="app-shell">
-        <header class="navbar-modern">
-            <div class="navbar-container">
-                <a class="navbar-logo" href="{{ url('/') }}">
-                    <span class="logo-icon">&#127891;</span>
-                    <span class="logo-text">SkillNest</span>
-                </a>
-                <nav class="navbar-links">
-                    <a href="{{ url('/cursos') }}">Cursos</a>
-                    <a href="{{ route('mentor-market.index') }}">Mentor&iacute;as</a>
-                    <a href="{{ url('/mentorias/create') }}">Convi&eacute;rtete en mentor</a>
-                </nav>
-                <div class="navbar-actions">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="btn-nav-secondary">Panel</a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="btn-nav-primary" style="background: linear-gradient(135deg,#ef4444,#f97316); box-shadow: 0 4px 15px rgba(239,68,68,0.3);">Salir</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="btn-nav-secondary">Ingresar</a>
-                        <a href="{{ route('register') }}" class="btn-nav-primary">Crear cuenta</a>
-                    @endauth
-                </div>
-            </div>
-        </header>
+        <x-navbar />
 
         <main class="app-main">
             <div class="app-container">

@@ -123,6 +123,7 @@
 @endpush
 
 @section('student-content')
+<<<<<<< HEAD
     <div class="mentorias-bar">
         <div class="pill-group">
             <button class="pill active" type="button">Todas</button>
@@ -135,6 +136,10 @@
     </div>
 
     <div class="content-card" style="margin-top:18px;">
+=======
+    {{-- Sección: resumen compacto del estudiante (Read del CRUD con acciones controladas). --}}
+    <div class="card space-y-4 overflow-x-auto">
+>>>>>>> 29e038f (Describe brevemente tus cambios)
         <table class="w-full min-w-[640px] border-separate border-spacing-y-2 text-sm">
             <thead>
                 <tr class="text-left text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">

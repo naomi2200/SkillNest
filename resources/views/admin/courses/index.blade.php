@@ -1,16 +1,28 @@
-@extends('layouts.dashboard')
+@extends('layouts.admin')
 
 @php
     $currentView = request()->query('view', 'solicitudes');
 @endphp
 
+@section('admin-title', $currentView === 'tabla' ? 'Gesti&oacute;n de cursos' : 'Centro de solicitudes')
+@section('admin-subtitle', $currentView === 'tabla' ? 'Consulta el estado global de todos los cursos enviados.' : 'Aprueba, rechaza o solicita cambios en un solo lugar.')
+
+@section('admin-actions')
+    <a href="{{ route('admin.courses.index', ['view' => 'solicitudes', 'status' => request()->query('status', 'pendiente')]) }}"
+       class="btn-action {{ $currentView === 'solicitudes' ? 'primary' : 'ghost' }}">
+        <i class="fa-solid fa-inbox"></i> Solicitudes
+    </a>
+    <a href="{{ route('admin.courses.index', ['view' => 'tabla', 'status' => request()->query('status', 'pendiente')]) }}"
+       class="btn-action {{ $currentView === 'tabla' ? 'primary' : 'ghost' }}">
+        <i class="fa-solid fa-table"></i> Vista tabla
+    </a>
+@endsection
+
 @push('styles')
     <style>
         :root {
             --primary: #6c47ff;
-            --primary-light: #f0edff;
             --secondary: #1f2937;
-            --accent: #8b5cf6;
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
@@ -23,24 +35,19 @@
             --success: #10b981;
             --warning: #f59e0b;
             --error: #ef4444;
-            --radius: 8px;
-            --radius-lg: 12px;
-            --radius-xl: 16px;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .dashboard-card.space-y-6 > * + * {margin-top:24px;}
-        .table-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;}
-        .header-content{flex:1;min-width:300px;}
-        .section-badge{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);font-weight:600;margin-bottom:8px;}
-        .section-title{font-size:1.5rem;font-weight:600;color:var(--secondary);margin-bottom:8px;}
-        .section-description{color:var(--gray-500);font-size:.875rem;}
+        .courses-board { border-radius: 32px; border: 1px solid rgba(226,232,240,0.9); background: #fff; padding: 32px; box-shadow: 0 15px 35px rgba(15,23,42,0.08); }
+        .courses-board .table-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:24px;}
+        .courses-board .header-content{flex:1;min-width:300px;}
+        .courses-board .section-badge{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);font-weight:600;margin-bottom:8px;}
+        .courses-board .section-title{font-size:1.6rem;font-weight:700;color:var(--secondary);margin-bottom:6px;}
+        .courses-board .section-description{color:var(--gray-500);font-size:.95rem;}
         .filter-form{display:flex;gap:12px;align-items:center;}
-        .filter-select{padding:10px 16px;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-700);font-size:.875rem;min-width:140px;transition:.2s;}
+        .filter-select{padding:10px 16px;border:1px solid var(--gray-300);border-radius:16px;background:var(--white);color:var(--gray-700);font-size:.875rem;min-width:160px;transition:.2s;}
         .filter-select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,71,255,.1);}
-        .filter-button{padding:10px 20px;background:var(--primary);color:var(--white);border:none;border-radius:var(--radius);font-weight:600;font-size:.875rem;cursor:pointer;transition:.2s;}
+        .filter-button{padding:10px 20px;background:var(--primary);color:var(--white);border:none;border-radius:16px;font-weight:600;font-size:.875rem;cursor:pointer;transition:.2s;}
         .filter-button:hover{background:#5a38e6;transform:translateY(-1px);}
-        .table-container{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--gray-200);background:var(--white);}
+        .table-container{overflow-x:auto;border-radius:24px;border:1px solid var(--gray-200);background:var(--white);}
         .data-table{width:100%;border-collapse:collapse;font-size:.875rem;}
         .data-table thead{background:var(--gray-50);border-bottom:1px solid var(--gray-200);}
         .data-table th{padding:16px 20px;text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--gray-500);font-weight:600;white-space:nowrap;}
@@ -54,7 +61,7 @@
         .status-aprobado{background:rgba(16,185,129,.1);color:var(--success);}
         .status-rechazado{background:rgba(239,68,68,.1);color:var(--error);}
         .action-buttons{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
-        .btn-table{padding:6px 12px;border-radius:var(--radius);font-size:.75rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:.2s;white-space:nowrap;}
+        .btn-table{padding:8px 14px;border-radius:14px;font-size:.8rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:.2s;white-space:nowrap;}
         .btn-view{background:var(--gray-100);color:var(--gray-700);}
         .btn-view:hover{background:var(--gray-200);}
         .btn-approve{background:rgba(16,185,129,.1);color:var(--success);}
@@ -62,22 +69,22 @@
         .btn-reject{background:rgba(239,68,68,.1);color:var(--error);}
         .btn-reject:hover{background:var(--error);color:var(--white);}
         .empty-state{text-align:center;padding:60px 20px;color:var(--gray-400);}
-        @media (max-width:1024px){.table-header{flex-direction:column;align-items:stretch}.filter-form{justify-content:flex-start}}
-        @media (max-width:768px){.filter-form{flex-direction:column;align-items:stretch}.table-container{border-radius:var(--radius)}.action-buttons{flex-direction:column}.btn-table{text-align:center}}
+        @media (max-width:1024px){.courses-board .table-header{flex-direction:column;align-items:stretch}.filter-form{justify-content:flex-start}}
+        @media (max-width:768px){.filter-form{flex-direction:column;align-items:stretch}.table-container{border-radius:16px}.action-buttons{flex-direction:column}.btn-table{text-align:center}}
     </style>
 @endpush
 
-@section('dashboard-content')
-    <div class="dashboard-card space-y-6">
+@section('admin-content')
+    <div class="courses-board">
         <div class="table-header">
             <div class="header-content">
-                <div class="section-badge">Gestión de cursos</div>
+                <div class="section-badge">Gesti&oacute;n de cursos</div>
                 <h2 class="section-title">
                     {{ $currentView === 'tabla' ? 'Listado general' : 'Centro de solicitudes' }}
                 </h2>
                 <p class="section-description">
                     @if($currentView === 'tabla')
-                        Consulta cursos publicados, rechazados y en revisión en formato tabla.
+                        Consulta cursos publicados, rechazados y en revisi&oacute;n en formato tabla.
                     @else
                         Aprueba, rechaza o solicita cambios en un solo lugar.
                     @endif
@@ -102,7 +109,7 @@
                     <th>Curso</th>
                     <th>Mentor</th>
                     <th>Estado</th>
-                    <th>Módulos</th>
+                    <th>M&oacute;dulos</th>
                     <th>Actualizado</th>
                     <th style="text-align:right;">Acciones</th>
                 </tr>
@@ -112,7 +119,7 @@
                     <tr>
                         <td>
                             <div class="course-title">{{ $course->title }}</div>
-                            <div class="course-category">{{ $course->category ?? 'Sin categoría' }}</div>
+                            <div class="course-category">{{ $course->category ?? 'Sin categor&iacute;a' }}</div>
                         </td>
                         <td>{{ $course->mentor->name ?? 'Sin asignar' }}</td>
                         <td>
@@ -154,7 +161,7 @@
             </table>
         </div>
 
-        <div>
+        <div style="margin-top:20px;">
             {{ $courses->links() }}
         </div>
     </div>

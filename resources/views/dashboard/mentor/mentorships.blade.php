@@ -2,13 +2,13 @@
 
 @php
     $statusClasses = [
-        'pendiente' => 'bg-amber-100 text-amber-700',
-        'aceptada' => 'bg-blue-100 text-blue-700',
-        'confirmada' => 'bg-blue-100 text-blue-700',
-        'rechazada' => 'bg-rose-100 text-rose-700',
-        'pagada' => 'bg-emerald-100 text-emerald-700',
-        'completada' => 'bg-green-100 text-green-700',
-        'cancelada' => 'bg-slate-200 text-slate-600',
+        'pendiente' => 'badge-pending',
+        'aceptada' => 'badge-published',
+        'confirmada' => 'badge-published',
+        'rechazada' => 'badge-archived',
+        'pagada' => 'badge-published',
+        'completada' => 'badge-published',
+        'cancelada' => 'badge-archived',
     ];
 
     $listMentorias = $mentorias ?? collect();
@@ -22,317 +22,386 @@
         }
         $listMentorias = $listMentorias->unique('id');
     }
+
+    $draftCount = $listMentorias->where('estado', 'borrador')->count();
+    $publishedCount = $listMentorias->where('estado', 'publicada')->count();
+    $monthlyIncome = $ingresosDelMes ?? 0;
+    $avgRating = $valoracionPromedio ?? 0;
 @endphp
 
-@section('mentor-title', 'Mis mentor√≠as')
+@section('mentor-title', 'Mis mentorÌas')
 @section('mentor-subtitle', 'Define tus sesiones y tarifas personalizadas')
 
 @push('styles')
 <style>
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 24px;
-        margin-bottom: 32px;
+    .mentor-shell .mentor-header,
+    .mentor-shell .mentor-actions {
+        display: none !important;
     }
-    .stat-card {
-        background: #fff;
-        border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
-        border: 1px solid rgba(108,71,255,0.08);
+    .mentorias-dashboard,
+    .mentorias-dashboard * {
+        font-family: 'Inter', sans-serif;
+    }
+    .mentorias-dashboard {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-    }
-    .stat-card .stat-label {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: #6b7280;
-        font-weight: 600;
-    }
-    .stat-card .stat-value {
-        font-size: 2.2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #6c47ff, #8b5cf6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .filter-bar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 32px;
-    }
-    .filter-btn {
-        padding: 10px 20px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 600;
-        background: #fff;
-        color: #6b7280;
-        border: 2px solid #e5e7eb;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .filter-btn.active {
-        border-color: transparent;
-        color: #fff;
-        background: linear-gradient(135deg, #6c47ff, #8b5cf6);
-    }
-    .cards-grid, .requests-grid {
-        display: grid;
         gap: 24px;
     }
-    .item-card {
+    .mentorias-header {
         background: #fff;
         border-radius: 24px;
-        padding: 28px;
-        border: 1px solid rgba(108,71,255,0.08);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.06);
-    }
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 20px;
-        gap: 24px;
-    }
-    .card-title {
-        margin: 0 0 8px;
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #1f2937;
-    }
-    .card-price {
-        font-size: 1.8rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #6c47ff, #8b5cf6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .info-grid {
-        padding: 20px;
-        border-radius: 16px;
-        border: 1px solid rgba(108,71,255,0.1);
-        background: linear-gradient(135deg, rgba(108,71,255,0.02), rgba(139,92,246,0.03));
-        display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        margin-bottom: 24px;
-    }
-    .info-item .info-label {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: #6b7280;
-        font-weight: 600;
-    }
-    .info-item .info-value {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #1f2937;
-    }
-    .actions-row {
+        padding: 28px 32px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.04);
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: center;
     }
-    .actions-row .btn {
-        padding: 10px 20px;
-        border-radius: 12px;
-        border-width: 2px;
-        border-style: solid;
-        font-weight: 600;
-        font-size: .9rem;
-        text-decoration: none;
-        transition: all 0.2s ease;
+    .mentorias-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+        color: #1f2937;
     }
-    .btn-primary {
-        background: linear-gradient(135deg, #6c47ff, #8b5cf6);
-        color: #fff;
-        border-color: transparent;
-    }
-    .btn-secondary {
-        border-color: rgba(108,71,255,0.2);
-        color: #6c47ff;
-        background: transparent;
-    }
-    .btn-outline {
-        border-color: #d1d5db;
+    .mentorias-header p {
         color: #6b7280;
-        background: transparent;
     }
-    .request-section {
-        margin-top: 48px;
+    .mentor-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(102,126,234,0.12);
+        color: #4c1d95;
+        font-weight: 600;
     }
-    .request-card {
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    .stats-card {
+        background: #fff;
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: 0 15px 45px rgba(15,23,42,0.06);
         position: relative;
         overflow: hidden;
-        border-radius: 32px;
-        padding: 32px;
-        border: 1px solid rgba(108,71,255,0.1);
-        box-shadow: 0 20px 60px rgba(15,23,42,0.08);
-        background: #fff;
     }
-    .request-card::before {
+    .stats-card::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient(135deg, rgba(108,71,255,0.08), rgba(139,92,246,0.12));
+        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08));
         opacity: 0;
         transition: opacity .3s ease;
     }
-    .request-card:hover::before {
-        opacity: 1;
+    .stats-card:hover::before { opacity: 1; }
+    .stats-card>* { position: relative; z-index: 1; }
+    .stats-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #1f2937;
     }
-    .request-card > * {
-        position: relative;
-        z-index: 1;
+    .stats-label { color: #6b7280; font-weight: 600; }
+    .stats-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(102,126,234,0.12);
+        color: #6c47ff;
+        font-size: 1.4rem;
     }
-    .request-header {
+    .filter-bar {
+        background: #fff;
+        border-radius: 24px;
+        padding: 20px;
+        box-shadow: 0 15px 45px rgba(15,23,42,0.05);
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 20px;
+        gap: 12px;
     }
-    .request-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 4px 0;
-    }
-    .request-student {
+    .filter-btn {
+        padding: 10px 22px;
+        border-radius: 999px;
+        border: 2px solid #e2e8f0;
+        background: transparent;
         color: #6b7280;
         font-weight: 600;
-        font-size: .95rem;
+        cursor: pointer;
+        transition: all .2s ease;
     }
-    .request-date {
-        color: #94a3b8;
-        font-size: .85rem;
+    .filter-btn.active {
+        background: linear-gradient(135deg,#667eea,#764ba2);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 15px 35px rgba(102,126,234,0.25);
     }
-    .request-meta {
+    .mentorias-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 16px;
-        padding: 20px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, rgba(108,71,255,0.02), rgba(139,92,246,0.04));
-        border: 1px solid rgba(108,71,255,0.08);
+        gap: 24px;
+    }
+    .mentoria-card {
+        background: #fff;
+        border-radius: 26px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(15,23,42,0.08);
+        border: 1px solid rgba(226,232,240,0.8);
+    }
+    .mentoria-card .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24px;
+        border-bottom: 1px solid rgba(226,232,240,0.7);
+        padding-bottom: 20px;
         margin-bottom: 20px;
     }
-    .request-meta-item .label {
+    .mentoria-card h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .card-meta { color: #6b7280; }
+    .price-block {
+        text-align: right;
+    }
+    .price {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .info-item {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+    }
+    .info-label {
         font-size: .75rem;
         text-transform: uppercase;
         letter-spacing: .08em;
-        color: #94a3b8;
+        color: #6b7280;
         font-weight: 600;
     }
-    .request-meta-item .value {
-        margin-top: 4px;
-        font-weight: 600;
+    .info-value {
+        font-size: 1rem;
+        font-weight: 700;
         color: #1f2937;
+    }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: .8rem;
+        font-weight: 700;
+    }
+    .badge-published { background: rgba(16,185,129,0.15); color: #047857; }
+    .badge-draft { background: rgba(99,102,241,0.18); color: #4338ca; }
+    .badge-pending { background: rgba(251,191,36,0.2); color: #92400e; }
+    .badge-archived { background: rgba(248,113,113,0.18); color: #b91c1c; }
+    .badge-virtual { background: rgba(79,172,254,0.18); color: #2563eb; }
+    .badge-presencial { background: rgba(168,237,234,0.5); color: #0f172a; }
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .action-btn {
+        border-radius: 12px;
+        padding: 10px 18px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: .9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-edit { background: rgba(56,178,172,0.12); color: #0f766e; }
+    .btn-publish { background: rgba(102,126,234,0.12); color: #4c1d95; }
+    .btn-view { background: rgba(59,130,246,0.12); color: #1d4ed8; }
+    .btn-delete { background: rgba(248,113,113,0.15); color: #b91c1c; }
+    .mentoria-empty {
+        text-align: center;
+        padding: 60px 30px;
+        border: 2px dashed #e2e8f0;
+        border-radius: 26px;
+        background: linear-gradient(135deg, #f8f9ff, #ffffff);
+    }
+    .requests-section {
+        background: #fff;
+        border-radius: 26px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(15,23,42,0.08);
+    }
+    .requests-grid {
+        display: grid;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .request-card {
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid rgba(226,232,240,0.9);
+        background: #f8fafc;
+    }
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    .request-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+        gap: 16px;
+        margin-bottom: 16px;
     }
     .request-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
     }
     .request-actions .btn {
-        border-radius: 14px;
+        border-radius: 12px;
+        padding: 8px 18px;
         font-weight: 600;
-        padding: 10px 20px;
         border: none;
-        cursor: pointer;
-        text-decoration: none;
     }
-    .request-status {
-        border-radius: 999px;
-        font-size: .85rem;
-        padding: .45rem 1.2rem;
-        font-weight: 700;
-    }
-    .btn-request-neutral {
-        background: rgba(108,71,255,0.12);
-        color: #6c47ff;
-    }
-    .btn-request-accept {
-        background: linear-gradient(135deg, #10b981, #34d399);
-        color: #fff;
-        box-shadow: 0 12px 25px rgba(16,185,129,0.3);
-    }
-    .btn-request-reject {
-        background: rgba(248,113,113,0.15);
-        color: #dc2626;
-        border: 1px solid rgba(248,113,113,0.4);
+    .btn-request-accept { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+    .btn-request-reject { background: rgba(248,113,113,0.15); color: #b91c1c; }
+    .btn-request-neutral { background: rgba(102,126,234,0.12); color: #4c1d95; }
+    @media (max-width: 768px) {
+        .mentorias-header { flex-direction: column; align-items: flex-start; }
+        .price-block { text-align: left; }
     }
 </style>
 @endpush
 
-@section('mentor-actions')
-    <a href="{{ route('mentorias.create') }}" class="btn btn-primary" style="border-radius: 999px; padding: 12px 32px;">
-        ‚ú® Crear mentor√≠a
-    </a>
-@endsection
+@section('mentor-actions', '')
+
 
 @section('mentor-content')
-    <div class="space-y-8">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-label">Borradores</span>
-                <span class="stat-value">{{ $listMentorias->where('estado', 'borrador')->count() }}</span>
+    <div class="mentorias-dashboard">
+        <section class="mentorias-header">
+            <div>
+                <h1>Mis MentorÌas</h1>
+                <p>Define tus sesiones y tarifas personalizadas</p>
+                <span class="mentor-date">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span id="mentorMentoriasCurrentDate"></span>
+                </span>
             </div>
-            <div class="stat-card">
-                <span class="stat-label">Publicadas</span>
-                <span class="stat-value">{{ $listMentorias->where('estado', 'publicada')->count() }}</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Ingresos del mes</span>
-                <span class="stat-value">S/ {{ number_format($ingresosDelMes ?? 0, 0) }}</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Valoraci√≥n promedio</span>
-                <span class="stat-value">{{ number_format($valoracionPromedio ?? 0, 1) }}</span>
-            </div>
-        </div>
+            <a href="{{ route('mentorias.create') }}" class="btn btn-primary" style="border-radius: 12px;">
+                <i class="fa-solid fa-plus"></i> Crear mentorÌa
+            </a>
+        </section>
 
-        <div class="filter-bar">
+        <section class="stats-grid">
+            <article class="stats-card">
+                <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
+                    <div>
+                        <p class="stats-value">{{ $draftCount }}</p>
+                        <p class="stats-label">Borradores</p>
+                    </div>
+                    <div class="stats-icon"><i class="fa-solid fa-file"></i></div>
+                </div>
+                <p class="text-sm text-slate-500" style="margin-top:10px;">En modo editor</p>
+            </article>
+            <article class="stats-card">
+                <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
+                    <div>
+                        <p class="stats-value">{{ $publishedCount }}</p>
+                        <p class="stats-label">Publicadas</p>
+                    </div>
+                    <div class="stats-icon" style="background:rgba(16,185,129,0.15);color:#047857;">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-500" style="margin-top:10px;">Listas para estudiantes</p>
+            </article>
+            <article class="stats-card">
+                <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
+                    <div>
+                        <p class="stats-value">S/ {{ number_format($monthlyIncome, 0) }}</p>
+                        <p class="stats-label">Ingresos del mes</p>
+                    </div>
+                    <div class="stats-icon" style="background:rgba(251,191,36,0.2);color:#b45309;">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-500" style="margin-top:10px;">Total ganado</p>
+            </article>
+            <article class="stats-card">
+                <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
+                    <div>
+                        <p class="stats-value">{{ number_format($avgRating, 1) }}</p>
+                        <p class="stats-label">ValoraciÛn promedio</p>
+                    </div>
+                    <div class="stats-icon" style="background:rgba(244,114,182,0.2);color:#be185d;">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-500" style="margin-top:10px;">Basado en reseÒas</p>
+            </article>
+        </section>
+
+        <section class="filter-bar">
             <button class="filter-btn active" data-filter="todas">Todas</button>
             <button class="filter-btn" data-filter="borrador">Borradores</button>
             <button class="filter-btn" data-filter="publicada">Publicadas</button>
             <button class="filter-btn" data-filter="virtual">Virtual</button>
             <button class="filter-btn" data-filter="presencial">Presencial</button>
-        </div>
+        </section>
 
-        <div class="cards-grid">
+        <section class="mentorias-grid">
             @forelse($listMentorias as $mentoria)
-                <article class="item-card" data-estado="{{ $mentoria->estado }}" data-modalidad="{{ $mentoria->modalidad }}">
+                <article class="mentoria-card" data-estado="{{ $mentoria->estado }}" data-modalidad="{{ $mentoria->modalidad }}">
                     <div class="card-header">
                         <div>
-                            <h3 class="card-title">{{ $mentoria->titulo }}</h3>
-                            <p class="card-subtitle">
-                                {{ ucfirst($mentoria->categoria) }} ¬∑ {{ ucfirst($mentoria->modalidad) }}
-                            </p>
+                            <h3>{{ $mentoria->titulo }}</h3>
+                            <p class="card-meta">{{ ucfirst($mentoria->categoria) }} ∑ {{ ucfirst($mentoria->modalidad) }}</p>
                         </div>
-                        <div class="card-price">S/ {{ number_format($mentoria->precio, 2) }}</div>
+                        <div class="price-block">
+                            <span class="badge {{ $mentoria->estado === 'publicada' ? 'badge-published' : ($mentoria->estado === 'borrador' ? 'badge-draft' : 'badge-pending') }}">
+                                <i class="fa-solid fa-circle"></i> {{ ucfirst($mentoria->estado) }}
+                            </span>
+                            <p class="price">S/ {{ number_format($mentoria->precio, 2) }}</p>
+                            <p class="text-sm text-slate-500">por sesiÛn</p>
+                        </div>
                     </div>
 
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Duraci√≥n</span>
-                            <span class="info-value">{{ $mentoria->duracion_minutos ?? $mentoria->duracion }} minutos</span>
+                            <span class="info-label">DuraciÛn</span>
+                            <span class="info-value">{{ $mentoria->duracion_minutos ?? $mentoria->duracion }} min</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Modalidad</span>
-                            <span class="info-value">{{ ucfirst($mentoria->modalidad) }}</span>
+                            <span class="info-value">
+                                <span class="badge {{ $mentoria->modalidad === 'virtual' ? 'badge-virtual' : 'badge-presencial' }}">
+                                    {{ ucfirst($mentoria->modalidad) }}
+                                </span>
+                            </span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">
-                                {{ $mentoria->estado === 'publicada' ? 'Sesiones' : 'Creada' }}
-                            </span>
+                            <span class="info-label">Sesiones/CreaciÛn</span>
                             <span class="info-value">
                                 @if($mentoria->estado === 'publicada')
                                     {{ $mentoria->sesiones_count ?? 0 }} realizadas
@@ -343,59 +412,63 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Estado</span>
-                            <span class="badge {{ $mentoria->estado === 'publicada' ? 'badge-success' : ($mentoria->estado === 'borrador' ? 'badge-warning' : 'badge-slate') }}">
-                                {{ ucfirst($mentoria->estado) }}
-                            </span>
+                            <span class="info-value">{{ ucfirst($mentoria->estado) }}</span>
                         </div>
                     </div>
 
-                    <div class="actions-row">
-                        <a href="{{ route('mentorias.edit', $mentoria) }}" class="btn btn-primary">‚úèÔ∏è Editar</a>
-
+                    <div class="action-buttons">
+                        <a href="{{ route('mentorias.edit', $mentoria) }}" class="action-btn btn-edit">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </a>
                         @if($mentoria->estado === 'borrador')
                             <form action="{{ route('mentor.mentorias.publicar', $mentoria) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="btn btn-secondary">üöÄ Publicar</button>
+                                <button type="submit" class="action-btn btn-publish">
+                                    <i class="fa-solid fa-rocket"></i> Publicar
+                                </button>
                             </form>
                         @endif
-
-                        <a href="{{ route('mentorias.show', $mentoria) }}" class="btn btn-outline" target="_blank">üëÅÔ∏è {{ $mentoria->estado === 'borrador' ? 'Vista previa' : 'Ver p√∫blico' }}</a>
-
+                        <a href="{{ route('mentorias.show', $mentoria) }}" target="_blank" class="action-btn btn-view">
+                            <i class="fa-solid fa-eye"></i> {{ $mentoria->estado === 'borrador' ? 'Vista previa' : 'Ver p˙blico' }}
+                        </a>
                         @if($mentoria->estado === 'borrador')
-                            <form action="{{ route('mentor.mentorias.destroy', $mentoria) }}" method="POST" onsubmit="return confirm('¬øEliminar esta mentor√≠a?');">
+                            <form action="{{ route('mentor.mentorias.destroy', $mentoria) }}" method="POST" onsubmit="return confirm('øEliminar esta mentorÌa?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-outline">üóëÔ∏è Eliminar</button>
+                                <button type="submit" class="action-btn btn-delete">
+                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                </button>
                             </form>
                         @endif
                     </div>
                 </article>
             @empty
-                <div class="item-card">
-                    <div class="text-center">
-                        <p class="text-4xl mb-2">üìö</p>
-                        <h3 class="text-lg font-semibold text-secondary">No tienes mentor√≠as creadas</h3>
-                        <p class="text-sm text-slate-500 mb-4">Comienza a compartir tu experiencia creando mentor√≠as personalizadas.</p>
-                        <a href="{{ route('mentorias.create') }}" class="btn btn-primary">Crear mi primera mentor√≠a</a>
+                <div class="mentoria-empty">
+                    <div class="w-24 h-24 rounded-full" style="margin:0 auto 16px; background:linear-gradient(135deg,#f3e8ff,#e0e7ff); display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-chalkboard-teacher" style="font-size:2rem;color:#6b46c1;"></i>
                     </div>
+                    <h3 class="text-xl font-semibold" style="color:#1f2937;">No tienes mentorÌas creadas</h3>
+                    <p style="color:#6b7280;margin:12px auto 20px;max-width:360px;">Comienza a compartir tu experiencia creando mentorÌas personalizadas.</p>
+                    <a href="{{ route('mentorias.create') }}" class="btn btn-primary" style="padding:12px 28px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-plus"></i> Crear mi primera mentorÌa
+                    </a>
                 </div>
             @endforelse
-        </div>
+        </section>
 
-        <div class="request-section">
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <section class="requests-section">
+            <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
                 <div>
-                    <h3 class="text-xl font-semibold text-secondary">Solicitudes recibidas</h3>
-                    <p class="text-sm text-slate-500">?ltimas solicitudes de tus mentor?as publicadas</p>
+                    <h2 class="text-xl font-semibold" style="color:#1f2937;">Solicitudes recibidas</h2>
+                    <p class="text-sm" style="color:#6b7280;">⁄ltimas solicitudes de tus mentorÌas publicadas</p>
                 </div>
-                <span class="text-sm text-slate-500">{{ $stats['total'] ?? 0 }} registro(s)</span>
+                <span class="text-sm" style="color:#94a3b8;">{{ $stats['total'] ?? 0 }} registro(s)</span>
             </div>
 
             <div class="requests-grid">
                 @forelse ($requests as $session)
                     @php
-                        $badge = $statusClasses[$session->estado] ?? 'bg-slate-100 text-slate-600';
                         $scheduleDate = $session->fecha_programada ?? $session->fecha_mentoria;
                         $scheduleTime = $session->hora_programada ?? optional($session->fecha_mentoria)?->format('H:i');
                         $amount = $session->monto ?? $session->precio;
@@ -403,35 +476,36 @@
                     <article class="request-card">
                         <div class="request-header">
                             <div>
-                                <p class="request-student">Estudiante: {{ $session->estudiante->name ?? 'No asignado' }}</p>
-                                <h4 class="request-title">{{ $session->titulo }}</h4>
-                                <p class="request-date">Solicitada {{ optional($session->fecha_solicitud)->format('d/m/Y H:i') ?? 'sin fecha' }}</p>
+                                <p class="text-sm" style="color:#6b7280;">Estudiante: {{ $session->estudiante->name ?? 'No asignado' }}</p>
+                                <h4 style="font-size:1.15rem;font-weight:700;color:#1f2937;">{{ $session->titulo }}</h4>
+                                <p class="text-xs" style="color:#94a3b8;">Solicitada {{ optional($session->fecha_solicitud)->format('d/m/Y H:i') ?? 'sin fecha' }}</p>
                             </div>
-                            <span class="badge request-status {{ $badge }}">{{ ucfirst($session->estado) }}</span>
+                            <span class="badge {{ $statusClasses[$session->estado] ?? 'badge-draft' }}">
+                                {{ ucfirst($session->estado) }}
+                            </span>
                         </div>
 
                         <div class="request-meta">
-                            <div class="request-meta-item">
-                                <span class="label">Fecha</span>
-                                <span class="value">{{ optional($scheduleDate)->format('d/m/Y') ?? 'Por definir' }}</span>
+                            <div>
+                                <span class="info-label">Fecha</span>
+                                <span class="info-value">{{ optional($scheduleDate)->format('d/m/Y') ?? 'Por definir' }}</span>
                             </div>
-                            <div class="request-meta-item">
-                                <span class="label">Hora</span>
-                                <span class="value">{{ $scheduleTime ?? 'Por definir' }}</span>
+                            <div>
+                                <span class="info-label">Hora</span>
+                                <span class="info-value">{{ $scheduleTime ?? 'Por definir' }}</span>
                             </div>
-                            <div class="request-meta-item">
-                                <span class="label">Modalidad</span>
-                                <span class="value capitalize">{{ $session->modalidad }}</span>
+                            <div>
+                                <span class="info-label">Modalidad</span>
+                                <span class="info-value">{{ ucfirst($session->modalidad) }}</span>
                             </div>
-                            <div class="request-meta-item">
-                                <span class="label">Monto</span>
-                                <span class="value">S/ {{ number_format($amount ?? 0, 2) }}</span>
+                            <div>
+                                <span class="info-label">Monto</span>
+                                <span class="info-value">S/ {{ number_format($amount ?? 0, 2) }}</span>
                             </div>
                         </div>
 
                         <div class="request-actions">
                             <a href="{{ route('mentorias.show', $session) }}" class="btn btn-request-neutral">Ver detalles</a>
-
                             @if ($session->estado === 'pendiente')
                                 <form method="POST" action="{{ route('mentor.mentorias.accept', $session) }}">
                                     @csrf
@@ -442,43 +516,48 @@
                                     <button type="submit" class="btn btn-request-reject">Rechazar</button>
                                 </form>
                             @endif
-
                             @if (in_array($session->estado, ['pagada', 'confirmada']))
                                 <form method="POST" action="{{ route('mentor.mentorias.completar', $session) }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-request-accept" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);box-shadow:0 12px 25px rgba(99,102,241,.25);">Completar sesi?n</button>
+                                    <button type="submit" class="btn btn-request-accept" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">Completar sesiÛn</button>
                                 </form>
                             @endif
                         </div>
                     </article>
                 @empty
-                    <div class="request-card text-center text-sm text-slate-500">
-                        A?n no tienes solicitudes de estudiantes.
+                    <div class="request-card" style="text-align:center;color:#6b7280;">
+                        A˙n no tienes solicitudes de estudiantes.
                     </div>
                 @endforelse
             </div>
-        </div>
-
-        </div>
+        </section>
     </div>
 @endsection
 
 @push('scripts')
 <script>
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateEl = document.getElementById('mentorMentoriasCurrentDate');
+        if (dateEl) {
+            const formatter = new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const formatted = formatter.format(new Date());
+            dateEl.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
 
-            const filter = this.dataset.filter;
-            document.querySelectorAll('.item-card').forEach(card => {
-                if (filter === 'todas') {
-                    card.style.display = 'block';
-                } else if (filter === 'virtual' || filter === 'presencial') {
-                    card.style.display = card.dataset.modalidad === filter ? 'block' : 'none';
-                } else {
-                    card.style.display = card.dataset.estado === filter ? 'block' : 'none';
-                }
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.dataset.filter;
+                document.querySelectorAll('.mentoria-card').forEach(card => {
+                    if (filter === 'todas') {
+                        card.style.display = 'block';
+                    } else if (filter === 'virtual' || filter === 'presencial') {
+                        card.style.display = card.dataset.modalidad === filter ? 'block' : 'none';
+                    } else {
+                        card.style.display = card.dataset.estado === filter ? 'block' : 'none';
+                    }
+                });
             });
         });
     });

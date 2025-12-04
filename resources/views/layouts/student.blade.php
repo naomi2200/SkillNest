@@ -7,25 +7,25 @@
     $navLinks = [
         [
             'label' => 'Dashboard',
-            'icon' => '📊',
+            'icon' => 'fa-solid fa-gauge-high',
             'url' => route('student.dashboard'),
             'active' => request()->routeIs('student.dashboard'),
         ],
         [
             'label' => 'Mis cursos',
-            'icon' => '📚',
+            'icon' => 'fa-solid fa-book-open',
             'url' => route('student.courses'),
             'active' => request()->routeIs('student.courses'),
         ],
         [
             'label' => 'Mis mentorías',
-            'icon' => '👥',
+            'icon' => 'fa-solid fa-chalkboard-user',
             'url' => route('student.mentorias'),
             'active' => request()->routeIs('student.mentorias'),
         ],
         [
             'label' => 'Mi perfil',
-            'icon' => '👤',
+            'icon' => 'fa-solid fa-user',
             'url' => route('student.profile'),
             'active' => request()->routeIs('student.profile'),
         ],
@@ -108,18 +108,33 @@
             text-decoration: none;
             transition: all 0.25s ease;
         }
-        .student-nav-link span:first-child {
-            width: 20px;
-            text-align: center;
+        .student-nav-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: rgba(124,58,237,0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 16px;
+            transition: all 0.2s ease;
         }
         .student-nav-link:hover {
             background: rgba(124,58,237,0.12);
             color: var(--primary);
         }
+        .student-nav-link:hover .student-nav-icon {
+            background: rgba(124,58,237,0.2);
+        }
         .student-nav-link.active {
             background: linear-gradient(135deg, var(--primary), var(--primary-2));
             color: #fff;
             box-shadow: 0 10px 25px rgba(124,58,237,0.25);
+        }
+        .student-nav-link.active .student-nav-icon {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
         }
 
         .student-main {
@@ -204,7 +219,9 @@
             <nav class="student-nav">
                 @foreach($navLinks as $link)
                     <a href="{{ $link['url'] }}" class="student-nav-link {{ $link['active'] ? 'active' : '' }}">
-                        <span>{{ $link['icon'] }}</span>
+                        <span class="student-nav-icon" aria-hidden="true">
+                            <i class="{{ $link['icon'] }}"></i>
+                        </span>
                         <span>{{ $link['label'] }}</span>
                     </a>
                 @endforeach

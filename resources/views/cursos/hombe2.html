@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillNest - Plataforma Educativa Profesional</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ESTILOS PERSONALIZADOS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Efectos personalizados */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .shadow-soft {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 4px;
+        }
+        
+        /* Estilos para tabs */
+        .tab-active {
+            border-bottom: 3px solid #4F46E5;
+            color: #4F46E5;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- ===== NAVBAR PROFESIONAL ===== -->
+    <nav x-data="{ scrolled: false, mobileMenuOpen: false }" 
+         @scroll.window="scrolled = window.pageYOffset > 10"
+         :class="scrolled ? 'glass-effect shadow-lg py-3' : 'bg-transparent py-5'"
+         class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <!-- Logo y navegación principal -->
+                <div class="flex items-center space-x-8">
+                    <!-- Logo -->
+                    <a href="#" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-lg gradient-bg flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">SN</span>
+                        </div>
+                        <span class="text-2xl font-bold gradient-text">SkillNest</span>
+                    </a>
+                    
+                    <!-- Navegación desktop -->
+                    <div class="hidden lg:flex items-center space-x-6">
+                        <a href="#" class="font-medium text-gray-700 hover:text-purple-600 transition-colors">
+                            <i class="fas fa-graduation-cap mr-2"></i>Cursos
+                        </a>
+                        <a href="#" class="font-medium text-gray-700 hover:text-purple-600 transition-colors">
+                            <i class="fas fa-users mr-2"></i>Mentorías
+                        </a>
+                        <a href="#" class="font-medium text-gray-700 hover:text-purple-600 transition-colors">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Ser mentor
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Acciones y auth -->
+                <div class="hidden lg:flex items-center space-x-4">
+                    <a href="#" class="font-medium text-gray-600 hover:text-purple-600 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Ingresar
+                    </a>
+                    <a href="#" class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-shadow">
+                        <i class="fas fa-user-plus mr-2"></i>Crear cuenta
+                    </a>
+                </div>
+                
+                <!-- Menú móvil -->
+                <div class="lg:hidden">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" 
+                            class="text-gray-700 hover:text-purple-600 p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Menú móvil desplegable -->
+            <div x-show="mobileMenuOpen" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="lg:hidden mt-4 glass-effect rounded-xl shadow-xl p-4">
+                <div class="flex flex-col space-y-4">
+                    <a href="#" class="font-medium text-gray-700 hover:text-purple-600 py-2">
+                        <i class="fas fa-graduation-cap mr-3"></i>Cursos
+                    </a>
+                    <a href="#" class="font-medium text-gray-700 hover:text-purple-600 py-2">
+                        <i class="fas fa-users mr-3"></i>Mentorías
+                    </a>
+                    <a href="#" class="font-medium text-gray-700 hover:text-purple-600 py-2">
+                        <i class="fas fa-chalkboard-teacher mr-3"></i>Ser mentor
+                    </a>
+                    <div class="pt-4 border-t border-gray-200">
+                        <a href="#" class="block text-center font-medium text-gray-600 hover:text-purple-600 py-2">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Ingresar
+                        </a>
+                        <a href="#" class="block text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-3 rounded-lg font-medium mt-2">
+                            <i class="fas fa-user-plus mr-2"></i>Crear cuenta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION DUAL ===== -->
+    <section class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-gray-50 to-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Badge destacado -->
+            <div class="flex justify-center mb-8">
+                <span class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 font-medium">
+                    <i class="fas fa-award mr-2"></i>PLATAFORMA EDUCATIVA LÍDER 2024
+                </span>
+            </div>
+            
+            <!-- Título principal -->
+            <div class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                    <span class="block">Aprende de expertos</span>
+                    <span class="block gradient-text">o comparte tu conocimiento</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Accede a más de 500 cursos y conecta con mentores profesionales para impulsar tu crecimiento profesional.
+                </p>
+            </div>
+            
+            <!-- Buscador principal -->
+            <div class="max-w-3xl mx-auto mb-12 animate-fade-in">
+                <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl blur opacity-20"></div>
+                    <div class="relative bg-white rounded-2xl shadow-soft p-2">
+                        <form class="flex flex-col sm:flex-row">
+                            <div class="flex-1 relative">
+                                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" 
+                                       placeholder="¿Qué quieres aprender hoy? Ej: Laravel, Diseño UI, Marketing Digital..." 
+                                       class="w-full pl-12 pr-4 py-4 text-gray-700 rounded-xl border-0 focus:ring-2 focus:ring-purple-300 focus:outline-none">
+                            </div>
+                            <button type="submit" 
+                                    class="mt-4 sm:mt-0 sm:ml-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium px-8 py-4 rounded-xl hover:shadow-lg transition-shadow">
+                                <i class="fas fa-search mr-2"></i>Buscar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hero Dual: Para Estudiantes / Para Mentores -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Card Estudiantes -->
+                <div class="bg-white rounded-2xl shadow-soft p-8 card-hover animate-fade-in">
+                    <div class="flex items-center mb-6">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center mr-4">
+                            <i class="fas fa-user-graduate text-2xl text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Para Estudiantes</h3>
+                            <p class="text-gray-600">Aprende habilidades demandadas</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>500+ cursos prácticos con certificación</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Mentoría personalizada 1:1</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Proyectos reales para tu portafolio</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Comunidad activa de aprendizaje</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="block w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-center font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                        <i class="fas fa-book-open mr-2"></i>Explorar cursos
+                    </a>
+                </div>
+                
+                <!-- Card Mentores -->
+                <div class="bg-white rounded-2xl shadow-soft p-8 card-hover animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="flex items-center mb-6">
+                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-chalkboard-teacher text-2xl text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Para Mentores</h3>
+                            <p class="text-gray-600">Comparte tu expertise</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Monetiza tu conocimiento y experiencia</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Herramientas profesionales de enseñanza</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Comunidad de mentores expertos</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>Flexibilidad horaria total</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                        <i class="fas fa-rocket mr-2"></i>Convertirme en mentor
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Stats en línea -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                <div class="text-center">
+                    <div class="text-3xl font-bold gradient-text mb-2">500+</div>
+                    <div class="text-gray-600">Cursos disponibles</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold gradient-text mb-2">10K+</div>
+                    <div class="text-gray-600">Estudiantes activos</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold gradient-text mb-2">4.8</div>
+                    <div class="text-gray-600">Valoración promedio</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold gradient-text mb-2">95%</div>
+                    <div class="text-gray-600">Satisfacción</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CATEGORÍAS DESTACADAS ===== -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Explora por categoría</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Encuentra el camino perfecto entre nuestras especialidades más demandadas</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Categoría 1 -->
+                <a href="#" class="group bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 border border-blue-100 card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-code text-2xl text-white"></i>
+                        </div>
+                        <span class="text-blue-600 font-medium bg-blue-100 px-3 py-1 rounded-full text-sm">234 cursos</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Programación</h3>
+                    <p class="text-gray-600 mb-4">Desarrollo web, mobile, backend y más con los lenguajes más demandados</p>
+                    <div class="text-blue-600 font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        Explorar categoría
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <!-- Categoría 2 -->
+                <a href="#" class="group bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100 card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-palette text-2xl text-white"></i>
+                        </div>
+                        <span class="text-purple-600 font-medium bg-purple-100 px-3 py-1 rounded-full text-sm">156 cursos</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Diseño</h3>
+                    <p class="text-gray-600 mb-4">UI/UX, gráfico, web y más para crear experiencias digitales excepcionales</p>
+                    <div class="text-purple-600 font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        Explorar categoría
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <!-- Categoría 3 -->
+                <a href="#" class="group bg-gradient-to-br from-green-50 to-white rounded-2xl p-6 border border-green-100 card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-chart-line text-2xl text-white"></i>
+                        </div>
+                        <span class="text-green-600 font-medium bg-green-100 px-3 py-1 rounded-full text-sm">98 cursos</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Marketing</h3>
+                    <p class="text-gray-600 mb-4">Digital, SEO, redes sociales y estrategias para hacer crecer cualquier negocio</p>
+                    <div class="text-green-600 font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        Explorar categoría
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <!-- Categoría 4 -->
+                <a href="#" class="group bg-gradient-to-br from-yellow-50 to-white rounded-2xl p-6 border border-yellow-100 card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-briefcase text-2xl text-white"></i>
+                        </div>
+                        <span class="text-yellow-600 font-medium bg-yellow-100 px-3 py-1 rounded-full text-sm">145 cursos</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Negocios</h3>
+                    <p class="text-gray-600 mb-4">Emprendimiento, finanzas, gestión y estrategias para líderes empresariales</p>
+                    <div class="text-yellow-600 font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        Explorar categoría
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <!-- Categoría 5 -->
+                <a href="#" class="group bg-gradient-to-br from-red-50 to-white rounded-2xl p-6 border border-red-100 card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-camera text-2xl text-white"></i>
+                        </div>
+                        <span class="text-red-600 font-medium bg-red-100 px-3 py-1 rounded-full text-sm">67 cursos</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Fotografía</h3>
+                    <p class="text-gray-600 mb-4">Técnicas, edición, iluminación y composición para capturar momentos únicos</p>
+                    <div class="text-red-600 font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        Explorar categoría
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                
+                <!-- Categoría 6 -->
+                <a href="#" class="group bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-6 border border-indigo-100 card-hover">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-music text-2xl text-white"></i>
+                        </div>
+                        <span class="text-indigo-600 font-medium bg-indigo-100 px-3 py-1 rounded-full text-sm">43 cursos</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Música</h3>
+                    <p class="text-gray-600 mb-4">Producción, teoría, instrumentos y técnicas para crear y entender música</p>
+                    <div class="text-indigo-600 font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        Explorar categoría
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="inline-flex items-center text-lg font-medium text-purple-600 hover:text-purple-700">
+                    Ver todas las categorías
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CURSOS Y MENTORES (TABS) ===== -->
+    <section class="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div x-data="{ activeTab: 'cursos' }" class="max-w-6xl mx-auto">
+                <!-- Tabs -->
+                <div class="flex justify-center mb-12">
+                    <div class="inline-flex rounded-xl bg-white p-1 shadow-soft">
+                        <button @click="activeTab = 'cursos'" 
+                                :class="activeTab === 'cursos' ? 'tab-active bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
+                                class="px-8 py-3 rounded-lg font-medium transition-all">
+                            <i class="fas fa-graduation-cap mr-2"></i>Cursos Populares
+                        </button>
+                        <button @click="activeTab = 'mentores'" 
+                                :class="activeTab === 'mentores' ? 'tab-active bg-gradient-to-r from-purple-50 to-pink-50 text-purple-600' : 'text-gray-600 hover:text-gray-900'"
+                                class="px-8 py-3 rounded-lg font-medium transition-all">
+                            <i class="fas fa-users mr-2"></i>Mentores Destacados
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Contenido Cursos -->
+                <div x-show="activeTab === 'cursos'" x-transition:enter="transition ease-out duration-300" class="animate-fade-in">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Curso 1 -->
+                        <div class="bg-white rounded-2xl shadow-soft overflow-hidden card-hover">
+                            <div class="h-48 bg-gradient-to-br from-blue-500 to-cyan-600 relative overflow-hidden">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i class="fas fa-laravel text-white text-6xl opacity-30"></i>
+                                </div>
+                                <div class="absolute top-4 right-4">
+                                    <span class="bg-white/90 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">AVANZADO</span>
+                                </div>
+                                <div class="absolute bottom-4 left-4">
+                                    <span class="text-white font-bold text-lg">Programación</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Laravel Avanzado: De Cero a Experto</h3>
+                                <p class="text-gray-600 mb-4 text-sm">Domina Laravel 10 con APIs RESTful, Livewire, testing y despliegue en producción.</p>
+                                <div class="flex items-center mb-4">
+                                    <div class="flex items-center text-yellow-500">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span class="ml-2 text-gray-700 font-medium">4.8</span>
+                                    </div>
+                                    <span class="mx-2 text-gray-300">•</span>
+                                    <span class="text-gray-600">
+                                        <i class="fas fa-users mr-1"></i>1,234 estudiantes
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mr-3">
+                                            <span class="text-blue-600 font-bold">CG</span>
+                                        </div>
+                                        <span class="text-gray-700 font-medium">Carlos Gómez</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-gray-900">S/ 149</div>
+                                        <div class="text-sm text-gray-500">curso completo</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="block w-full mt-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-center font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                    Ver curso <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Curso 2 -->
+                        <div class="bg-white rounded-2xl shadow-soft overflow-hidden card-hover">
+                            <div class="h-48 bg-gradient-to-br from-green-500 to-emerald-600 relative overflow-hidden">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i class="fab fa-vuejs text-white text-6xl opacity-30"></i>
+                                </div>
+                                <div class="absolute top-4 right-4">
+                                    <span class="bg-white/90 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">INTERMEDIO</span>
+                                </div>
+                                <div class="absolute bottom-4 left-4">
+                                    <span class="text-white font-bold text-lg">Programación</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Vue.js Completo: Frontend Moderno</h3>
+                                <p class="text-gray-600 mb-4 text-sm">Aprende Vue 3, Composition API, Pinia y construye aplicaciones empresariales.</p>
+                                <div class="flex items-center mb-4">
+                                    <div class="flex items-center text-yellow-500">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <span class="ml-2 text-gray-700 font-medium">4.9</span>
+                                    </div>
+                                    <span class="mx-2 text-gray-300">•</span>
+                                    <span class="text-gray-600">
+                                        <i class="fas fa-users mr-1"></i>897 estudiantes
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center mr-3">
+                                            <span class="text-green-600 font-bold">ML</span>
+                                        </div>
+                                        <span class="text-gray-700 font-medium">María López</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-gray-900">S/ 139</div>
+                                        <div class="text-sm text-gray-500">curso completo</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="block w-full mt-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-center font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                    Ver curso <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Curso 3 -->
+                        <div class="bg-white rounded-2xl shadow-soft overflow-hidden card-hover">
+                            <div class="h-48 bg-gradient-to-br from-purple-500 to-pink-600 relative overflow-hidden">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i class="fas fa-palette text-white text-6xl opacity-30"></i>
+                                </div>
+                                <div class="absolute top-4 right-4">
+                                    <span class="bg-white/90 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">PRINCIPIANTE</span>
+                                </div>
+                                <div class="absolute bottom-4 left-4">
+                                    <span class="text-white font-bold text-lg">Diseño</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Diseño UX/UI: Interfaces Increíbles</h3>
+                                <p class="text-gray-600 mb-4 text-sm">Crea experiencias de usuario excepcionales con Figma, prototipado y research.</p>
+                                <div class="flex items-center mb-4">
+                                    <div class="flex items-center text-yellow-500">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span class="ml-2 text-gray-700 font-medium">4.7</span>
+                                    </div>
+                                    <span class="mx-2 text-gray-300">•</span>
+                                    <span class="text-gray-600">
+                                        <i class="fas fa-users mr-1"></i>856 estudiantes
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mr-3">
+                                            <span class="text-purple-600 font-bold">AG</span>
+                                        </div>
+                                        <span class="text-gray-700 font-medium">Ana García</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-2xl font-bold text-gray-900">S/ 129</div>
+                                        <div class="text-sm text-gray-500">curso completo</div>
+                                    </div>
+                                </div>
+                                <a href="#" class="block w-full mt-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                    Ver curso <i class="fas fa-arrow-right ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-12">
+                        <a href="#" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium rounded-xl hover:shadow-lg transition-shadow">
+                            Ver todos los cursos
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Contenido Mentores -->
+                <div x-show="activeTab === 'mentores'" x-transition:enter="transition ease-out duration-300" class="animate-fade-in">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Mentor 1 -->
+                        <div class="bg-white rounded-2xl shadow-soft p-6 text-center card-hover">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+                                CG
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">Carlos Gómez</h3>
+                            <p class="text-blue-600 font-medium mb-4">Senior Laravel Developer</p>
+                            <div class="flex items-center justify-center mb-4">
+                                <div class="flex items-center text-yellow-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span class="ml-2 text-gray-700 font-medium">4.9</span>
+                                </div>
+                            </div>
+                            <div class="text-gray-600 mb-4">
+                                <i class="fas fa-clock mr-2"></i>123 sesiones
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-6">S/ 80<span class="text-sm font-normal text-gray-600">/hora</span></div>
+                            <a href="#" class="block w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                Ver perfil <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- Mentor 2 -->
+                        <div class="bg-white rounded-2xl shadow-soft p-6 text-center card-hover">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+                                ML
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">María López</h3>
+                            <p class="text-green-600 font-medium mb-4">Frontend Expert</p>
+                            <div class="flex items-center justify-center mb-4">
+                                <div class="flex items-center text-yellow-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span class="ml-2 text-gray-700 font-medium">4.9</span>
+                                </div>
+                            </div>
+                            <div class="text-gray-600 mb-4">
+                                <i class="fas fa-clock mr-2"></i>98 sesiones
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-6">S/ 70<span class="text-sm font-normal text-gray-600">/hora</span></div>
+                            <a href="#" class="block w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                Ver perfil <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- Mentor 3 -->
+                        <div class="bg-white rounded-2xl shadow-soft p-6 text-center card-hover">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+                                AG
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">Ana García</h3>
+                            <p class="text-purple-600 font-medium mb-4">UX/UI Designer</p>
+                            <div class="flex items-center justify-center mb-4">
+                                <div class="flex items-center text-yellow-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span class="ml-2 text-gray-700 font-medium">5.0</span>
+                                </div>
+                            </div>
+                            <div class="text-gray-600 mb-4">
+                                <i class="fas fa-clock mr-2"></i>158 sesiones
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-6">S/ 90<span class="text-sm font-normal text-gray-600">/hora</span></div>
+                            <a href="#" class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                Ver perfil <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- Mentor 4 -->
+                        <div class="bg-white rounded-2xl shadow-soft p-6 text-center card-hover">
+                            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
+                                JR
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">José Ramírez</h3>
+                            <p class="text-yellow-600 font-medium mb-4">Marketing Strategist</p>
+                            <div class="flex items-center justify-center mb-4">
+                                <div class="flex items-center text-yellow-500">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                    <span class="ml-2 text-gray-700 font-medium">4.7</span>
+                                </div>
+                            </div>
+                            <div class="text-gray-600 mb-4">
+                                <i class="fas fa-clock mr-2"></i>89 sesiones
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-6">S/ 75<span class="text-sm font-normal text-gray-600">/hora</span></div>
+                            <a href="#" class="block w-full bg-gradient-to-r from-yellow-600 to-orange-600 text-white font-medium py-3 rounded-xl hover:shadow-lg transition-shadow">
+                                Ver perfil <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-12">
+                        <a href="#" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-xl hover:shadow-lg transition-shadow">
+                            Ver todos los mentores
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA FINAL ===== -->
+    <section class="py-20 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">¿Listo para transformar tu carrera?</h2>
+            <p class="text-xl text-blue-100 max-w-2xl mx-auto mb-10">
+                Únete a miles de profesionales que ya están aprendiendo y enseñando en SkillNest
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#" class="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors">
+                    <i class="fas fa-user-graduate mr-3"></i>Empezar a aprender
+                </a>
+                <a href="#" class="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+                    <i class="fas fa-chalkboard-teacher mr-3"></i>Convertirme en mentor
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER PROFESIONAL ===== -->
+    <footer class="bg-gray-900 text-white pt-12 pb-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <!-- Columna 1: Logo y descripción -->
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-10 h-10 rounded-lg gradient-bg flex items-center justify-center">
+                            <span class="text-white font-bold text-xl">SN</span>
+                        </div>
+                        <span class="text-2xl font-bold text-white">SkillNest</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        La plataforma educativa donde expertos comparten conocimiento y profesionales impulsan sus carreras.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Columna 2: Enlaces -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Para estudiantes</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Explorar cursos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Encontrar mentores</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Certificaciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Comunidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Precios</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Columna 3: Enlaces -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Para mentores</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Ser mentor</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Herramientas</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Comunidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Recursos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Tarifas</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Columna 4: Contacto -->
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Contacto</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-envelope mr-3"></i>
+                            <span>hola@skillnest.com</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-phone mr-3"></i>
+                            <span>+51 987 654 321</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-map-marker-alt mr-3"></i>
+                            <span>Lima, Perú</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Línea divisoria -->
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-gray-400 text-sm mb-4 md:mb-0">
+                        © 2024 SkillNest. Todos los derechos reservados.
+                    </div>
+                    <div class="flex space-x-6 text-sm text-gray-400">
+                        <a href="#" class="hover:text-white transition-colors">Términos</a>
+                        <a href="#" class="hover:text-white transition-colors">Privacidad</a>
+                        <a href="#" class="hover:text-white transition-colors">Cookies</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Inicializar Alpine y agregar interacciones
+        document.addEventListener('alpine:init', () => {
+            console.log('SkillNest - Plataforma Educativa Profesional ✅');
+        });
+        
+        // Smooth scroll para anclas
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
