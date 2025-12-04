@@ -95,13 +95,23 @@
                                 <td>
                                     <div class="mentor-info">
                                         <div class="mentor-avatar {{ $loop->index % 3 == 0 ? 'blue' : ($loop->index % 3 == 1 ? 'pink' : 'purple') }}">{{ strtoupper(substr($mentor->name ?? 'M',0,2)) }}</div>
-                                        <span class="mentor-name">{{ $mentor->name ?? '—' }}</span>
+<<<<<<< HEAD
+                                        <span class="mentor-name">{{ $mentor->name ?? 'Mentor' }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? '—') }}</td>
+                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? 'General') }}</td>
                                 <td>{{ optional($mentoria)->fecha_programada ?? '—' }}</td>
                                 <td>{{ optional($mentoria)->hora_programada ?? '—' }}</td>
                                 <td><span class="badge {{ $estado === 'confirmada' ? 'confirmada' : 'pendiente' }}">{{ ucfirst($estado) }}</span></td>
+=======
+                                        <span class="mentor-name">{{ $mentor->name ?? 'Mentor SkillNest' }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ $mentor->specialty ?? ($mentoria->especialidad ?? 'Sin definir') }}</td>
+                                <td>{{ optional($mentoria)->fecha_programada ?? 'Por confirmar' }}</td>
+                                <td>{{ optional($mentoria)->hora_programada ?? 'Por confirmar' }}</td>
+                                <td><span class="badge {{ $estadoBadge }}">{{ ucfirst($estado) }}</span></td>
+>>>>>>> 29e038f (Describe brevemente tus cambios)
                                 <td>
                                     <div class="action-buttons">
                                         @if($puedePagar)

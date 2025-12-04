@@ -1,361 +1,346 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('admin-title', 'Panel general de SkillNest')
+@section('admin-subtitle', 'Supervisa cursos en revisi&oacute;n, mentores y actividad de la comunidad')
 
 @push('styles')
-    <style>
-        :root {
-            --primary: #6c47ff;
-            --primary-light: #f0edff;
-            --secondary: #1f2937;
-            --accent: #8b5cf6;
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --white: #ffffff;
-            --radius: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        body {
-            background: linear-gradient(135deg, #f8faff 0%, #f5f7ff 100%);
-        }
-
-        .dashboard-layout {
-            min-height: calc(100vh - 96px);
-            background: var(--gray-50);
-            padding: clamp(16px, 3vw, 32px);
-        }
-
-        .dashboard-shell {
-            display: flex;
-            gap: 24px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .dashboard-sidebar {
-            width: 280px;
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--gray-200);
-            position: sticky;
-            top: clamp(100px, 16vh, 140px);
-            align-self: flex-start;
-        }
-
-        .sidebar-header {
-            margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .sidebar-header h2 {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
-        }
-
-        .sidebar-header p {
-            font-size: 12px;
-            color: var(--gray-400);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 600;
-        }
-
-        .dashboard-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            text-decoration: none;
-            color: var(--gray-600);
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .nav-item:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .nav-item.active {
-            background: var(--primary);
-            color: var(--white);
-            font-weight: 600;
-        }
-
-        .dashboard-main {
-            flex: 1;
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: clamp(20px, 3vw, 32px);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--gray-200);
-        }
-
-        .dashboard-hero {
-            background: linear-gradient(135deg, rgba(108, 71, 255, 0.07), rgba(139, 92, 246, 0.12));
-            border-radius: var(--radius-xl);
-            padding: clamp(20px, 3vw, 32px);
-            margin-bottom: 32px;
-            border: 1px solid rgba(108, 71, 255, 0.15);
-        }
-
-        .hero-badge {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .hero-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .hero-text h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 8px;
-        }
-
-        .hero-text p {
-            color: var(--gray-600);
-            max-width: 520px;
-        }
-
-        .hero-user {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            background: var(--white);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--primary);
-            border: 1px solid var(--gray-300);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 20px;
-            border: 1px solid var(--gray-200);
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        .content-section {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            border: 1px solid var(--gray-200);
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--secondary);
-            margin-bottom: 16px;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-shell {
-                flex-direction: column;
-            }
-            .dashboard-sidebar {
-                width: 100%;
-                position: static;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero-content {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .hero-actions {
-                width: 100%;
-            }
-            .btn {
-                flex: 1;
-                text-align: center;
-            }
-        }
-    </style>
+<style>
+    .dashboard-hero {
+        background: linear-gradient(135deg, rgba(108,71,255,0.08), rgba(139,92,246,0.12));
+        border: 1px solid rgba(108,71,255,0.15);
+        border-radius: 32px;
+        padding: clamp(20px, 3vw, 32px);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .hero-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .hero-meta span {
+        font-size: .8rem;
+        letter-spacing: .25em;
+        text-transform: uppercase;
+        color: #7c3aed;
+        font-weight: 700;
+    }
+    .hero-meta h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: rgba(124,58,237,0.12);
+        color: #5b21b6;
+        font-weight: 600;
+        font-size: .9rem;
+    }
+    .hero-user {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-radius: 20px;
+        background: #fff;
+        box-shadow: 0 10px 25px rgba(15,23,42,0.08);
+    }
+    .hero-avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#7c3aed,#8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+    .admin-actions .btn-action {
+        border-radius: 18px;
+        padding: 12px 24px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-action.primary {
+        background: linear-gradient(135deg,#7c3aed,#8b5cf6);
+        color: #fff;
+        box-shadow: 0 12px 25px rgba(124,58,237,0.25);
+    }
+    .btn-action.ghost {
+        background: rgba(124,58,237,0.08);
+        color: #5b21b6;
+    }
+    .stats-grid {
+        margin-top: 32px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+        gap: 16px;
+    }
+    .stat-card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid rgba(226,232,240,0.9);
+    }
+    .stat-label {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #94a3b8;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+    .summary-grid {
+        margin-top: 32px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+        gap: 20px;
+    }
+    .summary-card {
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid rgba(226,232,240,0.9);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .summary-card h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .summary-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: .9rem;
+        color: #475569;
+    }
+    .summary-item span:last-child {
+        font-size: .8rem;
+        color: #94a3b8;
+    }
+    .review-section {
+        margin-top: 32px;
+        background: #fff;
+        border-radius: 28px;
+        border: 1px solid rgba(226,232,240,0.9);
+        padding: 24px;
+    }
+    .review-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+    .review-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .table-container {
+        overflow-x: auto;
+    }
+    table.review-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .9rem;
+    }
+    .review-table thead {
+        background: #f8fafc;
+    }
+    .review-table th,
+    .review-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(226,232,240,0.9);
+        text-align: left;
+    }
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+    .status-pendiente { background: rgba(245,158,11,0.15); color: #b45309; }
+    .status-aprobado { background: rgba(16,185,129,0.18); color: #047857; }
+    .status-rechazado { background: rgba(248,113,113,0.18); color: #b91c1c; }
+    .table-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .table-actions form,
+    .table-actions a {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .table-actions textarea {
+        width: 100%;
+        border: 1px solid rgba(226,232,240,0.9);
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: .8rem;
+        resize: vertical;
+    }
+    .btn-table {
+        border: none;
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-weight: 600;
+        font-size: .8rem;
+        cursor: pointer;
+        text-align: center;
+    }
+    .btn-approve { background: rgba(16,185,129,0.15); color: #047857; }
+    .btn-approve:hover { background: #10b981; color:#fff; }
+    .btn-reject { background: rgba(248,113,113,0.15); color: #b91c1c; }
+    .btn-reject:hover { background: #ef4444; color:#fff; }
+    .btn-reset { background: rgba(59,130,246,0.15); color: #1d4ed8; }
+    .btn-reset:hover { background: #3b82f6; color:#fff; }
+    .empty-state {
+        text-align: center;
+        padding: 20px;
+        color: #94a3b8;
+    }
+    @media (max-width: 768px) {
+        .table-actions { flex-direction: column; }
+        .table-actions form { width: 100%; }
+    }
+</style>
 @endpush
 
-@section('content')
-    <div class="dashboard-layout">
-        <div class="dashboard-shell">
-            <aside class="dashboard-sidebar">
-                <div class="sidebar-header">
-                    <h2>SkillNest</h2>
-                    <p>Dashboard</p>
-                </div>
-                <nav class="dashboard-nav">
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item active">
-                        <span>�Y"S</span> <span>Resumen</span>
-                    </a>
-                    <a href="{{ route('admin.courses.index', ['status' => 'aprobado', 'view' => 'tabla']) }}" class="nav-item">
-                        <span>�Y"s</span> <span>Cursos</span>
-                    </a>
-                    <a href="#" class="nav-item">
-                        <span>�sT��?</span> <span>Configuraci��n</span>
-                    </a>
-                </nav>
-            </aside>
+@section('admin-actions')
+    <a href="{{ route('admin.courses.index', ['status' => 'pendiente', 'view' => 'solicitudes']) }}" class="btn-action primary">
+        <i class="fa-solid fa-inbox"></i> Ver cursos pendientes
+    </a>
+    <a href="{{ route('admin.courses.index', ['view' => 'tabla', 'status' => 'pendiente']) }}" class="btn-action ghost">
+        <i class="fa-solid fa-table"></i> Gestionar cursos
+    </a>
+@endsection
 
-            <main class="dashboard-main">
-                <header class="dashboard-hero">
-                    <div class="hero-badge">Hola, {{ auth()->user()->name }}</div>
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h1>Panel general de SkillNest</h1>
-                            <p>Supervisa los cursos enviados a revisi��n, el estado de la comunidad y las mentor��as activas.</p>
-                        </div>
-                        <div class="hero-user">
-                            <div class="user-info">
-                                <p>{{ auth()->user()->name ?? 'Administrador' }}</p>
-                                <p>{{ auth()->user()->email ?? 'admin@skillnest.com' }}</p>
-                            </div>
-                            <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</div>
-                        </div>
-                    </div>
-                    <div class="hero-actions">
-                        <a href="{{ route('admin.courses.index', ['status' => 'pendiente', 'view' => 'solicitudes']) }}" class="btn btn-primary">Ver cursos pendientes</a>
-                        <a href="{{ route('admin.courses.index', ['status' => 'aprobado', 'view' => 'tabla']) }}" class="btn btn-secondary">Gestionar cursos</a>
-                    </div>
-                </header>
+@section('admin-content')
+    @php
+        $pendingList = collect($pendingCourses ?? []);
+        $recentCoursesList = collect($recentCourses ?? []);
+        $recentMentoriasList = collect($recentMentorias ?? []);
+        $recentUsersList = collect($recentUsers ?? []);
+    @endphp
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">{{ number_format($stats['courses_active'] ?? 0) }}</div>
-                        <div class="stat-label">Cursos activos</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">{{ number_format($stats['courses_pending'] ?? 0) }}</div>
-                        <div class="stat-label">En revisi��n</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">{{ number_format($stats['courses_drafts'] ?? 0) }}</div>
-                        <div class="stat-label">Borradores</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">{{ number_format($stats['courses_rejected'] ?? 0) }}</div>
-                        <div class="stat-label">Rechazados</div>
-                    </div>
-                </div>
-
-                <div class="content-section">
-                    <h3 class="section-title">Cursos pendientes ({{ ($pendingCourses ?? collect())->count() }})</h3>
-                    @forelse($pendingCourses ?? [] as $course)
-                        <div class="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 mb-3">
-                            <p class="font-semibold text-secondary">{{ $course->title }}</p>
-                            <p class="text-xs text-gray-500">Mentor: {{ $course->mentor->name ?? 'Sin asignar' }}</p>
-                        </div>
-                    @empty
-                        <p class="text-sm text-gray-500">No hay cursos pendientes en este momento.</p>
-                    @endforelse
-                </div>
-
-                <div class="content-section">
-                    <h3 class="section-title">Nuevos usuarios</h3>
-                    @forelse($recentUsers ?? [] as $recentUser)
-                        <div class="flex justify-between rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 mb-2">
-                            <span class="font-semibold text-secondary">{{ $recentUser->name }}</span>
-                            <span class="text-sm text-gray-500">{{ ucfirst($recentUser->role ?? 'usuario') }}</span>
-                        </div>
-                    @empty
-                        <p class="text-sm text-gray-500">Sin registros recientes.</p>
-                    @endforelse
-                </div>
-            </main>
+    <section class="dashboard-hero">
+        <div class="hero-meta">
+            <span>Panel admin</span>
+            <h2>Hola, {{ auth()->user()->name ?? 'Admin' }}</h2>
+            <p style="margin:0;color:#475569;">Mant&eacute;n el pulso de la comunidad y aprueba nuevos contenidos.</p>
+            <span class="hero-pill">
+                <i class="fa-solid fa-calendar"></i>
+                {{ \Carbon\Carbon::now()->locale('es')->translatedFormat('l, d \d\e F') }}
+            </span>
         </div>
-    </div>
+        <div class="hero-user">
+            <div>
+                <strong>{{ auth()->user()->name ?? 'Administrador' }}</strong>
+                <p style="margin:0;color:#6b7280;font-size:.9rem;">{{ auth()->user()->email ?? 'admin@skillnest.com' }}</p>
+            </div>
+            <div class="hero-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</div>
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <span class="stat-label">Cursos activos</span>
+            <span class="stat-value">{{ number_format($stats['courses_active'] ?? 0) }}</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">En revisi&oacute;n</span>
+            <span class="stat-value">{{ number_format($stats['courses_pending'] ?? 0) }}</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Borradores</span>
+            <span class="stat-value">{{ number_format($stats['courses_drafts'] ?? 0) }}</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Rechazados</span>
+            <span class="stat-value">{{ number_format($stats['courses_rejected'] ?? 0) }}</span>
+        </article>
+    </section>
+
+    <section class="summary-grid">
+        <article class="summary-card">
+            <h3>Usuarios recientes</h3>
+            <ul class="summary-list">
+                @forelse ($recentUsersList as $user)
+                    <li class="summary-item">
+                        <strong>{{ $user->name }}</strong>
+                        <span>{{ ucfirst($user->role ?? 'usuario') }}</span>
+                    </li>
+                @empty
+                    <li class="summary-item"><span>Sin registros</span></li>
+                @endforelse
+            </ul>
+        </article>
+        <article class="summary-card">
+            <h3>Cursos publicados</h3>
+            <ul class="summary-list">
+                @forelse ($recentCoursesList as $course)
+                    <li class="summary-item">
+                        <strong>{{ $course->title }}</strong>
+                        <span>{{ optional($course->updated_at)->diffForHumans() ?? 'reciente' }}</span>
+                    </li>
+                @empty
+                    <li class="summary-item"><span>Sin cursos recientes</span></li>
+                @endforelse
+            </ul>
+        </article>
+        <article class="summary-card">
+            <h3>Mentor&iacute;as recientes</h3>
+            <ul class="summary-list">
+                @forelse ($recentMentoriasList as $mentoria)
+                    <li class="summary-item">
+                        <strong>{{ $mentoria->titulo ?? 'Sin t&iacute;tulo' }}</strong>
+                        <span>{{ ucfirst($mentoria->estado ?? 'borrador') }}</span>
+                    </li>
+                @empty
+                    <li class="summary-item"><span>Sin mentor&iacute;as publicadas</span></li>
+                @endforelse
+            </ul>
+        </article>
+    </section>
 @endsection

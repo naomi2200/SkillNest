@@ -1,644 +1,910 @@
 @extends('layouts.dashboard')
 
+{{-- // Vista adaptada al diseño oficial de SkillNest --}}
+
 @section('dashboard-title', 'Editor de curso')
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pIVp98VYqCw42Hcps225y7sY9qsK0kGugHgdGXNq35p3xNmPR9U1FVLtZL1YI7Di5urN6LyjHgNsZM3Rp3crGQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        .editor-hero {
-            background: linear-gradient(135deg, rgba(108,71,255,0.18), rgba(139,92,246,0.15));
-            border: 1px solid rgba(108,71,255,0.2);
+        :root {
+            --editor-surface: rgba(255, 255, 255, 0.97);
+            --editor-border: rgba(15, 23, 42, 0.08);
+            --editor-radius: 32px;
         }
-        .editor-hero .editor-actions-bar {
-            margin-top: 18px;
-        }
-    </style>
-@endpush
 
-@section('dashboard-hero')
-    <header class="dashboard-hero editor-hero">
-        <span class="dashboard-hero__badge">Hola, {{ auth()->user()->name }}</span>
-        <div class="dashboard-hero__content">
-            <div class="dashboard-hero__text">
-                <h1>Editor de curso</h1>
-                <p>Explora y gestiona todo tu ecosistema SkillNest</p>
-            </div>
-            <div class="dashboard-hero__meta">
-                <div>
-                    <p class="font-semibold text-slate-800">{{ auth()->user()->name }}</p>
-                    <p class="text-sm text-slate-500">{{ auth()->user()->email }}</p>
-                </div>
-                <div class="dashboard-hero__avatar">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'S', 0, 1)) }}
-                </div>
-            </div>
-        </div>
-        <div class="editor-actions-bar">
-            <div>
-                <p class="editor-actions-caption">Acciones rápidas</p>
-                <h3 class="editor-actions-title">Gestiona tu publicación</h3>
-            </div>
-            <div class="editor-actions-buttons">
-                {{-- // Rutas corregidas para evitar Missing parameter: curso --}}
-                <a href="{{ route('cursos.show', $curso->id) }}" class="btn-secondary">
-                    <i class="fas fa-eye"></i> Vista Previa
-                </a>
-                {{-- // Botón funcional para enviar a revisión --}}
-                <form method="POST" action="{{ route('cursos.send-to-review', $curso->id) }}">
-                    @csrf
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-paper-plane"></i> Enviar a Revisión
-                    </button>
-                </form>
-            </div>
-        </div>
-    </header>
-@endsection
-
-@section('dashboard-content')
-    <div id="editor-toast" class="fixed right-6 top-24 z-50 hidden rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 font-semibold text-white shadow-2xl">
-        <i class="fas fa-check-circle mr-2"></i>Cambios guardados correctamente
-    </div>
-    <style>
-        .course-editor {
-            --color-primary: #6c47ff;
-            --color-primary-hover: #5a38e6;
-            --shadow-card: 0 10px 40px rgba(0,0,0,0.08);
-            color: #333;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-        .course-editor * {
-            box-sizing: border-box;
-        }
-        .editor-actions-bar {
+        .editor-banner {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            gap: 24px;
-            padding: 20px 28px;
-            background: #fff;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(108,71,255,0.08);
-            border: 1px solid rgba(0,0,0,0.05);
+            gap: 1.25rem;
+            padding: 1.5rem 1.75rem;
+            border-radius: 40px;
+            border: 1px solid var(--editor-border);
+            background: linear-gradient(135deg, #ffffff 0%, rgba(248, 250, 255, 0.9) 100%);
+            box-shadow: 0 22px 55px rgba(15, 23, 42, 0.1);
         }
-        .editor-actions-caption {
-            font-size: 0.75rem;
+
+        .editor-banner__caption {
+            letter-spacing: 0.35em;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: #9ca3af;
-            margin: 0 0 4px;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-bottom: 0.35rem;
         }
-        .editor-actions-title {
+
+        .editor-banner__title {
             margin: 0;
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             font-weight: 800;
-            color: #1f2937;
+            color: #0f172a;
         }
-        .editor-actions-buttons {
+
+        .editor-banner__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .editor-banner__actions form {
+            margin: 0;
+        }
+
+        .btn-pill,
+        .btn-outline {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 0.5rem;
+            border-radius: 999px;
+            font-weight: 600;
+            padding: 0.85rem 1.75rem;
+            border: 1px solid transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+
+        .btn-pill {
+            background: linear-gradient(120deg, var(--color-primary), #8b5cf6);
             color: #fff;
-            padding: 12px 28px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
+            box-shadow: 0 18px 36px rgba(108, 71, 255, 0.35);
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(108,71,255,0.4);
+
+        .btn-pill:hover {
+            transform: translateY(-1px);
         }
-        .btn-secondary {
-            background: transparent;
+
+        .btn-outline {
+            background: #fff;
             color: var(--color-primary);
-            padding: 12px 28px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            transition: all 0.3s ease;
-            border: 2px solid var(--color-primary);
+            border-color: rgba(108, 71, 255, 0.35);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.07);
         }
-        .btn-secondary:hover {
-            background: var(--color-primary);
-            color: #fff;
+
+        .btn-outline:hover {
+            background: rgba(108, 71, 255, 0.08);
         }
-        .course-editor .editor-wrapper {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-        .course-editor .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
-        .course-editor .stat-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 32px;
-            box-shadow: var(--shadow-card);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        .course-editor .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-            border-color: rgba(108,71,255,0.2);
-        }
-        .course-editor .stat-card h4 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: #6b7280;
-            font-weight: 800;
-            margin-bottom: 16px;
-        }
-        .course-editor .stat-card strong {
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: block;
-            line-height: 1;
-        }
-        .course-editor .editor-layout {
-            display: grid;
-            grid-template-columns: 380px 1fr 320px;
-            gap: 32px;
-        }
-        @media (max-width: 1400px) {
-            .editor-layout {
-                grid-template-columns: 340px 1fr;
-            }
-            .editor-layout aside:last-of-type {
-                grid-column: span 2;
-            }
-        }
-        @media (max-width: 1024px) {
-            .editor-layout {
-                grid-template-columns: 1fr;
-            }
-            .editor-layout aside:last-of-type {
-                grid-column: auto;
-            }
-        .course-editor .editor-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 32px;
-            box-shadow: var(--shadow-card);
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-        .course-editor .editor-card:hover {
-            border-color: rgba(108,71,255,0.1);
-        }
-        .course-editor .editor-card h3 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--color-primary);
-            font-weight: 800;
-            margin-bottom: 24px;
-        }
-        .course-editor .form-stack label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-        .course-editor .form-stack input,
-        .course-editor .form-stack textarea,
-        .course-editor .form-stack select {
-            width: 100%;
-            border-radius: 12px;
-            border: 2px solid rgba(0,0,0,0.08);
-            padding: 16px 20px;
-            font-size: 0.95rem;
-            background: #fff;
-            transition: all 0.3s ease;
-        }
-        .course-editor .form-stack input:focus,
-        .course-editor .form-stack textarea:focus,
-        .course-editor .form-stack select:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 4px rgba(108,71,255,0.1);
-            transform: translateY(-2px);
-        }
-        .course-editor .image-preview-container {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px dashed rgba(108,71,255,0.3);
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            margin-bottom: 16px;
-        }
-        .course-editor .image-preview-container img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .course-editor .image-badge {
+
+        .sr-only {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            background: rgba(255,255,255,0.95);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--color-primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
-        .course-editor .modules-head {
+
+        .editor-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .editor-toast {
+            position: fixed;
+            top: 6.5rem;
+            right: 1.5rem;
+            z-index: 50;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(0,0,0,0.06);
+            gap: 0.6rem;
+            padding: 0.85rem 1.5rem;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #34d399, #059669);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 22px 45px rgba(16, 185, 129, 0.35);
         }
-        .course-editor .modules-head h2 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+
+        .editor-toast.editor-toast--error {
+            background: linear-gradient(120deg, #f87171, #ef4444);
+            box-shadow: 0 22px 45px rgba(248, 113, 113, 0.35);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-card {
+            background: var(--editor-surface);
+            border-radius: var(--editor-radius);
+            border: 1px solid var(--editor-border);
+            box-shadow: 0 25px 55px rgba(15, 23, 42, 0.08);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .stat-label {
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+
+        .stat-value {
+            font-size: 2.4rem;
+            font-weight: 900;
+            background: linear-gradient(120deg, var(--color-primary), #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .course-editor .module-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 24px;
-            border: 2px solid rgba(0,0,0,0.06);
-            box-shadow: var(--shadow-card);
-            transition: all 0.3s ease;
-            position: relative;
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 999px;
+            padding: 0.5rem 1.2rem;
+            border: 1px solid rgba(108, 71, 255, 0.2);
+            background: linear-gradient(135deg, rgba(108, 71, 255, 0.12), rgba(139, 92, 246, 0.12));
+            color: var(--color-primary);
+            font-size: 0.85rem;
+            font-weight: 600;
         }
-        .module-card:hover {
-            border-color: var(--color-primary);
-            box-shadow: 0 20px 40px rgba(108,71,255,0.15);
-            transform: translateY(-4px);
+
+        .stat-meta {
+            font-size: 0.85rem;
+            color: #64748b;
         }
-        .course-editor .module-card.sortable-ghost,
-        .course-editor .lesson-block.sortable-ghost { opacity: 0.6; transform: scale(0.98); }
-        .course-editor .module-card.is-dragging,
-        .course-editor .lesson-block.is-dragging { border-color: var(--color-primary); }
-        .course-editor .module-top {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        .course-editor .module-fields {
-            flex: 1;
-        }
-        .course-editor .module-fields input,
-        .course-editor .module-fields textarea {
-            width: 100%;
-            border-radius: 12px;
-            border: 2px solid rgba(0,0,0,0.08);
-            padding: 16px 20px;
-            font-size: 0.95rem;
-            background: #fff;
-            transition: all 0.3s ease;
-        }
-        .module-fields textarea {
-            margin-top: 16px;
-            min-height: 80px;
-            resize: vertical;
-        }
-        .course-editor .module-actions {
-            display: flex;
-            gap: 12px;
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2.25fr) minmax(260px, 360px);
+            gap: clamp(1.25rem, 3vw, 2.25rem);
             align-items: flex-start;
         }
-        .course-editor .module-actions button {
-            border: none;
-            border-radius: 12px;
-            padding: 12px 16px;
-            font-size: 0.75rem;
+
+        @media (min-width: 1440px) {
+            .editor-grid {
+                grid-template-columns: minmax(0, 2.6fr) minmax(280px, 380px);
+            }
+        }
+
+        .editor-main-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+
+        .course-meta {
+            margin: 0.2rem 0 0;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .course-meta strong {
+            color: #0f172a;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
-        .course-editor .module-handle {
-            background: rgba(108,71,255,0.1);
+
+        .editor-card {
+            background: var(--editor-surface);
+            border-radius: var(--editor-radius);
+            border: 1px solid var(--editor-border);
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1);
+            padding: 2rem;
+        }
+
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+
+        .editor-structure {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .panel-subtitle {
+            margin: 0.25rem 0 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .editor-section-title {
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .editor-section-heading {
+            margin: 0.2rem 0 0;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .cover-picker {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px dashed rgba(15, 23, 42, 0.12);
+            background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        }
+
+        .cover-picker img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .cover-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            border: none;
+            border-radius: 999px;
+            padding: 0.4rem 1.1rem;
+            background: #fff;
             color: var(--color-primary);
-            border: 2px solid rgba(108,71,255,0.2);
-            cursor: grab;
+            font-weight: 700;
+            font-size: 0.75rem;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
         }
-        .course-editor .module-add-lesson {
-            background: rgba(16,185,129,0.1);
-            color: #047857;
-            border: 2px solid rgba(16,185,129,0.2);
+
+        .hint-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
         }
-        .course-editor .module-delete {
-            background: rgba(239,68,68,0.1);
-            color: #dc2626;
-            border: 2px solid rgba(239,68,68,0.2);
-        }
-        .course-editor .lesson-block {
-            background: linear-gradient(135deg, #fafbff, #f3f5ff);
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 16px;
-            border: 1px solid rgba(0,0,0,0.06);
-            transition: all 0.3s ease;
-        }
-        .lesson-block:hover {
-            border-color: var(--color-primary);
-            transform: translateX(4px);
-        }
-        .course-editor .lesson-row {
+
+        .file-upload {
+            width: 100%;
+            border: 1px dashed rgba(15, 23, 42, 0.2);
+            border-radius: 18px;
             display: flex;
-            gap: 16px;
+            justify-content: space-between;
             align-items: center;
+            padding: 0.9rem 1.2rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(248, 250, 255, 0.6), rgba(238, 242, 255, 0.6));
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 10px 25px rgba(108, 71, 255, 0.15);
+        }
+
+        .file-upload__action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .file-upload__name {
+            font-size: 0.9rem;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 55%;
+        }
+
+        .basic-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-stack label {
+            display: block;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-stack input,
+        .form-stack textarea,
+        .form-stack select {
+            width: 100%;
+            border-radius: 18px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            background: #fff;
+            padding: 0.95rem 1.15rem;
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .form-stack input:hover,
+        .form-stack textarea:hover,
+        .form-stack select:hover {
+            border-color: rgba(108, 71, 255, 0.5);
+        }
+
+        .form-stack input:focus,
+        .form-stack textarea:focus,
+        .form-stack select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.12);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .form-stack textarea {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        .modules-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .modules-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .module-card {
+            border-radius: 28px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: #fff;
+            padding: 1.5rem;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .module-card + .module-card {
+            margin-top: 1rem;
+        }
+
+        .module-card:hover {
+            border-color: rgba(108, 71, 255, 0.45);
+            transform: translateY(-2px);
+        }
+
+        .module-top {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .module-fields {
+            flex: 1;
+            min-width: 240px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .module-fields input,
+        .module-fields textarea {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 0.85rem 1rem;
+            background: #f8fafc;
+        }
+
+        .module-actions {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
             flex-wrap: wrap;
         }
-        .course-editor .lesson-row input,
-        .course-editor .lesson-row select {
-            flex: 1;
-            min-width: 120px;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            padding: 12px 16px;
-            background: #fff;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .course-editor .lesson-row input:focus,
-        .course-editor .lesson-row select:focus {
-            border-color: var(--color-primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(108,71,255,0.1);
-        }
-        .course-editor .checklist {
-            list-style: none;
-        }
-        .course-editor .checklist li {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            font-weight: 500;
-            color: #374151;
-        }
-        .course-editor .checklist li:last-child {
-            border-bottom: none;
-        }
-        .course-editor .check-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid rgba(0,0,0,0.1);
-            display: flex;
+
+        .module-actions button {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
+            gap: 0.35rem;
+            border-radius: 16px;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: #f8fafc;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .course-editor .check-dot.fill {
-            background: linear-gradient(135deg, #10b981, #059669);
+
+        .module-actions button:hover {
+            transform: translateY(-2px);
+        }
+
+        .module-handle {
+            background: #f6f3ff;
+            color: var(--color-primary);
+            border-color: rgba(108, 71, 255, 0.45);
+        }
+
+        .module-add-lesson {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .module-delete {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: rgba(248, 113, 113, 0.4);
+        }
+
+        .lessons-wrapper {
+            margin-top: 1rem;
+        }
+
+        .lesson-block {
+            border-radius: 22px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #f9f9ff, #f2f5ff);
+            transition: border-color 0.2s ease;
+        }
+
+        .lesson-block + .lesson-block {
+            margin-top: 1rem;
+        }
+
+        .lesson-block:hover {
+            border-color: var(--color-primary);
+        }
+
+        .lesson-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .lesson-row input,
+        .lesson-row select {
+            flex: 1;
+            min-width: 140px;
+            border-radius: 14px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 0.75rem 0.9rem;
+            background: #fff;
+            font-weight: 600;
+        }
+
+        .lesson-extra {
+            margin-top: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+
+        .lesson-extra input,
+        .lesson-extra textarea,
+        .lesson-editor {
+            border-radius: 16px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 0.85rem 1rem;
+            background: #fff;
+        }
+
+        .lesson-editor {
+            min-height: 110px;
+            white-space: pre-wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            border-radius: 28px;
+            border: 1px dashed rgba(15, 23, 42, 0.12);
+            background: #f8fafc;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #cbd5f5;
+            margin-bottom: 1rem;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 1.25rem 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .check-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #0f172a;
+        }
+
+        .check-dot.fill {
+            background: linear-gradient(120deg, #10b981, #059669);
+            color: #fff;
             border-color: transparent;
+            box-shadow: 0 10px 24px rgba(16, 185, 129, 0.35);
         }
-        .course-editor .check-dot.fill::before {
-            content: '\2713';
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
+
+        .tips-card {
+            border-radius: 28px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            background: linear-gradient(145deg, #f0f9ff, #e0f2fe);
+            padding: 1.5rem;
         }
-        .course-editor .progress-bar {
+
+        .tips-card ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            margin: 1rem 0 0;
+        }
+
+        .tips-card li {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+            color: #0f172a;
+        }
+
+        .tips-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: #2563eb;
+        }
+
+        .tips-dot--amber {
+            background: #f59e0b;
+        }
+
+        .tips-dot--emerald {
+            background: #10b981;
+        }
+
+        .progress-track {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .progress-track__bar {
             height: 8px;
             border-radius: 999px;
-            background: rgba(0,0,0,0.06);
+            background: rgba(15, 23, 42, 0.1);
             overflow: hidden;
-            margin-top: 8px;
         }
-        .course-editor .progress-bar span {
+
+        .progress-track__bar span {
             display: block;
             height: 100%;
             border-radius: inherit;
-            background: linear-gradient(90deg, var(--color-primary), #8b5cf6);
-            transition: width 0.5s ease;
+            background: linear-gradient(120deg, var(--color-primary), #8b5cf6);
         }
-        .course-editor .tips-card {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border-radius: 20px;
-            padding: 24px;
-            margin-top: 32px;
-            border: 1px solid rgba(186,230,253,0.5);
+
+        @media (max-width: 1280px) {
+            .editor-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
         }
-        .course-editor .empty-state {
-            text-align: center;
-            padding: 48px 32px;
-            color: #6b7280;
-        }
-        .course-editor .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-        .course-editor .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 20px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, rgba(108,71,255,0.1), rgba(139,92,246,0.1));
-            border: 1px solid rgba(108,71,255,0.2);
-            width: fit-content;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            color: var(--color-primary);
+
+        @media (max-width: 768px) {
+            .editor-card {
+                padding: 1.5rem;
+            }
+
+            .editor-banner {
+                padding: 1.25rem;
+            }
+
+            .btn-pill,
+            .btn-outline {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
-    @php
-        $initialImage = $curso->image_url
-            ? (\Illuminate\Support\Str::startsWith($curso->image_url, ['http://', 'https://'])
-                ? $curso->image_url
-                : asset($curso->image_url))
-            : 'https://picsum.photos/seed/' . $curso->id . '/800/600';
-        $basicFields = [
-            ['name' => 'title', 'label' => 'Título del Curso', 'type' => 'text'],
-            ['name' => 'category', 'label' => 'Categoría', 'type' => 'text'],
-            ['name' => 'level', 'label' => 'Nivel', 'type' => 'select', 'options' => ['principiante','intermedio','avanzado']],
-            ['name' => 'price', 'label' => 'Precio (S/)', 'type' => 'number', 'step' => '0.01'],
-            ['name' => 'duration', 'label' => 'Duración (horas)', 'type' => 'number', 'min' => 1],
-            ['name' => 'description', 'label' => 'Descripción Corta', 'type' => 'textarea'],
-            ['name' => 'objectives', 'label' => 'Objetivos de Aprendizaje', 'type' => 'textarea'],
-            ['name' => 'requirements', 'label' => 'Requisitos', 'type' => 'textarea'],
-        ];
-    @endphp
-    @php
-        // Métricas dinámicas para las tarjetas de estado
-        $modulesCount = $curso->modules->count();
-        $lessonsCount = $curso->modules->sum(fn ($module) => $module->lessons->count());
-    @endphp
-    <div class="course-editor">
-    <div class="editor-wrapper">
-        {{-- // Carga dinámica de datos del curso --}}
-        <div class="stats-row">
-            <div class="stat-card">
-                <h4>Estado del Curso</h4>
-                <div class="flex items-center gap-4">
-                    <span class="status-badge">
-                        <i class="fas fa-pencil-alt"></i> <span class="capitalize" id="course-status">{{ $curso->status }}</span>
-                    </span>
-                    <span class="text-sm text-gray-600" id="last-saved-indicator">Último guardado hace instantes</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <h4>Módulos</h4>
-                <strong>{{ $modulesCount }}</strong>
-                <p class="text-sm text-gray-600 mt-2">Estructuras creadas</p>
-            </div>
-            <div class="stat-card">
-                <h4>Lecciones</h4>
-                <strong>{{ $lessonsCount }}</strong>
-                <p class="text-sm text-gray-600 mt-2">Bloques de contenido</p>
-            </div>
+@endpush
+@section('dashboard-actions')
+    <div class="editor-banner">
+        <div>
+            <p class="editor-banner__caption">Acciones rápidas</p>
+            <h3 class="editor-banner__title">Gestiona tu publicación</h3>
+        </div>
+        <div class="editor-banner__actions">
+            <a href="{{ route('cursos.show', $curso) }}" class="btn-outline">
+                <i class="fas fa-eye"></i>
+                <span>Vista previa</span>
+            </a>
+            <form action="{{ route('cursos.send-to-review', $curso) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn-pill">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Enviar a revisión</span>
+                </button>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@php
+    $modulesCount = $curso->modules->count();
+    $lessonsCount = $curso->modules->sum(fn($module) => $module->lessons->count());
+@endphp
+
+@php
+    $initialImage = $curso->image_url
+        ? (\Illuminate\Support\Str::startsWith($curso->image_url, ['http://', 'https://'])
+            ? $curso->image_url
+            : asset($curso->image_url))
+        : 'https://picsum.photos/seed/' . $curso->id . '/800/600';
+    $basicFields = [
+        ['name' => 'title', 'label' => 'Título del curso', 'type' => 'text', 'placeholder' => 'Ej. Diseño UX para principiantes'],
+        ['name' => 'category', 'label' => 'Categoría', 'type' => 'text', 'placeholder' => 'Ej. Tecnología'],
+        ['name' => 'level', 'label' => 'Nivel', 'type' => 'select', 'options' => ['principiante', 'intermedio', 'avanzado']],
+        ['name' => 'price', 'label' => 'Precio (S/)', 'type' => 'number', 'step' => '0.01', 'min' => 0],
+        ['name' => 'duration', 'label' => 'Duración (horas)', 'type' => 'number', 'min' => 1],
+        ['name' => 'description', 'label' => 'Descripción corta', 'type' => 'textarea', 'rows' => 3],
+        ['name' => 'objectives', 'label' => 'Objetivos de aprendizaje', 'type' => 'textarea', 'rows' => 3],
+        ['name' => 'requirements', 'label' => 'Requisitos', 'type' => 'textarea', 'rows' => 3],
+    ];
+@endphp
+
+@php
+    $courseDetail = [
+        'title' => $curso->titulo ?? $curso->title ?? 'Curso sin título',
+        'category' => data_get($curso, 'categoria.nombre') ?? $curso->category ?? 'General',
+        'level' => $curso->nivel ?? $curso->level ?? 'principiante',
+        'price' => $curso->precio ?? $curso->price ?? 0,
+        'duration' => $curso->duracion ?? $curso->duration ?? 1,
+        'description' => $curso->descripcion ?? $curso->description ?? '',
+        'objectives' => $curso->objetivos ?? $curso->objectives ?? '',
+        'requirements' => $curso->requisitos ?? $curso->requirements ?? '',
+    ];
+
+    $courseFieldMap = [
+        'title' => $courseDetail['title'],
+        'category' => $courseDetail['category'],
+        'level' => strtolower((string) $courseDetail['level']),
+        'price' => $courseDetail['price'],
+        'duration' => $courseDetail['duration'],
+        'description' => $courseDetail['description'],
+        'objectives' => $courseDetail['objectives'],
+        'requirements' => $courseDetail['requirements'],
+    ];
+
+@endphp
+
+@section('dashboard-content')
+    <div class="editor-shell">
+        <div id="editor-toast" class="editor-toast hidden" role="status" aria-live="polite">
+            <i class="fas fa-check-circle"></i>
+            <span data-toast-message>Cambios guardados correctamente</span>
         </div>
 
+        <div class="stats-grid">
+            <article class="stat-card">
+                <span class="stat-label">Estado del curso</span>
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="status-pill">
+                        <i class="fas fa-pencil-alt"></i>
+                        <span class="capitalize" id="course-status">{{ $curso->status }}</span>
+                    </span>
+                    <span class="stat-meta" id="last-saved-indicator">Último guardado hace instantes</span>
+                </div>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Módulos</span>
+                <span class="stat-value">{{ $modulesCount }}</span>
+                <p class="stat-meta">Estructuras creadas</p>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Lecciones</span>
+                <span class="stat-value">{{ $lessonsCount }}</span>
+                <p class="stat-meta">Bloques de contenido</p>
+            </article>
+        </div>
+
+        {{-- // Mantiene compatibilidad con scripts originales --}}
         <div id="course-editor"
              data-course-id="{{ $curso->id }}"
-             data-basics-endpoint="{{ route('cursos.update-basics', $curso->id) }}"
-             data-order-endpoint="{{ route('cursos.order', $curso->id) }}"
-             data-image-endpoint="{{ route('cursos.update-image', $curso->id) }}"
-             class="editor-layout">
-            <aside class="editor-card form-stack">
-                {{-- // Imagen dinámica --}}
-                <h3>Imagen del Curso</h3>
-                <div class="image-preview-container">
-                    <img id="course-image-preview" src="{{ $initialImage }}" alt="Imagen del curso">
-                    <span class="image-badge">Portada</span>
-                </div>
-                <label>
-                    <input type="file" accept="image/*" id="course-image-input" class="w-full cursor-pointer rounded-2xl border border-dashed border-gray-300 px-4 py-3">
-                </label>
-                <span class="text-xs text-gray-500 mt-2">Formatos: JPG o PNG (máx 4 MB)</span>
-
-                {{-- // Inputs sincronizados con modelo Laravel --}}
-                <div class="mt-8 space-y-6">
-                    @foreach($basicFields as $field)
-                        <div>
-                            <label>{{ $field['label'] }}</label>
-                            @if($field['type'] === 'select')
-                                <select data-basic-field="{{ $field['name'] }}">
-                                    @foreach($field['options'] as $option)
-                                        <option value="{{ $option }}" @selected($curso->{$field['name']} === $option)>{{ ucfirst($option) }}</option>
-                                    @endforeach
-                                </select>
-                            @elseif($field['type'] === 'textarea')
-                                <textarea data-basic-field="{{ $field['name'] }}" rows="3">{{ $curso->{$field['name']} }}</textarea>
-                            @else
-                                <input type="{{ $field['type'] }}"
-                                       step="{{ $field['step'] ?? '' }}"
-                                       min="{{ $field['min'] ?? '' }}"
-                                       data-basic-field="{{ $field['name'] }}"
-                                       value="{{ $curso->{$field['name']} }}">
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </aside>
-
-            <section class="editor-card">
-                <div class="modules-head">
+             data-basics-endpoint="{{ route('cursos.update-basics', $curso) }}"
+             data-order-endpoint="{{ route('cursos.order', $curso) }}"
+             data-image-endpoint="{{ route('cursos.update-image', $curso) }}"
+             class="editor-grid">
+            <div class="editor-main-column">
+                {{-- // Sección: Información del curso --}}
+                <article class="editor-card editor-panel form-stack course-basics-card">
                     <div>
-                        <p class="text-sm uppercase tracking-wider text-gray-500">Estructura del Curso</p>
-                        <h2>Organiza módulos y lecciones</h2>
+                        <span class="editor-section-title">Base del curso</span>
+                        <h2 class="editor-section-heading">Portada e información clave</h2>
+                        <p class="course-meta">Curso: <strong>{{ $courseDetail['title'] }}</strong></p>
+                        <p class="course-meta">Categoría actual: <strong>{{ $courseDetail['category'] }}</strong></p>
+                        <p class="course-meta">Nivel: <strong>{{ ucfirst($courseDetail['level']) }}</strong></p>
                     </div>
-                    <button type="button" id="add-module-btn" class="btn-primary">
-                        <i class="fas fa-plus mr-2"></i>Agregar Módulo
-                    </button>
-                </div>
+                    <div class="cover-picker">
+                        <img id="course-image-preview" src="{{ $initialImage }}" alt="Imagen del curso">
+                        <span class="cover-badge">Portada</span>
+                    </div>
+                    <input type="file" accept="image/*" id="course-image-input" class="sr-only">
+                    <label for="course-image-input" class="file-upload">
+                        <span class="file-upload__action">
+                            <i class="fas fa-upload"></i>
+                            <span>Seleccionar archivo</span>
+                        </span>
+                        <span class="file-upload__name" data-file-name>JPG o PNG hasta 4 MB</span>
+                    </label>
+                    <p class="hint-text">Formatos permitidos: JPG o PNG (máx. 4 MB)</p>
 
-                {{-- // Renderizado de módulos --}}
-                <div id="modules-canvas" class="space-y-6">
-                    @foreach($curso->modules as $module)
-                        <div class="module-card" data-module-id="{{ $module->id }}">
-                            <div class="module-top">
-                                <div class="module-fields">
-                                    <input type="text" class="module-title" value="{{ $module->title }}" placeholder="Título del módulo">
-                                    <textarea class="module-description" placeholder="Descripción del módulo (opcional)">{{ $module->description }}</textarea>
-                                </div>
-                                <div class="module-actions">
-                                    <button type="button" class="module-handle" title="Arrastrar módulo">
-                                        <i class="fas fa-grip-vertical"></i>
-                                    </button>
-                                    <button type="button" class="module-add-lesson">
-                                        <i class="fas fa-plus mr-1"></i>Lección
-                                    </button>
-                                    <button type="button" class="module-delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                    <div class="basic-fields">
+                        @foreach($basicFields as $field)
+                            @php
+                                $fieldValue = old($field['name'], $courseFieldMap[$field['name']] ?? ($curso->{$field['name']} ?? ''));
+                                $fieldId = 'field-' . $field['name'];
+                            @endphp
+                            <div>
+                                <label for="{{ $fieldId }}">{{ $field['label'] }}</label>
+                                @if($field['type'] === 'select')
+                                    <select id="{{ $fieldId }}" data-basic-field="{{ $field['name'] }}">
+                                        @foreach($field['options'] as $option)
+                                            <option value="{{ $option }}" @selected($fieldValue === $option)>{{ ucfirst($option) }}</option>
+                                        @endforeach
+                                    </select>
+                                @elseif($field['type'] === 'textarea')
+                                    <textarea id="{{ $fieldId }}"
+                                              rows="{{ $field['rows'] ?? 3 }}"
+                                              data-basic-field="{{ $field['name'] }}"
+                                              placeholder="{{ $field['placeholder'] ?? '' }}">{{ $fieldValue }}</textarea>
+                                @else
+                                    <input id="{{ $fieldId }}"
+                                           type="{{ $field['type'] }}"
+                                           data-basic-field="{{ $field['name'] }}"
+                                           value="{{ $fieldValue }}"
+                                           placeholder="{{ $field['placeholder'] ?? '' }}"
+                                           @if(isset($field['step'])) step="{{ $field['step'] }}" @endif
+                                           @if(isset($field['min'])) min="{{ $field['min'] }}" @endif>
+                                @endif
                             </div>
+                        @endforeach
+                    </div>
+                </article>
 
-                            {{-- // Renderizado de lecciones --}}
-                            <div class="lessons-wrapper" data-lessons-container>
-                                @foreach($module->lessons as $lesson)
-                                    <div class="lesson-block" data-lesson-id="{{ $lesson->id }}">
-                                        <div class="lesson-row">
-                                            <button type="button" class="module-handle lesson-handle" title="Arrastrar lección">
-                                                <i class="fas fa-grip-vertical"></i>
-                                            </button>
-                                            <input type="text" class="lesson-title" value="{{ $lesson->title }}" placeholder="Título de la lección">
-                                            <select class="lesson-type">
-                                                @foreach(['video','reading','quiz','live','file'] as $type)
-                                                    <option value="{{ $type }}" @selected($lesson->type === $type)>{{ ucfirst($type) }}</option>
-                                                @endforeach
-                                            </select>
-                                            <button type="button" class="module-delete lesson-delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                        <div class="lesson-extra mt-4 space-y-3">
-                                            <input type="text" class="lesson-video hidden w-full rounded-xl border border-gray-200 p-3"
-                                                   placeholder="URL del video" value="{{ $lesson->video_url }}">
-                                            <input type="text" class="lesson-resource hidden w-full rounded-xl border border-gray-200 p-3"
-                                                   placeholder="URL del recurso" value="{{ $lesson->resource_url }}">
-                                            <div class="lesson-editor hidden rounded-xl border border-gray-200 p-3 text-sm" contenteditable="true">{!! nl2br(e($lesson->content)) !!}</div>
-                                            <textarea class="lesson-content hidden w-full rounded-xl border border-gray-200 p-3" rows="3" placeholder="Contenido">{{ $lesson->content }}</textarea>
-                                        </div>
+                {{-- // Sección: Módulos y lecciones dinámicas --}}
+                <section class="editor-card editor-structure">
+                    <div class="modules-head">
+                        <div>
+                            <span class="editor-section-title">Estructura del curso</span>
+                            <h2 class="editor-section-heading">Organiza módulos y lecciones</h2>
+                        </div>
+                        <button type="button" id="add-module-btn" class="btn-pill">
+                            <i class="fas fa-plus"></i>
+                            <span>Agregar módulo</span>
+                        </button>
+                    </div>
+
+                    <div id="modules-canvas">
+                        @forelse($curso->modules as $module)
+                            <div class="module-card" data-module-id="{{ $module->id }}">
+                                <div class="module-top">
+                                    <div class="module-fields">
+                                        <input type="text" class="module-title" value="{{ $module->title }}" placeholder="Título del módulo">
+                                        <textarea class="module-description" placeholder="Describe el módulo (opcional)">{{ $module->description }}</textarea>
                                     </div>
-                                @endforeach
+                                    <div class="module-actions">
+                                        <button type="button" class="module-handle" title="Arrastrar módulo">
+                                            <i class="fas fa-grip-vertical"></i>
+                                        </button>
+                                        <button type="button" class="module-add-lesson">
+                                            <i class="fas fa-plus"></i>
+                                            <span>Lección</span>
+                                        </button>
+                                        <button type="button" class="module-delete" title="Eliminar módulo">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="lessons-wrapper" data-lessons-container>
+                                    @foreach($module->lessons as $lesson)
+                                        <div class="lesson-block" data-lesson-id="{{ $lesson->id }}">
+                                            <div class="lesson-row">
+                                                <button type="button" class="module-handle lesson-handle" title="Arrastrar lección">
+                                                    <i class="fas fa-grip-lines"></i>
+                                                </button>
+                                                <input type="text" class="lesson-title" value="{{ $lesson->title }}" placeholder="Título de la lección">
+                                                <select class="lesson-type">
+                                                    @foreach(['video','reading','quiz','live','file'] as $type)
+                                                        <option value="{{ $type }}" @selected($lesson->type === $type)>{{ ucfirst($type) }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="module-delete lesson-delete" title="Eliminar lección">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                            <div class="lesson-extra">
+                                                <input type="text" class="lesson-video hidden" placeholder="URL del video" value="{{ $lesson->video_url }}">
+                                                <input type="text" class="lesson-resource hidden" placeholder="URL del recurso" value="{{ $lesson->resource_url }}">
+                                                <div class="lesson-editor hidden" contenteditable="true">{{ $lesson->content }}</div>
+                                                <textarea class="lesson-content hidden" rows="3" placeholder="Contenido">{{ $lesson->content }}</textarea>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
-                    @if($curso->modules->isEmpty())
-                        <div class="empty-state">
-                            <i class="fas fa-book-open"></i>
-                            <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay módulos todavía</h3>
-                            <p class="text-gray-500 mb-6">Agrega tu primera estructura para empezar</p>
-                            <button type="button" class="btn-primary" id="add-first-module">
-                                <i class="fas fa-plus mr-2"></i>Agregar primer módulo
-                            </button>
-                        </div>
-                    @endif
-                </div>
-            </section>
+                        @empty
+                            <div class="empty-state" data-empty-state>
+                                <i class="fas fa-book-open"></i>
+                                <h3 class="panel-title">Sin módulos todavía</h3>
+                                <p class="panel-subtitle">Agrega tu primera estructura para empezar a planificar.</p>
+                                <button type="button" class="btn-pill mt-4" id="add-first-module">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Agregar primer módulo</span>
+                                </button>
+                            </div>
+                        @endforelse
+                    </div>
+                </section>
+            </div>
 
-            <aside class="editor-card space-y-8">
+            {{-- // Sección: Checklist de completado --}}
+            <aside class="editor-card editor-panel">
                 <div>
-                    <h3>Checklist de Completado</h3>
-                    <ul class="checklist mt-6" id="checklist">
+                    <h3 class="panel-title">Checklist de completado</h3>
+                    <p class="panel-subtitle">Usa esta guía para validar tu curso.</p>
+                    <ul class="checklist" id="editor-checklist">
                         <li>
                             <span class="check-dot" data-check="basics"></span>
                             <span>Información básica completa</span>
@@ -661,43 +927,42 @@
                         </li>
                     </ul>
                 </div>
-
                 <div class="tips-card">
-                    <h4 class="font-bold text-blue-900 mb-4">Consejos Rápidos</h4>
-                    <ul class="space-y-3 text-sm text-blue-800">
-                        <li class="flex items-start gap-3">
-                            <span class="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0"></span>
-                            <span>Guarda contenido clave en objetivos para que el panel admin lo lea</span>
+                    <h4 class="panel-title">Consejos rápidos</h4>
+                    <ul>
+                        <li>
+                            <span class="tips-dot"></span>
+                            <span>Describe beneficios claros en la sección de objetivos.</span>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="mt-1 h-2 w-2 rounded-full bg-amber-500 flex-shrink-0"></span>
-                            <span>Usa quizzes para bloquear el siguiente módulo y asegurar el aprendizaje</span>
+                        <li>
+                            <span class="tips-dot tips-dot--amber"></span>
+                            <span>Combina videos y lecturas para mantener el ritmo.</span>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="mt-1 h-2 w-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                            <span>Adjunta recursos en formato file para materiales descargables bonus</span>
+                        <li>
+                            <span class="tips-dot tips-dot--emerald"></span>
+                            <span>Adjunta archivos para sumar valor descargable.</span>
                         </li>
                     </ul>
                 </div>
 
-                <div class="space-y-6">
-                    <h3>Progreso del Curso</h3>
-                    <div class="space-y-4">
+                <div>
+                    <h3 class="panel-title">Progreso del curso</h3>
+                    <div class="progress-track">
                         <div>
-                            <div class="flex justify-between text-sm font-semibold text-gray-600">
+                            <div class="flex justify-between text-sm font-semibold text-slate-600">
                                 <span>Borrador</span>
                                 <span>{{ $modulesCount ? 'Completado' : 'Pendiente' }}</span>
                             </div>
-                            <div class="progress-bar">
+                            <div class="progress-track__bar">
                                 <span style="width: {{ $modulesCount ? '70%' : '30%' }}"></span>
                             </div>
                         </div>
                         <div>
-                            <div class="flex justify-between text-sm font-semibold text-gray-600">
+                            <div class="flex justify-between text-sm font-semibold text-slate-600">
                                 <span>Revisión</span>
                                 <span>{{ $curso->status === 'pendiente' ? 'Enviado' : 'Por enviar' }}</span>
                             </div>
-                            <div class="progress-bar">
+                            <div class="progress-track__bar">
                                 <span style="width: {{ $curso->status === 'pendiente' ? '80%' : '35%' }}"></span>
                             </div>
                         </div>
@@ -706,9 +971,7 @@
             </aside>
         </div>
     </div>
-    </div>
 @endsection
-
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
@@ -725,16 +988,20 @@
             const modulesCanvas = document.getElementById('modules-canvas');
             const imageInput = document.getElementById('course-image-input');
             const imagePreview = document.getElementById('course-image-preview');
+            const fileNameLabel = document.querySelector('[data-file-name]');
 
             const toast = document.getElementById('editor-toast');
+            const toastMessage = toast?.querySelector('[data-toast-message]');
             let toastTimer = null;
             const showToast = (message, variant = 'success') => {
                 if (!toast) return;
-                toast.textContent = message;
-                toast.classList.remove('hidden', 'bg-rose-500', 'bg-secondary');
-                toast.classList.add(variant === 'error' ? 'bg-rose-500' : 'bg-secondary');
+                if (toastMessage) toastMessage.textContent = message;
+                toast.classList.remove('hidden', 'editor-toast--error');
+                if (variant === 'error') {
+                    toast.classList.add('editor-toast--error');
+                }
                 if (toastTimer) clearTimeout(toastTimer);
-                toastTimer = setTimeout(() => toast?.classList.add('hidden'), 2500);
+                toastTimer = setTimeout(() => toast?.classList.add('hidden'), 2600);
             };
 
             const fetchJson = (url, options = {}) => fetch(url, Object.assign({
@@ -785,6 +1052,7 @@
                 imageInput.addEventListener('change', () => {
                     if (!imageInput.files.length) return;
                     const [file] = imageInput.files;
+                    if (fileNameLabel) fileNameLabel.textContent = file.name;
                     if (imagePreview) {
                         const tempUrl = URL.createObjectURL(file);
                         imagePreview.src = tempUrl;
@@ -810,105 +1078,89 @@
                         showToast('No se pudo actualizar la imagen', 'error');
                     }).finally(() => {
                         imageInput.value = '';
+                        if (fileNameLabel) fileNameLabel.textContent = 'JPG o PNG hasta 4 MB';
                     });
                 });
             }
-
-            const registerModuleCard = (card) => {
-                const moduleId = card.dataset.moduleId;
-                const titleInput = card.querySelector('.module-title');
-                const descInput = card.querySelector('.module-description');
-                const deleteBtn = card.querySelector('.module-delete');
-                const addLessonBtn = card.querySelector('.module-add-lesson');
-                const lessonsContainer = card.querySelector('[data-lessons-container]');
-
-                const saveModule = debounce(() => {
-                    fetchJson(`{{ url('/modules') }}/${moduleId}`, {
-                        method: 'PUT',
-                        body: JSON.stringify({
-                            title: titleInput.value,
-                            description: descInput.value
-                        })
-                    }).then(() => {
-                        updateLastSaved();
-                        showToast('Módulo actualizado');
-                    }).catch(err => {
-                        console.error(err);
-                        showToast('Error al actualizar módulo', 'error');
-                    });
-                });
-
-                titleInput.addEventListener('input', saveModule);
-                descInput.addEventListener('input', saveModule);
-
-                deleteBtn.addEventListener('click', () => {
-                    if (!confirm('¿Eliminar módulo completo?')) return;
-                    fetchJson(`{{ url('/modules') }}/${moduleId}`, { method: 'DELETE' })
-                        .then(() => {
-                            card.remove();
-                            sendReorder();
-                            refreshChecklist();
-                            showToast('Módulo eliminado');
-                        })
-                        .catch(err => {
-                            console.error(err);
-                            showToast('No se pudo eliminar', 'error');
-                        });
-                });
-
-                addLessonBtn.addEventListener('click', () => {
-                    const title = prompt('Título de la lección', 'Nueva lección');
-                    if (!title) return;
-                    fetchJson(`{{ url('/modules') }}/${moduleId}/lessons`, {
-                        method: 'POST',
-                        body: JSON.stringify({ title, type: 'video' })
-                    }).then(({ lesson }) => {
-                        const lessonBlock = buildLessonBlock(lesson);
-                        lessonsContainer.appendChild(lessonBlock);
-                        registerLessonBlock(lessonBlock);
-                        refreshChecklist();
-                        showToast('Lección creada');
-                    }).catch(err => {
-                        console.error(err);
-                        showToast('Error creando lección', 'error');
-                    });
-                });
-
-                new Sortable(lessonsContainer, {
-                    handle: '.lesson-handle',
-                    animation: 200,
-                    onStart: evt => evt.item.classList.add('is-dragging'),
-                    onEnd: evt => {
-                        evt.item.classList.remove('is-dragging');
-                        sendReorder();
-                    }
-                });
-
-                lessonsContainer.querySelectorAll('.lesson-block').forEach(registerLessonBlock);
+            const removeEmptyState = () => {
+                modulesCanvas?.querySelector('[data-empty-state]')?.remove();
             };
 
+            const emptyStateTemplate = () => `
+                <div class="empty-state" data-empty-state>
+                    <i class="fas fa-book-open"></i>
+                    <h3 class="panel-title">Sin módulos todavía</h3>
+                    <p class="panel-subtitle">Agrega tu primera estructura para empezar a planificar.</p>
+                    <button type="button" class="btn-pill mt-4" id="add-first-module">
+                        <i class="fas fa-plus"></i>
+                        <span>Agregar primer módulo</span>
+                    </button>
+                </div>
+            `;
+
+            const bindAddFirstModuleBtn = () => {
+                const addFirstModuleBtn = document.getElementById('add-first-module');
+                addFirstModuleBtn?.addEventListener('click', handleCreateModule);
+            };
+
+            const ensureEmptyState = () => {
+                if (!modulesCanvas) return;
+                const hasModules = modulesCanvas.querySelector('.module-card');
+                const hasEmptyState = modulesCanvas.querySelector('[data-empty-state]');
+                if (!hasModules && !hasEmptyState) {
+                    modulesCanvas.insertAdjacentHTML('beforeend', emptyStateTemplate());
+                    bindAddFirstModuleBtn();
+                }
+            };
+
+            const sendReorder = debounce(() => {
+                const modulesOrder = Array.from(modulesCanvas.querySelectorAll('.module-card'))
+                    .map(card => card.dataset.moduleId);
+
+                const lessonsOrder = {};
+                modulesCanvas.querySelectorAll('.module-card').forEach(card => {
+                    const moduleId = card.dataset.moduleId;
+                    const lessons = Array.from(card.querySelectorAll('.lesson-block')).map(block => block.dataset.lessonId);
+                    lessonsOrder[moduleId] = lessons;
+                });
+
+                fetchJson(orderEndpoint, {
+                    method: 'PUT',
+                    body: JSON.stringify({ modules: modulesOrder, lessons: lessonsOrder })
+                }).then(() => {
+                    updateLastSaved();
+                    showToast('Orden actualizado');
+                }).catch(err => {
+                    console.error(err);
+                    showToast('No se pudo guardar el orden', 'error');
+                });
+            }, 400);
             const buildLessonBlock = (lesson) => {
                 const template = document.createElement('div');
-                template.className = 'lesson-block rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3';
+                template.className = 'lesson-block';
                 template.dataset.lessonId = lesson.id;
                 template.innerHTML = `
                     <div class="lesson-row">
                         <button type="button" class="module-handle lesson-handle" title="Arrastrar lección">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h4m-4 6h4M5 9h.01M5 15h.01M18.99 9H19m-.01 6H19"/>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 9h4m-4 6h4M5 9h.01M5 15h.01M18.99 9H19m-.01 6H19" />
                             </svg>
                         </button>
-                        <input type="text" class="lesson-title" value="${lesson.title}">
+                        <input type="text" class="lesson-title" value="${lesson.title}" placeholder="Título de la lección">
                         <select class="lesson-type">
                             ${['video','reading','quiz','live','file'].map(type => `<option value="${type}" ${lesson.type === type ? 'selected' : ''}>${type.charAt(0).toUpperCase() + type.slice(1)}</option>`).join('')}
                         </select>
-                        <button type="button" class="module-delete lesson-delete">Eliminar</button>
+                        <button type="button" class="module-delete lesson-delete" title="Eliminar lección">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7v10m6-10v10M5 7l1-2h12l1 2M9 21h6" />
+                            </svg>
+                        </button>
                     </div>
-                    <div class="lesson-extra mt-3 space-y-2 text-sm text-slate-600">
-                        <input type="text" class="lesson-video hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del video" value="${lesson.video_url ?? ''}">
-                        <input type="text" class="lesson-resource hidden w-full rounded-2xl border border-slate-200 px-3 py-2" placeholder="URL del recurso" value="${lesson.resource_url ?? ''}">
-                        <div class="lesson-editor hidden rounded-2xl border border-slate-200 px-3 py-2 text-sm" contenteditable="true">${lesson.content ?? ''}</div>
-                        <textarea class="lesson-content hidden w-full rounded-2xl border border-slate-200 px-3 py-2" rows="3">${lesson.content ?? ''}</textarea>
+                    <div class="lesson-extra">
+                        <input type="text" class="lesson-video hidden" placeholder="URL del video" value="${lesson.video_url ?? ''}">
+                        <input type="text" class="lesson-resource hidden" placeholder="URL del recurso" value="${lesson.resource_url ?? ''}">
+                        <div class="lesson-editor hidden" contenteditable="true">${lesson.content ?? ''}</div>
+                        <textarea class="lesson-content hidden" rows="3" placeholder="Contenido">${lesson.content ?? ''}</textarea>
                     </div>
                 `;
                 return template;
@@ -974,12 +1226,88 @@
                             sendReorder();
                             refreshChecklist();
                             showToast('Lección eliminada');
-                        }).catch(console.error);
+                            ensureEmptyState();
+                        }).catch(err => {
+                            console.error(err);
+                            showToast('No se pudo eliminar la lección', 'error');
+                        });
                 });
+            };
+            const registerModuleCard = (card) => {
+                const moduleId = card.dataset.moduleId;
+                const titleInput = card.querySelector('.module-title');
+                const descInput = card.querySelector('.module-description');
+                const deleteBtn = card.querySelector('.module-delete');
+                const addLessonBtn = card.querySelector('.module-add-lesson');
+                const lessonsContainer = card.querySelector('[data-lessons-container]');
+
+                const saveModule = debounce(() => {
+                    fetchJson(`{{ url('/modules') }}/${moduleId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            title: titleInput.value,
+                            description: descInput.value
+                        })
+                    }).then(() => {
+                        updateLastSaved();
+                        showToast('Módulo actualizado');
+                    }).catch(err => {
+                        console.error(err);
+                        showToast('Error al actualizar módulo', 'error');
+                    });
+                });
+
+                titleInput.addEventListener('input', saveModule);
+                descInput.addEventListener('input', saveModule);
+
+                deleteBtn.addEventListener('click', () => {
+                    if (!confirm('¿Eliminar módulo completo?')) return;
+                    fetchJson(`{{ url('/modules') }}/${moduleId}`, { method: 'DELETE' })
+                        .then(() => {
+                            card.remove();
+                            sendReorder();
+                            refreshChecklist();
+                            ensureEmptyState();
+                            showToast('Módulo eliminado');
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            showToast('No se pudo eliminar el módulo', 'error');
+                        });
+                });
+
+                addLessonBtn.addEventListener('click', () => {
+                    const title = prompt('Título de la lección', 'Nueva lección');
+                    if (!title) return;
+                    fetchJson(`{{ url('/modules') }}/${moduleId}/lessons`, {
+                        method: 'POST',
+                        body: JSON.stringify({ title, type: 'video' })
+                    }).then(({ lesson }) => {
+                        const lessonBlock = buildLessonBlock(lesson);
+                        lessonsContainer.appendChild(lessonBlock);
+                        registerLessonBlock(lessonBlock);
+                        refreshChecklist();
+                        showToast('Lección creada');
+                    }).catch(err => {
+                        console.error(err);
+                        showToast('Error creando lección', 'error');
+                    });
+                });
+
+                new Sortable(lessonsContainer, {
+                    handle: '.lesson-handle',
+                    animation: 200,
+                    onStart: evt => evt.item.classList.add('is-dragging'),
+                    onEnd: evt => {
+                        evt.item.classList.remove('is-dragging');
+                        sendReorder();
+                    }
+                });
+
+                lessonsContainer.querySelectorAll('.lesson-block').forEach(registerLessonBlock);
             };
 
             const addModuleBtn = document.getElementById('add-module-btn');
-            const addFirstModuleBtn = document.getElementById('add-first-module');
 
             const handleCreateModule = () => {
                 const title = prompt('Nombre del módulo', 'Nuevo módulo');
@@ -988,22 +1316,29 @@
                     method: 'POST',
                     body: JSON.stringify({ title })
                 }).then(({ module }) => {
+                    removeEmptyState();
                     const wrapper = document.createElement('div');
                     wrapper.innerHTML = `
                         <div class="module-card" data-module-id="${module.id}">
                             <div class="module-top">
                                 <div class="module-fields">
-                                    <input type="text" class="module-title" value="${module.title}">
-                                    <textarea class="module-description" placeholder="Descripción del módulo (opcional)"></textarea>
+                                    <input type="text" class="module-title" value="${module.title}" placeholder="Título del módulo">
+                                    <textarea class="module-description" placeholder="Describe el módulo (opcional)"></textarea>
                                 </div>
                                 <div class="module-actions">
                                     <button type="button" class="module-handle" title="Arrastrar módulo">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 9h14M5 15h14"/>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 9h14M5 15h14" />
                                         </svg>
                                     </button>
-                                    <button type="button" class="module-add-lesson">+ Lección</button>
-                                    <button type="button" class="module-delete">Eliminar</button>
+                                    <button type="button" class="module-add-lesson">
+                                        <span>+ Lección</span>
+                                    </button>
+                                    <button type="button" class="module-delete" title="Eliminar módulo">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12M9 7v10m6-10v10M5 7l1-2h12l1 2M9 21h6" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                             <div class="lessons-wrapper" data-lessons-container></div>
@@ -1022,7 +1357,7 @@
             };
 
             addModuleBtn?.addEventListener('click', handleCreateModule);
-            addFirstModuleBtn?.addEventListener('click', handleCreateModule);
+            bindAddFirstModuleBtn();
 
             new Sortable(modulesCanvas, {
                 handle: '.module-handle',
@@ -1033,29 +1368,6 @@
                     sendReorder();
                 }
             });
-
-            const sendReorder = debounce(() => {
-                const modulesOrder = Array.from(modulesCanvas.querySelectorAll('.module-card'))
-                    .map(card => card.dataset.moduleId);
-
-                const lessonsOrder = {};
-                modulesCanvas.querySelectorAll('.module-card').forEach(card => {
-                    const moduleId = card.dataset.moduleId;
-                    const lessons = Array.from(card.querySelectorAll('.lesson-block')).map(block => block.dataset.lessonId);
-                    lessonsOrder[moduleId] = lessons;
-                });
-
-                fetchJson(orderEndpoint, {
-                    method: 'PUT',
-                    body: JSON.stringify({ modules: modulesOrder, lessons: lessonsOrder })
-                }).then(() => {
-                    updateLastSaved();
-                    showToast('Orden actualizado');
-                }).catch(err => {
-                    console.error(err);
-                    showToast('No se pudo guardar el orden', 'error');
-                });
-            }, 400);
 
             modulesCanvas.querySelectorAll('.module-card').forEach(registerModuleCard);
 
@@ -1080,6 +1392,7 @@
             };
 
             refreshChecklist();
+            ensureEmptyState();
         })();
     </script>
 @endpush

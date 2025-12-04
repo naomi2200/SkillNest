@@ -1,0 +1,174 @@
+[33mcommit df2646d1810a3d8cd21646f7170405603da2a046[m
+Author: Naomi <solanch.veliz@tecsup.edu.pe>
+Date:   Sat Nov 29 12:07:36 2025 -0500
+
+    Describe brevemente tus cambios
+
+[1mdiff --git a/app/Http/Controllers/MentoriaBookingController.php b/app/Http/Controllers/MentoriaBookingController.php[m
+[1mindex ffe866f..a72cd79 100644[m
+[1m--- a/app/Http/Controllers/MentoriaBookingController.php[m
+[1m+++ b/app/Http/Controllers/MentoriaBookingController.php[m
+[36m@@ -7,10 +7,19 @@[m
+ use Carbon\Carbon;[m
+ use Illuminate\Http\Request;[m
+ [m
+[32m+[m[32m/**[m
+[32m+[m[32m * Controlador encargado de que estudiantes agenden sesiones con mentores.[m
+[32m+[m[32m * Documenta el flujo secundario de reservas según la rúbrica Tecsup.[m
+[32m+[m[32m */[m
+ class MentoriaBookingController extends Controller[m
+ {[m
+     /**[m
+[31m-     * Crea una mentoría personalizada para un estudiante a partir de la oferta publicada del mentor.[m
+[32m+[m[32m     * Flujo Student -> Mentor:[m
+[32m+[m[32m     * Crea una mentoría personalizada reutilizando la oferta pública del mentor.[m
+[32m+[m[32m     * Validaciones aplicadas:[m
+[32m+[m[32m     *  - Fecha y hora posteriores al día actual.[m
+[32m+[m[32m     *  - Notas opcionales máximo 500 caracteres.[m
+[32m+[m[32m     * Manejo de errores: abort_unless con códigos HTTP legibles.[m
+      */[m
+     public function store(Request $request, User $mentor)[m
+     {[m
+[36m@@ -49,6 +58,7 @@[m [mpublic function store(Request $request, User $mentor)[m
+             ?? $baseAmount);[m
+         $amount = round($amount, 2);[m
+ [m
+[32m+[m[32m        // CRUD Create (flujo secundario): se clona configuracion del mentor sin exponer IDs al front.[m
+         Mentoria::create([[m
+             'mentor_id' => $mentor->id,[m
+             'estudiante_id' => $student->id,[m
+[1mdiff --git a/app/Http/Controllers/MentoriaController.php b/app/Http/Controllers/MentoriaController.php[m
+[1mindex 225a2ad..2a9a314 100644[m
+[1m--- a/app/Http/Controllers/MentoriaController.php[m
+[1m+++ b/app/Http/Controllers/MentoriaController.php[m
+[36m@@ -7,8 +7,20 @@[m
+ use Illuminate\Http\Request;[m
+ use Illuminate\Support\Facades\Log;[m
+ [m
+[32m+[m[32m/**[m
+[32m+[m[32m * Controlador de Mentorias[m
+[32m+[m[32m *[m
+[32m+[m[32m * Cobertura de la rúbrica:[m
+[32m+[m[32m * - Explica cada flujo CRUD (crear, editar, eliminar, publicar).[m
+[32m+[m[32m * - Documenta procesos secundarios (aceptar, rechazar, completar sesiones).[m
+[32m+[m[32m * - Mantiene la lógica intacta, solo añade comentarios para exposiciones Tecsup.[m
+[32m+[m[32m */[m
+ class MentoriaController extends Controller[m
+ {[m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * Muestra el formulario de creación (solo mentores).[m
+[32m+[m[32m     * // Flujo CRUD: Create - paso visual antes de MentoriaController::store.[m
+[32m+[m[32m     */[m
+     public function create(Request $request)[m
+     {[m
+         $user = $request->user();[m
+[36m@@ -17,6 +29,10 @@[m [mpublic function create(Request $request)[m
+         return view('mentorias.create');[m
+     }[m
+ [m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * Listado de mentorías (mentores/estudiantes/admin segun contexto).[m
+[32m+[m[32m     * // Read del CRUD: puede devolver JSON o Blade sin exponer IDs.[m
+[32m+[m[32m     */[m
+     public function index(Request $request)[m
+     {[m
+         $mentorias = Mentoria::with(['mentor', 'estudiante'])[m
+[36m@@ -30,7 +46,10 @@[m [mpublic function index(Request $request)[m
+     }[m
+ [m
+     /**[m
+[31m-     * CRUD: persiste una nueva mentoría creada por el mentor en estado borrador.[m
+[32m+[m[32m     * CRUD - Create:[m
+[32m+[m[32m     * Persiste la oferta del mentor en estado borrador con validaciones de servidor.[m
+[32m+[m[32m     * Validaciones aplicadas: título, especialidad, descripción, precio, duración y modalidad.[m
+[32m+[m[32m     * Manejo de excepciones: logging y mensajes amigables sin filtrar detalles sensibles.[m
+      */[m
+     public function store(Request $request)[m
+     {[m
+[36m@@ -85,6 +104,10 @@[m [mpublic function store(Request $request)[m
+         }[m
+     }[m
+ [m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * CRUD - Read:[m
+[32m+[m[32m     * Devuelve la mentoría con sus relaciones según el formato requerido (JSON o Blade).[m
+[32m+[m[32m     */[m
+     public function show(Request $request, Mentoria $mentoria)[m
+     {[m
+         $mentoria->load(['mentor', 'estudiante']);[m
+[36m@@ -94,6 +117,11 @@[m [mpublic function show(Request $request, Mentoria $mentoria)[m
+             : view('mentorias.show', compact('mentoria'));[m
+     }[m
+ [m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * Flujo secundario:[m
+[32m+[m[32m     * Autoriza a mentor/estudiante a unirse a la sesión virtual si el estado lo permite.[m
+[32m+[m[32m     * Incluye controles adicionales (ensureSessionLink + can_view_session) antes de exponer la URL.[m
+[32m+[m[32m     */[m
+     public function join(Request $request, Mentoria $mentoria)[m
+     {[m
+         $user = $request->user();[m
+[36m@@ -112,6 +140,10 @@[m [mpublic function join(Request $request, Mentoria $mentoria)[m
+         return redirect()->away($mentoria->session_link);[m
+     }[m
+ [m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * Vista edición (solo mentor propietario).[m
+[32m+[m[32m     * // Flujo CRUD: Update - expone datos amigables sin IDs.[m
+[32m+[m[32m     */[m
+     public function edit(Mentoria $mentoria)[m
+     {[m
+         $this->authorizeMentorAction($mentoria);[m
+[36m@@ -120,7 +152,9 @@[m [mpublic function edit(Mentoria $mentoria)[m
+     }[m
+ [m
+     /**[m
+[31m-     * CRUD: actualiza los campos editables de una mentoría creada por el mentor.[m
+[32m+[m[32m     * CRUD - Update:[m
+[32m+[m[32m     * Valida los campos editables del mentor (Request::validate) y aplica reglas de negocio.[m
+[32m+[m[32m     * Seguridad: se restringe a mentor propietario vía authorizeMentorAction.[m
+      */[m
+     public function update(Request $request, Mentoria $mentoria)[m
+     {[m
+[36m@@ -144,7 +178,8 @@[m [mpublic function update(Request $request, Mentoria $mentoria)[m
+     }[m
+ [m
+     /**[m
+[31m-     * CRUD: elimina una mentoría siempre que no tenga un estudiante asignado.[m
+[32m+[m[32m     * CRUD - Delete:[m
+[32m+[m[32m     * Permite eliminar solo borradores sin estudiante, evitando inconsistencias de historial.[m
+      */[m
+     public function destroy(Mentoria $mentoria)[m
+     {[m
+[36m@@ -160,7 +195,9 @@[m [mpublic function destroy(Mentoria $mentoria)[m
+     }[m
+ [m
+     /**[m
+[31m-     * Flujo mentor: acepta una solicitud pendiente para habilitar el pago.[m
+[32m+[m[32m     * Flujo mentor (proceso secundario):[m
+[32m+[m[32m     * Cambia estado a aceptada para habilitar pagos.[m
+[32m+[m[32m     * Incluye validaciones de rol y pertenencia antes de modificar la entidad.[m
+      */[m
+     public function aceptar(Request $request, Mentoria $mentoria)[m
+     {[m
+[36m@@ -184,7 +221,8 @@[m [mpublic function aceptar(Request $request, Mentoria $mentoria)[m
+     }[m
+ [m
+     /**[m
+[31m-     * Flujo mentor: rechaza la solicitud, limpia enlaces y notifica al estudiante.[m
+[32m+[m[32m     * Flujo mentor (rechazo):[m
+[32m+[m[32m     * Restablece flags de pago y elimina enlaces activos para evitar accesos no autorizados.[m
+      */[m
+     public function rechazar(Request $request, Mentoria $mentoria)[m
+     {[m
+[36m@@ -211,7 +249,8 @@[m [mpublic function rechazar(Request $request, Mentoria $mentoria)[m
+     }[m
+ [m
+     /**[m
+[31m-     * Flujo mentor: marca una sesión pagada/confirmada como completada y registra el pago interno.[m
+[32m+[m[32m     * Flujo mentor (post-pago):[m
+[32m+[m[32m     * Marca la sesión como completada y registra el reparto económico en PaymentLog.[m
+      */[m
+     public function completar(Request $request, Mentoria $mentoria)[m
+     {[m
+[36m@@ -244,13 +283,15 @@[m [mpublic function completar(Request $request, Mentoria $mentoria)

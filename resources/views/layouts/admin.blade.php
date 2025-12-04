@@ -1,351 +1,219 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Panel Administrativo') · SkillNest</title>
+﻿@extends('layouts.app')
+
+@php
+    use Illuminate\Support\Facades\Route;
+
+    $admin = auth()->user();
+    $isCoursesRoute = request()->routeIs('admin.courses.*');
+    $coursesView = $isCoursesRoute && request()->routeIs('admin.courses.index')
+        ? request()->query('view', 'solicitudes')
+        : 'tabla';
+    $navLinks = [
+        [
+            'label' => 'Resumen',
+            'icon' => 'fa-solid fa-chart-pie',
+            'url' => route('admin.dashboard'),
+            'active' => request()->routeIs('admin.dashboard'),
+        ],
+        [
+            'label' => 'Solicitudes',
+            'icon' => 'fa-solid fa-folder-open',
+            'url' => route('admin.courses.index', ['view' => 'solicitudes', 'status' => 'pendiente']),
+            'active' => request()->routeIs('admin.courses.index') && $coursesView === 'solicitudes',
+        ],
+        [
+            'label' => 'Cursos',
+            'icon' => 'fa-solid fa-book',
+            'url' => route('admin.courses.index', ['view' => 'tabla', 'status' => request()->query('status', 'pendiente')]),
+            'active' => $isCoursesRoute && (!request()->routeIs('admin.courses.index') || $coursesView !== 'solicitudes'),
+        ],
+    ];
+@endphp
+
+@push('styles')
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #7c3aed;
+            --primary-2: #8b5cf6;
         }
 
-        :root {
-            --color-primary: #6c47ff;
-            --color-primary-hover: #5a38e6;
-        }
+        .app-main { padding: 0; background: transparent; }
+        .app-container { max-width: none; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7ff 0%, #fef9f4 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(124,58,237,0.08), transparent 35%),
+                        radial-gradient(circle at 80% 0%, rgba(124,58,237,0.06), transparent 30%),
+                        #f4f3ff;
             min-height: 100vh;
-            color: #1f2937;
-            position: relative;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(108, 71, 255, 0.12) 0%, transparent 55%),
-                radial-gradient(circle at 80% 80%, rgba(14,165,233,0.12) 0%, transparent 55%),
-                radial-gradient(circle at 40% 20%, rgba(248,113,113,0.12) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
+            color: #111827;
         }
 
         .admin-shell {
             display: flex;
-            min-height: 100vh;
-            position: relative;
-            z-index: 1;
+            gap: 32px;
+            min-height: calc(100vh - 96px);
+            padding: clamp(24px, 3vw, 48px);
+            align-items: stretch;
+            width: 100%;
         }
 
-        aside {
-            width: 270px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(226,232,240,0.6);
-            padding: 32px 0;
-            height: 100vh;
+        .admin-sidebar {
             position: sticky;
-            top: 0;
-            overflow-y: auto;
-            box-shadow: 10px 0 40px rgba(15,23,42,0.08);
-        }
-
-        .sidebar-logo {
-            padding: 0 24px 32px;
-            border-bottom: 1px solid rgba(108, 71, 255, 0.1);
-            margin-bottom: 32px;
-        }
-
-        .sidebar-logo h2 {
-            font-size: 30px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--color-primary) 0%, #8b5cf6 50%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.02em;
-        }
-
-        .sidebar-logo p {
-            font-size: 11px;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-top: 8px;
-            font-weight: 600;
-        }
-
-        nav {
-            padding: 0 16px;
-        }
-
-        nav a {
+            top: clamp(96px, 12vh, 128px);
+            align-self: flex-start;
+            width: 260px;
+            border-radius: 32px;
+            background: linear-gradient(180deg, #ede9fe 0%, #ddd6fe 100%);
+            border: 1px solid rgba(124,58,237,0.15);
+            box-shadow: 0 20px 60px rgba(124,58,237,0.18);
+            padding: 32px 24px;
             display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 18px;
-            margin-bottom: 6px;
-            border-radius: 16px;
-            text-decoration: none;
-            color: #475569;
-            font-weight: 500;
-            font-size: 15px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        nav a::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(108, 71, 255, 0.12), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s ease;
-        }
-
-        nav a:hover::before {
-            transform: translateX(100%);
-        }
-
-        nav a:hover {
-            background: linear-gradient(135deg, rgba(108, 71, 255, 0.08), rgba(14,165,233,0.08));
-            color: var(--color-primary);
-            transform: translateX(6px);
-            box-shadow: 0 6px 18px rgba(108, 71, 255, 0.15);
-        }
-
-        nav a.active {
-            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 8px 24px rgba(108, 71, 255, 0.35);
-        }
-
-        .nav-icon {
-            width: 24px;
-            text-align: center;
-        }
-
-        .main-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: vertical;
             flex-direction: column;
-            min-height: 100vh;
+            max-height: calc(100vh - 64px);
+            overflow-y: auto;
         }
-
-        header {
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(226,232,240,0.6);
-            padding: 28px 48px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 12px 30px rgba(15,23,42,0.08);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-title {
-            position: relative;
-            padding-left: 20px;
-        }
-
-        .header-title::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: -8px;
-            width: 4px;
-            height: calc(100% + 16px);
-            background: linear-gradient(180deg, var(--color-primary), #8b5cf6);
-            border-radius: 2px;
-            box-shadow: 0 0 12px rgba(108, 71, 255, 0.5);
-        }
-
-        .header-title h1 {
-            font-size: 30px;
+        .admin-brand h2 {
+            font-size: 26px;
             font-weight: 900;
-            background: linear-gradient(135deg, #1f2937, #4b5563);
+            margin: 6px 0 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.02em;
         }
-
-        .header-title p {
-            font-size: 13px;
-            letter-spacing: 0.08em;
-            color: #9ca3af;
+        .admin-brand p {
+            font-size: 11px;
+            letter-spacing: 0.25em;
             text-transform: uppercase;
-            margin-top: 6px;
+            color: #a1a1aa;
         }
-
-        .header-user {
+        .admin-nav {
+            margin-top: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .admin-nav-link {
             display: flex;
             align-items: center;
-            gap: 20px;
-            padding: 12px 20px;
-            background: rgba(108, 71, 255, 0.05);
-            border-radius: 20px;
-            border: 1px solid rgba(108, 71, 255, 0.1);
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #3f3f46;
+            text-decoration: none;
+            transition: all 0.25s ease;
         }
-
-        .header-user .user-info {
-            text-align: right;
-        }
-
-        .header-user .user-info p:first-child {
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .header-user .user-info p:last-child {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-
-        .user-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-            color: #fff;
-            font-weight: 800;
-            display: flex;
+        .admin-nav-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: rgba(124,58,237,0.12);
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid #fff;
-            box-shadow: 0 8px 24px rgba(108, 71, 255, 0.35);
-            position: relative;
+            color: var(--primary);
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        .admin-nav-link:hover {
+            background: rgba(124,58,237,0.12);
+            color: var(--primary);
+        }
+        .admin-nav-link:hover .admin-nav-icon {
+            background: rgba(124,58,237,0.2);
+        }
+        .admin-nav-link.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            color: #fff;
+            box-shadow: 0 10px 25px rgba(124,58,237,0.25);
+        }
+        .admin-nav-link.active .admin-nav-icon {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
         }
 
-        .user-avatar::after {
-            content: "";
-            position: absolute;
-            right: 4px;
-            bottom: 4px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #10b981;
-            border: 2px solid #fff;
-        }
-
-        main {
+        .admin-main {
             flex: 1;
-            padding: 48px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(245,247,255,0.85));
-            backdrop-filter: blur(8px);
-        }
-        .admin-content {
-            max-width: 1400px;
-            margin: 0 auto;
+            border-radius: 32px;
+            background: #fff;
+            border: 1px solid rgba(124,58,237,0.12);
+            box-shadow: 0 30px 60px rgba(124,58,237,0.12);
+            padding: 40px;
+            backdrop-filter: blur(12px);
+            min-height: calc(100vh - 96px);
             display: flex;
             flex-direction: column;
-            gap: 32px;
         }
-        .admin-card {
-            background: #fff;
-            border-radius: 28px;
-            padding: 28px;
-            border: 1px solid rgba(226,232,240,0.8);
-            box-shadow: 0 20px 45px rgba(15,23,42,0.08);
+        .admin-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(15,23,42,0.08);
+            margin-bottom: 32px;
         }
-        .admin-grid {
-            display: grid;
-            gap: 24px;
-        }
-        .admin-grid.two {
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        }
-        .admin-grid.three {
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        }
+        .admin-header h1 { font-size: 32px; font-weight: 900; color: #1f2937; }
+        .admin-header p { font-size: 14px; color: #6b7280; }
+        .admin-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
-        @media (max-width: 1024px) {
-            aside {
-                display: none;
-            }
+        .admin-content { display: flex; flex-direction: column; gap: 24px; }
+        .admin-content > * { width: 100%; }
 
-            main,
-            header {
-                padding: 24px;
-            }
-            .admin-content {
-                gap: 20px;
-            }
+        @media (max-width: 1200px) {
+            .admin-shell { flex-direction: column; }
+            .admin-sidebar { width: 100%; position: relative; top: 0; max-height: none; }
+            .admin-main { min-height: auto; }
+        }
+        @media (max-width: 640px) {
+            .admin-shell { padding: 20px; }
+            .admin-main { padding: 28px 20px; }
         }
     </style>
-</head>
-<body>
+@endpush
+
+@section('content')
     <div class="admin-shell">
-        <aside>
-            <div class="sidebar-logo">
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <p>Admin panel</p>
                 <h2>SkillNest</h2>
-                <p>Admin Panel</p>
             </div>
-            <nav>
-                <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <span class="nav-icon">📊</span>
-                    Dashboard
-                </a>
-                <a href="{{ route('admin.courses.index') }}" class="{{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
-                    <span class="nav-icon">📚</span>
-                    Cursos
-                </a>
-                <a href="#">
-                    <span class="nav-icon">👥</span>
-                    Usuarios
-                </a>
-                <a href="#">
-                    <span class="nav-icon">💰</span>
-                    Ventas
-                </a>
-                <a href="#">
-                    <span class="nav-icon">📈</span>
-                    Reportes
-                </a>
-                <a href="#">
-                    <span class="nav-icon">⚙️</span>
-                    Configuración
-                </a>
+            <nav class="admin-nav">
+                @foreach($navLinks as $link)
+                    <a href="{{ $link['url'] }}" class="admin-nav-link {{ $link['active'] ? 'active' : '' }}">
+                        <span class="admin-nav-icon" aria-hidden="true">
+                            <i class="{{ $link['icon'] }}"></i>
+                        </span>
+                        <span>{{ $link['label'] }}</span>
+                    </a>
+                @endforeach
             </nav>
+            <div style="margin-top:auto; font-size:12px; color:#6b7280;">
+                <p style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">Sesión</p>
+                <p style="font-weight:700; color:#111827;">{{ $admin->name ?? 'Administrador' }}</p>
+                <p>{{ $admin->email ?? 'admin@skillnest.com' }}</p>
+            </div>
         </aside>
-        <div class="main-wrapper">
-            <header>
-                <div class="header-content">
-                    <div class="header-title">
-                        <h1>@yield('header-title', 'Panel Administrativo')</h1>
-                        <p>@yield('header-subtitle', 'Monitorea la actividad general de SkillNest')</p>
-                    </div>
-                    <div class="header-user">
-                        <div class="user-info">
-                            <p>{{ auth()->user()->name ?? 'Administrador' }}</p>
-                            <p>{{ auth()->user()->email ?? 'admin@skillnest.com' }}</p>
-                        </div>
-                        <div class="user-avatar">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
-                        </div>
-                    </div>
+
+        <div class="admin-main">
+            <div class="admin-header">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Panel administrador</p>
+                    <h1>@yield('admin-title', 'Panel administrativo')</h1>
+                    <p>@yield('admin-subtitle', 'Monitorea la actividad global')</p>
                 </div>
-            </header>
-            <main>
-                <div class="admin-content">
-                    @yield('content')
+                <div class="admin-actions">
+                    @yield('admin-actions')
                 </div>
-            </main>
+            </div>
+
+            <div class="admin-content">
+                @yield('admin-content')
+            </div>
         </div>
     </div>
-</body>
-</html>
+@endsection

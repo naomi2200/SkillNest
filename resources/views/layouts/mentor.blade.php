@@ -7,37 +7,37 @@
     $navLinks = [
         [
             'label' => 'Dashboard',
-            'icon' => '🎓',
-            'url' => Route::has('dashboard') ? route('dashboard') : '#',
+            'icon' => 'fa-solid fa-gauge-high',
+            'url' => (Route::has('dashboard') ? route('dashboard') : '#'),
             'active' => request()->routeIs('dashboard'),
         ],
         [
             'label' => 'Mis cursos',
-            'icon' => '📚',
+            'icon' => 'fa-solid fa-book-open',
             'url' => route('mentor.courses'),
             'active' => request()->routeIs('mentor.courses'),
         ],
         [
             'label' => 'Crear curso',
-            'icon' => '➕',
+            'icon' => 'fa-solid fa-circle-plus',
             'url' => route('mentor.courses.create'),
             'active' => request()->routeIs('mentor.courses.create'),
         ],
         [
-            'label' => 'Mis mentorías',
-            'icon' => '👥',
+            'label' => 'Mis mentor?as',
+            'icon' => 'fa-solid fa-chalkboard-user',
             'url' => route('mentor.mentorias.index'),
             'active' => request()->routeIs('mentor.mentorias.*'),
         ],
         [
-            'label' => 'Crear mentoría',
-            'icon' => '✨',
+            'label' => 'Crear mentor?a',
+            'icon' => 'fa-solid fa-user-plus',
             'url' => route('mentorias.create'),
             'active' => request()->routeIs('mentorias.create'),
         ],
         [
             'label' => 'Mi perfil',
-            'icon' => '👤',
+            'icon' => 'fa-solid fa-user-circle',
             'url' => route('mentor.profile'),
             'active' => request()->routeIs('mentor.profile'),
         ],
@@ -119,18 +119,33 @@
             text-decoration: none;
             transition: all 0.25s ease;
         }
-        .mentor-nav-link span:first-child {
-            width: 20px;
-            text-align: center;
+        .mentor-nav-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: rgba(124,58,237,0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 16px;
+            transition: all 0.2s ease;
         }
         .mentor-nav-link:hover {
             background: rgba(124,58,237,0.12);
             color: var(--primary);
         }
+        .mentor-nav-link:hover .mentor-nav-icon {
+            background: rgba(124,58,237,0.2);
+        }
         .mentor-nav-link.active {
             background: linear-gradient(135deg, var(--primary), var(--primary-2));
             color: #fff;
             box-shadow: 0 10px 25px rgba(124,58,237,0.25);
+        }
+        .mentor-nav-link.active .mentor-nav-icon {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
         }
 
         .mentor-main {
@@ -147,17 +162,22 @@
         }
         .mentor-header {
             display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 18px;
             padding-bottom: 24px;
             border-bottom: 1px solid rgba(15,23,42,0.08);
             margin-bottom: 32px;
         }
         .mentor-header h1 { font-size: 32px; font-weight: 900; color: #1f2937; }
         .mentor-header p { font-size: 14px; color: #6b7280; }
-        .mentor-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .mentor-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
 
         .mentor-content { display: flex; flex-direction: column; gap: 24px; }
         .mentor-content > * { width: 100%; }
@@ -226,7 +246,9 @@
             <nav class="mentor-nav">
                 @foreach($navLinks as $link)
                     <a href="{{ $link['url'] }}" class="mentor-nav-link {{ $link['active'] ? 'active' : '' }}">
-                        <span>{{ $link['icon'] }}</span>
+                        <span class="mentor-nav-icon" aria-hidden="true">
+                            <i class="{{ $link['icon'] }}"></i>
+                        </span>
                         <span>{{ $link['label'] }}</span>
                     </a>
                 @endforeach
