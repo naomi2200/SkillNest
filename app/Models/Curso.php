@@ -22,6 +22,7 @@ class Curso extends Model
         'category',
         'image_url',
         'status',
+        'review_status',
         'rejection_reason',
         'objectives',
         'requirements',

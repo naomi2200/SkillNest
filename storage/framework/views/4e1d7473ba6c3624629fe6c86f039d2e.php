@@ -1,43 +1,31 @@
 <?php
     use Illuminate\Support\Facades\Route;
 
-    $mentor = auth()->user();
+    $student = auth()->user();
     $navLinks = [
         [
             'label' => 'Dashboard',
             'icon' => 'fa-solid fa-gauge-high',
-            'url' => (Route::has('dashboard') ? route('dashboard') : '#'),
-            'active' => request()->routeIs('dashboard'),
+            'url' => route('student.dashboard'),
+            'active' => request()->routeIs('student.dashboard'),
         ],
         [
             'label' => 'Mis cursos',
             'icon' => 'fa-solid fa-book-open',
-            'url' => route('mentor.courses'),
-            'active' => request()->routeIs('mentor.courses'),
+            'url' => route('student.courses'),
+            'active' => request()->routeIs('student.courses'),
         ],
         [
-            'label' => 'Crear curso',
-            'icon' => 'fa-solid fa-circle-plus',
-            'url' => route('mentor.courses.create'),
-            'active' => request()->routeIs('mentor.courses.create'),
-        ],
-        [
-            'label' => 'Mis mentor?as',
+            'label' => 'Mis mentorías',
             'icon' => 'fa-solid fa-chalkboard-user',
-            'url' => route('mentor.mentorias.index'),
-            'active' => request()->routeIs('mentor.mentorias.*'),
-        ],
-        [
-            'label' => 'Crear mentor?a',
-            'icon' => 'fa-solid fa-user-plus',
-            'url' => route('mentorias.create'),
-            'active' => request()->routeIs('mentorias.create'),
+            'url' => route('student.mentorias'),
+            'active' => request()->routeIs('student.mentorias'),
         ],
         [
             'label' => 'Mi perfil',
-            'icon' => 'fa-solid fa-user-circle',
-            'url' => route('mentor.profile'),
-            'active' => request()->routeIs('mentor.profile'),
+            'icon' => 'fa-solid fa-user',
+            'url' => route('student.profile'),
+            'active' => request()->routeIs('student.profile'),
         ],
     ];
 ?>
@@ -47,6 +35,7 @@
         :root {
             --primary: #7c3aed;
             --primary-2: #8b5cf6;
+            --primary-3: #6d28d9;
         }
 
         .app-main { padding: 0; background: transparent; }
@@ -61,7 +50,7 @@
             color: #111827;
         }
 
-        .mentor-shell {
+        .student-shell {
             display: flex;
             gap: 32px;
             min-height: calc(100vh - 96px);
@@ -70,7 +59,7 @@
             width: 100%;
         }
 
-        .mentor-sidebar {
+        .student-sidebar {
             position: sticky;
             top: clamp(96px, 12vh, 128px);
             align-self: flex-start;
@@ -85,7 +74,7 @@
             max-height: calc(100vh - 64px);
             overflow-y: auto;
         }
-        .mentor-brand h2 {
+        .student-brand h2 {
             font-size: 26px;
             font-weight: 900;
             margin: 6px 0 0;
@@ -93,19 +82,19 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .mentor-brand p {
+        .student-brand p {
             font-size: 11px;
             letter-spacing: 0.25em;
             text-transform: uppercase;
             color: #a1a1aa;
         }
-        .mentor-nav {
+        .student-nav {
             margin-top: 28px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        .mentor-nav-link {
+        .student-nav-link {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -117,7 +106,7 @@
             text-decoration: none;
             transition: all 0.25s ease;
         }
-        .mentor-nav-icon {
+        .student-nav-icon {
             width: 38px;
             height: 38px;
             border-radius: 14px;
@@ -129,24 +118,24 @@
             font-size: 16px;
             transition: all 0.2s ease;
         }
-        .mentor-nav-link:hover {
+        .student-nav-link:hover {
             background: rgba(124,58,237,0.12);
             color: var(--primary);
         }
-        .mentor-nav-link:hover .mentor-nav-icon {
+        .student-nav-link:hover .student-nav-icon {
             background: rgba(124,58,237,0.2);
         }
-        .mentor-nav-link.active {
+        .student-nav-link.active {
             background: linear-gradient(135deg, var(--primary), var(--primary-2));
             color: #fff;
             box-shadow: 0 10px 25px rgba(124,58,237,0.25);
         }
-        .mentor-nav-link.active .mentor-nav-icon {
+        .student-nav-link.active .student-nav-icon {
             background: rgba(255,255,255,0.25);
             color: #fff;
         }
 
-        .mentor-main {
+        .student-main {
             flex: 1;
             border-radius: 32px;
             background: #fff;
@@ -158,93 +147,77 @@
             display: flex;
             flex-direction: column;
         }
-        .mentor-header {
+        .student-header {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-            gap: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
             padding-bottom: 24px;
             border-bottom: 1px solid rgba(15,23,42,0.08);
             margin-bottom: 32px;
         }
-        .mentor-header h1 { font-size: 32px; font-weight: 900; color: #1f2937; }
-        .mentor-header p { font-size: 14px; color: #6b7280; }
-        .mentor-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            width: 100%;
+        .student-header h1 { font-size: 32px; font-weight: 900; color: #1f2937; }
+        .student-header p { font-size: 14px; color: #6b7280; }
+        .student-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .student-content { display: flex; flex-direction: column; gap: 24px; }
+        .student-content > * { width: 100%; }
+
+        /* Estadísticas y tarjetas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            align-items: start;
         }
-
-        .mentor-content { display: flex; flex-direction: column; gap: 24px; }
-        .mentor-content > * { width: 100%; }
-
-        /* Cards and table styling aligned with student */
-        .mentor-card {
-            border-radius: 24px;
-            border: 1px solid rgba(124,58,237,0.12);
+        .stat-card {
             background: #fff;
-            padding: 28px;
-            box-shadow: 0 16px 40px rgba(124,58,237,0.08);
+            border-radius: 22px;
+            padding: 24px;
+            border: 1px solid rgba(124,58,237,0.12);
+            box-shadow: 0 10px 30px rgba(124,58,237,0.12);
+            transition: all 0.25s ease;
         }
-        .mentor-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 18px 32px rgba(124,58,237,0.2); }
+        .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: #94a3b8; font-weight: 600; }
+        .stat-value {
+            font-size: 36px;
+            font-weight: 900;
+            margin-top: 8px;
+            color: var(--primary);
         }
-        .mentor-table thead {
-            background: #f8fafc;
-            color: #7c7f98;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-        }
-        .mentor-table th,
-        .mentor-table td {
-            padding: 14px;
-            border-bottom: 1px solid rgba(226,232,240,0.8);
-            text-align: left;
-        }
-        .mentor-table tbody tr:hover { background: rgba(124,58,237,0.05); }
+        .stat-description { font-size: 13px; color: #6b7280; margin-top: 8px; }
 
-        .mentor-badge {
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        .badge-draft {background: rgba(148,163,184,0.2); color: #475569;}
-        .badge-pending {background: rgba(251,191,36,0.2); color: #b45309;}
-        .badge-approved {background: rgba(16,185,129,0.2); color: #047857;}
-        .badge-rejected {background: rgba(248,113,113,0.2); color: #b91c1c;}
+        .content-card { background: #fff; border-radius: 26px; padding: 28px; border: 1px solid rgba(226,232,240,0.8); box-shadow: 0 12px 30px rgba(124,58,237,0.08); }
+        .content-card h2 { font-size: 20px; font-weight: 800; color: #1f2937; margin-bottom: 16px; }
+        .empty-state { text-align: center; padding: 40px 20px; }
+        .empty-icon { font-size: 56px; margin-bottom: 12px; }
+        .empty-text { color: #6b7280; font-size: 14px; }
 
         @media (max-width: 1200px) {
-            .mentor-shell { flex-direction: column; }
-            .mentor-sidebar { width: 100%; position: relative; top: 0; max-height: none; }
-            .mentor-main { min-height: auto; }
+            .student-shell { flex-direction: column; }
+            .student-sidebar { width: 100%; position: relative; top: 0; max-height: none; }
+            .student-main { min-height: auto; }
         }
         @media (max-width: 640px) {
-            .mentor-shell { padding: 20px; }
-            .mentor-main { padding: 28px 20px; }
+            .student-shell { padding: 20px; }
+            .student-main { padding: 28px 20px; }
         }
     </style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
-    <div class="mentor-shell">
-        <aside class="mentor-sidebar">
-            <div class="mentor-brand">
-                <p>Mentor panel</p>
+    <div class="student-shell">
+        <aside class="student-sidebar">
+            <div class="student-brand">
+                <p>Student panel</p>
                 <h2>SkillNest</h2>
             </div>
-            <nav class="mentor-nav">
+            <nav class="student-nav">
                 <?php $__currentLoopData = $navLinks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $link): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <a href="<?php echo e($link['url']); ?>" class="mentor-nav-link <?php echo e($link['active'] ? 'active' : ''); ?>">
-                        <span class="mentor-nav-icon" aria-hidden="true">
+                    <a href="<?php echo e($link['url']); ?>" class="student-nav-link <?php echo e($link['active'] ? 'active' : ''); ?>">
+                        <span class="student-nav-icon" aria-hidden="true">
                             <i class="<?php echo e($link['icon']); ?>"></i>
                         </span>
                         <span><?php echo e($link['label']); ?></span>
@@ -253,28 +226,34 @@
             </nav>
             <div style="margin-top:auto; font-size:12px; color:#6b7280;">
                 <p style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">Sesión</p>
-                <p style="font-weight:700; color:#111827;"><?php echo e($mentor->name); ?></p>
-                <p><?php echo e($mentor->email); ?></p>
+                <p style="font-weight:700; color:#111827;"><?php echo e($student->name); ?></p>
+                <p><?php echo e($student->email); ?></p>
             </div>
         </aside>
 
-        <div class="mentor-main">
-            <div class="mentor-header">
+        <div class="student-main">
+            <div class="student-header">
                 <div>
-                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Panel mentor</p>
-                    <h1><?php echo $__env->yieldContent('mentor-title', 'Mi panel de mentor'); ?></h1>
-                    <p><?php echo $__env->yieldContent('mentor-subtitle', 'Gestiona tus cursos y mentorías'); ?></p>
+                    <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Panel estudiante</p>
+                    <h1><?php echo $__env->yieldContent('student-title', 'Panel del estudiante'); ?></h1>
+                    <p><?php echo $__env->yieldContent('student-subtitle', 'Revisa tus cursos y mentorías'); ?></p>
                 </div>
-                <div class="mentor-actions">
-                    <?php echo $__env->yieldContent('mentor-actions'); ?>
+                <div class="student-actions">
+                    <?php echo $__env->yieldContent('student-actions'); ?>
                 </div>
             </div>
 
-            <div class="mentor-content">
-                <?php echo $__env->yieldContent('mentor-content'); ?>
+            <div class="student-content">
+                <?php if (! empty(trim($__env->yieldContent('student-widgets')))): ?>
+                    <div class="stats-grid">
+                        <?php echo $__env->yieldContent('student-widgets'); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php echo $__env->yieldContent('student-content'); ?>
             </div>
         </div>
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/layouts/mentor.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/layouts/student.blade.php ENDPATH**/ ?>

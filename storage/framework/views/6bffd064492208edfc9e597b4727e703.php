@@ -182,4 +182,4 @@
         </div>
     </div>
 </footer>
-<?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/partials/footer.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/partials/footer.blade.php ENDPATH**/ ?>

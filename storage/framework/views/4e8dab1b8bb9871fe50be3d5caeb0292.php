@@ -1,10 +1,10 @@
-﻿@extends('layouts.dashboard')
+﻿
 
-{{-- // Vista adaptada al diseño oficial de SkillNest --}}
 
-@section('dashboard-title', 'Editor de curso')
 
-@push('styles')
+<?php $__env->startSection('dashboard-title', 'Editor de curso'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
 .dashboard-sidebar h2,
 .dashboard-sidebar .sidebar-title {
@@ -955,16 +955,16 @@
             }
         }
     </style>
-@endpush
-@section('dashboard-actions')
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->startSection('dashboard-actions'); ?>
+<?php $__env->stopSection(); ?>
 
-@php
+<?php
     $modulesCount = $curso->modules->count();
     $lessonsCount = $curso->modules->sum(fn($module) => $module->lessons->count());
-@endphp
+?>
 
-@php
+<?php
     $initialImage = $curso->image_url
         ? (\Illuminate\Support\Str::startsWith($curso->image_url, ['http://', 'https://'])
             ? $curso->image_url
@@ -980,9 +980,9 @@
         ['name' => 'objectives', 'label' => 'Objetivos de aprendizaje', 'type' => 'textarea', 'rows' => 3],
         ['name' => 'requirements', 'label' => 'Requisitos', 'type' => 'textarea', 'rows' => 3],
     ];
-@endphp
+?>
 
-@php
+<?php
     $courseDetail = [
         'title' => $curso->titulo ?? $curso->title ?? 'Curso sin título',
         'category' => data_get($curso, 'categoria.nombre') ?? $curso->category ?? 'General',
@@ -1005,9 +1005,9 @@
         'requirements' => $courseDetail['requirements'],
     ];
 
-@endphp
+?>
 
-@section('dashboard-content')
+<?php $__env->startSection('dashboard-content'); ?>
     <div class="editor-shell">
         <div id="editor-toast" class="editor-toast hidden" role="status" aria-live="polite">
             <i class="fas fa-check-circle"></i>
@@ -1020,43 +1020,43 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="status-pill">
                         <i class="fas fa-pencil-alt"></i>
-                        <span class="capitalize" id="course-status">{{ $curso->status }}</span>
+                        <span class="capitalize" id="course-status"><?php echo e($curso->status); ?></span>
                     </span>
                     <span class="stat-meta" id="last-saved-indicator">Último guardado hace instantes</span>
                 </div>
             </article>
             <article class="stat-card">
                 <span class="stat-label">Módulos</span>
-                <span class="stat-value">{{ $modulesCount }}</span>
+                <span class="stat-value"><?php echo e($modulesCount); ?></span>
                 <p class="stat-meta">Estructuras creadas</p>
             </article>
             <article class="stat-card">
                 <span class="stat-label">Lecciones</span>
-                <span class="stat-value">{{ $lessonsCount }}</span>
+                <span class="stat-value"><?php echo e($lessonsCount); ?></span>
                 <p class="stat-meta">Bloques de contenido</p>
             </article>
         </div>
 
-        {{-- // Mantiene compatibilidad con scripts originales --}}
+        
         <div id="course-editor"
-             data-course-id="{{ $curso->id }}"
-             data-basics-endpoint="{{ route('cursos.update-basics', $curso) }}"
-             data-order-endpoint="{{ route('cursos.order', $curso) }}"
-             data-fullsave-endpoint="{{ route('cursos.full-save', $curso) }}"
-             data-image-endpoint="{{ route('cursos.update-image', $curso) }}"
+             data-course-id="<?php echo e($curso->id); ?>"
+             data-basics-endpoint="<?php echo e(route('cursos.update-basics', $curso)); ?>"
+             data-order-endpoint="<?php echo e(route('cursos.order', $curso)); ?>"
+             data-fullsave-endpoint="<?php echo e(route('cursos.full-save', $curso)); ?>"
+             data-image-endpoint="<?php echo e(route('cursos.update-image', $curso)); ?>"
              class="editor-grid">
             <div class="editor-main-column">
-                {{-- // Sección: Información del curso --}}
+                
                 <article class="editor-card editor-panel form-stack course-basics-card">
                     <div>
                         <span class="editor-section-title">Base del curso</span>
                         <h2 class="editor-section-heading">Portada e información clave</h2>
-                        <p class="course-meta">Curso: <strong>{{ $courseDetail['title'] }}</strong></p>
-                        <p class="course-meta">Categoría actual: <strong>{{ $courseDetail['category'] }}</strong></p>
-                        <p class="course-meta">Nivel: <strong>{{ ucfirst($courseDetail['level']) }}</strong></p>
+                        <p class="course-meta">Curso: <strong><?php echo e($courseDetail['title']); ?></strong></p>
+                        <p class="course-meta">Categoría actual: <strong><?php echo e($courseDetail['category']); ?></strong></p>
+                        <p class="course-meta">Nivel: <strong><?php echo e(ucfirst($courseDetail['level'])); ?></strong></p>
                     </div>
                     <div class="cover-picker">
-                        <img id="course-image-preview" src="{{ $initialImage }}" alt="Imagen del curso">
+                        <img id="course-image-preview" src="<?php echo e($initialImage); ?>" alt="Imagen del curso">
                         <span class="cover-badge">Portada</span>
                     </div>
                     <input type="file" accept="image/*" id="course-image-input" class="sr-only">
@@ -1070,39 +1070,39 @@
                     <p class="hint-text">Formatos permitidos: JPG o PNG (máx. 4 MB)</p>
 
                     <div class="basic-fields">
-                        @foreach($basicFields as $field)
-                            @php
+                        <?php $__currentLoopData = $basicFields; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $field): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $fieldValue = old($field['name'], $courseFieldMap[$field['name']] ?? ($curso->{$field['name']} ?? ''));
                                 $fieldId = 'field-' . $field['name'];
-                            @endphp
+                            ?>
                             <div>
-                                <label for="{{ $fieldId }}">{{ $field['label'] }}</label>
-                                @if($field['type'] === 'select')
-                                    <select id="{{ $fieldId }}" data-basic-field="{{ $field['name'] }}">
-                                        @foreach($field['options'] as $option)
-                                            <option value="{{ $option }}" @selected($fieldValue === $option)>{{ ucfirst($option) }}</option>
-                                        @endforeach
+                                <label for="<?php echo e($fieldId); ?>"><?php echo e($field['label']); ?></label>
+                                <?php if($field['type'] === 'select'): ?>
+                                    <select id="<?php echo e($fieldId); ?>" data-basic-field="<?php echo e($field['name']); ?>">
+                                        <?php $__currentLoopData = $field['options']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($option); ?>" <?php if($fieldValue === $option): echo 'selected'; endif; ?>><?php echo e(ucfirst($option)); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
-                                @elseif($field['type'] === 'textarea')
-                                    <textarea id="{{ $fieldId }}"
-                                              rows="{{ $field['rows'] ?? 3 }}"
-                                              data-basic-field="{{ $field['name'] }}"
-                                              placeholder="{{ $field['placeholder'] ?? '' }}">{{ $fieldValue }}</textarea>
-                                @else
-                                    <input id="{{ $fieldId }}"
-                                           type="{{ $field['type'] }}"
-                                           data-basic-field="{{ $field['name'] }}"
-                                           value="{{ $fieldValue }}"
-                                           placeholder="{{ $field['placeholder'] ?? '' }}"
-                                           @if(isset($field['step'])) step="{{ $field['step'] }}" @endif
-                                           @if(isset($field['min'])) min="{{ $field['min'] }}" @endif>
-                                @endif
+                                <?php elseif($field['type'] === 'textarea'): ?>
+                                    <textarea id="<?php echo e($fieldId); ?>"
+                                              rows="<?php echo e($field['rows'] ?? 3); ?>"
+                                              data-basic-field="<?php echo e($field['name']); ?>"
+                                              placeholder="<?php echo e($field['placeholder'] ?? ''); ?>"><?php echo e($fieldValue); ?></textarea>
+                                <?php else: ?>
+                                    <input id="<?php echo e($fieldId); ?>"
+                                           type="<?php echo e($field['type']); ?>"
+                                           data-basic-field="<?php echo e($field['name']); ?>"
+                                           value="<?php echo e($fieldValue); ?>"
+                                           placeholder="<?php echo e($field['placeholder'] ?? ''); ?>"
+                                           <?php if(isset($field['step'])): ?> step="<?php echo e($field['step']); ?>" <?php endif; ?>
+                                           <?php if(isset($field['min'])): ?> min="<?php echo e($field['min']); ?>" <?php endif; ?>>
+                                <?php endif; ?>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </article>
 
-                {{-- // Sección: Módulos y lecciones dinámicas --}}
+                
                 <section class="editor-card editor-structure">
                     <div class="modules-head">
                         <div>
@@ -1115,12 +1115,12 @@
                         </button>
                     </div>
                     <div id="modules-canvas">
-                        @forelse($curso->modules as $module)
-                            <div class="module-card" data-module-id="{{ $module->id }}">
+                        <?php $__empty_1 = true; $__currentLoopData = $curso->modules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <div class="module-card" data-module-id="<?php echo e($module->id); ?>">
                                 <div class="module-top">
                                     <div class="module-fields">
-                                        <input type="text" class="module-title" value="{{ $module->title }}" placeholder="Título del módulo">
-                                        <textarea class="module-description" placeholder="Describe el módulo (opcional)">{{ $module->description }}</textarea>
+                                        <input type="text" class="module-title" value="<?php echo e($module->title); ?>" placeholder="Título del módulo">
+                                        <textarea class="module-description" placeholder="Describe el módulo (opcional)"><?php echo e($module->description); ?></textarea>
                                     </div>
                                     <div class="module-actions">
                                         <button type="button" class="module-handle" title="Arrastrar módulo">
@@ -1136,33 +1136,33 @@
                                     </div>
                                 </div>
                                 <div class="lessons-wrapper" data-lessons-container>
-                                    @foreach($module->lessons as $lesson)
-                                        <div class="lesson-block" data-lesson-id="{{ $lesson->id }}">
+                                    <?php $__currentLoopData = $module->lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <div class="lesson-block" data-lesson-id="<?php echo e($lesson->id); ?>">
                                             <div class="lesson-row">
                                                 <button type="button" class="module-handle lesson-handle" title="Arrastrar lección">
                                                     <i class="fas fa-grip-lines"></i>
                                                 </button>
-                                                <input type="text" class="lesson-title" value="{{ $lesson->title }}" placeholder="Título de la lección">
+                                                <input type="text" class="lesson-title" value="<?php echo e($lesson->title); ?>" placeholder="Título de la lección">
                                                 <select class="lesson-type">
-                                                    @foreach(['video','reading','quiz','live','file'] as $type)
-                                                        <option value="{{ $type }}" @selected($lesson->type === $type)>{{ ucfirst($type) }}</option>
-                                                    @endforeach
+                                                    <?php $__currentLoopData = ['video','reading','quiz','live','file']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <option value="<?php echo e($type); ?>" <?php if($lesson->type === $type): echo 'selected'; endif; ?>><?php echo e(ucfirst($type)); ?></option>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </select>
                                                 <button type="button" class="module-delete lesson-delete" title="Eliminar lección">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
                                             <div class="lesson-extra">
-                                                <input type="text" class="lesson-video hidden" placeholder="URL del video" value="{{ $lesson->video_url }}">
-                                                <input type="text" class="lesson-resource hidden" placeholder="URL del recurso" value="{{ $lesson->resource_url }}">
-                                                <div class="lesson-editor hidden" contenteditable="true">{{ $lesson->content }}</div>
-                                                <textarea class="lesson-content hidden" rows="3" placeholder="Contenido">{{ $lesson->content }}</textarea>
+                                                <input type="text" class="lesson-video hidden" placeholder="URL del video" value="<?php echo e($lesson->video_url); ?>">
+                                                <input type="text" class="lesson-resource hidden" placeholder="URL del recurso" value="<?php echo e($lesson->resource_url); ?>">
+                                                <div class="lesson-editor hidden" contenteditable="true"><?php echo e($lesson->content); ?></div>
+                                                <textarea class="lesson-content hidden" rows="3" placeholder="Contenido"><?php echo e($lesson->content); ?></textarea>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="empty-state" data-empty-state>
                                 <i class="fas fa-book-open"></i>
                                 <h3 class="panel-title">Sin módulos todavía</h3>
@@ -1172,12 +1172,12 @@
                                     <span>Agregar primer módulo</span>
                                 </button>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </section>
             </div>
 
-            {{-- // Sección: Checklist de completado --}}
+            
             <aside class="editor-card editor-panel">
                 <div>
                     <h3 class="panel-title">Checklist de completado</h3>
@@ -1229,19 +1229,19 @@
                         <div>
                             <div class="flex justify-between text-sm font-semibold text-slate-600">
                                 <span>Borrador</span>
-                                <span>{{ $modulesCount ? 'Completado' : 'Pendiente' }}</span>
+                                <span><?php echo e($modulesCount ? 'Completado' : 'Pendiente'); ?></span>
                             </div>
                             <div class="progress-track__bar">
-                                <span style="width: {{ $modulesCount ? '70%' : '30%' }}"></span>
+                                <span style="width: <?php echo e($modulesCount ? '70%' : '30%'); ?>"></span>
                             </div>
                         </div>
                         <div>
                             <div class="flex justify-between text-sm font-semibold text-slate-600">
                                 <span>Revisión</span>
-                                <span>{{ $curso->status === 'pendiente' ? 'Enviado' : 'Por enviar' }}</span>
+                                <span><?php echo e($curso->status === 'pendiente' ? 'Enviado' : 'Por enviar'); ?></span>
                             </div>
                             <div class="progress-track__bar">
-                                <span style="width: {{ $curso->status === 'pendiente' ? '80%' : '35%' }}"></span>
+                                <span style="width: <?php echo e($curso->status === 'pendiente' ? '80%' : '35%'); ?>"></span>
                             </div>
                         </div>
                     </div>
@@ -1254,26 +1254,26 @@
                 <h3 class="editor-banner__title">Gestiona tu publicacion</h3>
             </div>
             <div class="editor-banner__actions">
-                <a href="{{ route('cursos.show', $curso) }}" class="btn-outline">
+                <a href="<?php echo e(route('cursos.show', $curso)); ?>" class="btn-outline">
                     <i class="fas fa-eye"></i>
                     <span>Vista previa</span>
                 </a>
-                <form id="send-to-review-form" action="{{ route('cursos.send-to-review', $curso) }}" method="POST">
-                    @csrf
+                <form id="send-to-review-form" action="<?php echo e(route('cursos.send-to-review', $curso)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" id="send-to-review-btn" class="btn-pill">
                         <i class="fas fa-paper-plane"></i>
                         <span>Enviar a revision</span>
                     </button>
                 </form>
-                @if($curso->status === 'aprobado')
-                    <form action="{{ route('cursos.publish', $curso) }}" method="POST">
-                        @csrf
+                <?php if($curso->status === 'aprobado'): ?>
+                    <form action="<?php echo e(route('cursos.publish', $curso)); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-outline">
                             <i class="fas fa-bullhorn"></i>
                             <span>Publicar curso</span>
                         </button>
                     </form>
-                @endif
+                <?php endif; ?>
                 <button type="button" id="save-all-btn" class="btn-outline">
                     <i class="fas fa-save"></i>
                     <span>Guardar cambios</span>
@@ -1281,8 +1281,8 @@
             </div>
         </div>
     </div>
-@endsection
-@push('scripts')
+<?php $__env->stopSection(); ?>
+<?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         (() => {
@@ -1599,7 +1599,7 @@
                 toggleFields();
 
                 const saveLesson = debounce(() => {
-                    fetchJson(`{{ url('/lessons') }}/${lessonId}`, {
+                    fetchJson(`<?php echo e(url('/lessons')); ?>/${lessonId}`, {
                         method: 'PUT',
                         body: JSON.stringify({
                             title: titleInput.value,
@@ -1630,7 +1630,7 @@
 
                 deleteBtn.addEventListener('click', () => {
                     if (!confirm('¿Eliminar esta lección?')) return;
-                    fetchJson(`{{ url('/lessons') }}/${lessonId}`, { method: 'DELETE' })
+                    fetchJson(`<?php echo e(url('/lessons')); ?>/${lessonId}`, { method: 'DELETE' })
                         .then(() => {
                             block.remove();
                             sendReorder();
@@ -1652,7 +1652,7 @@
                 const lessonsContainer = card.querySelector('[data-lessons-container]');
 
                 const saveModule = debounce(() => {
-                    fetchJson(`{{ url('/modules') }}/${moduleId}`, {
+                    fetchJson(`<?php echo e(url('/modules')); ?>/${moduleId}`, {
                         method: 'PUT',
                         body: JSON.stringify({
                             title: titleInput.value,
@@ -1672,7 +1672,7 @@
 
                 deleteBtn.addEventListener('click', () => {
                     if (!confirm('¿Eliminar módulo completo?')) return;
-                    fetchJson(`{{ url('/modules') }}/${moduleId}`, { method: 'DELETE' })
+                    fetchJson(`<?php echo e(url('/modules')); ?>/${moduleId}`, { method: 'DELETE' })
                         .then(() => {
                             card.remove();
                             sendReorder();
@@ -1689,7 +1689,7 @@
                 addLessonBtn.addEventListener('click', () => {
                     const title = prompt('Título de la lección', 'Nueva lección');
                     if (!title) return;
-                    fetchJson(`{{ url('/modules') }}/${moduleId}/lessons`, {
+                    fetchJson(`<?php echo e(url('/modules')); ?>/${moduleId}/lessons`, {
                         method: 'POST',
                         body: JSON.stringify({ title, type: 'video' })
                     }).then(({ lesson }) => {
@@ -1722,7 +1722,7 @@
             const handleCreateModule = () => {
                 const title = prompt('Nombre del módulo', 'Nuevo módulo');
                 if (!title) return;
-                fetchJson(`{{ url('/cursos') }}/${courseId}/modules`, {
+                fetchJson(`<?php echo e(url('/cursos')); ?>/${courseId}/modules`, {
                     method: 'POST',
                     body: JSON.stringify({ title })
                 }).then(({ module }) => {
@@ -1815,5 +1815,7 @@
             ensureEmptyState();
         })();
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
+
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/cursos/editor.blade.php ENDPATH**/ ?>

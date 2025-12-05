@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CourseApproved;
+use App\Notifications\CourseRejected;
 
 class CourseReviewController extends Controller
 {
-    private array $allowedStatuses = ['pendiente', 'aprobado', 'rechazado'];
+    private array $allowedStatuses = ['pendiente', 'aprobado', 'rechazado', 'publicado'];
 
     private array $statusAliases = [
         'pending' => 'pendiente',
@@ -17,6 +21,7 @@ class CourseReviewController extends Controller
         'pendiente' => 'pendiente',
         'aprobado' => 'aprobado',
         'rechazado' => 'rechazado',
+        'publicado' => 'publicado',
     ];
 
     public function index(Request $request)
@@ -37,17 +42,27 @@ class CourseReviewController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $pendingPreview = Curso::query()
+            ->where('status', 'pendiente')
+            ->with('mentor')
+            ->latest()
+            ->take(5)
+            ->get();
+
         $pendingCount = Curso::where('status', 'pendiente')->count();
         $approvedCount = Curso::where('status', 'aprobado')->count();
         $rejectedCount = Curso::where('status', 'rechazado')->count();
+        $publishedCount = Curso::where('status', 'publicado')->count();
 
         return view('admin.courses.index', [
             'courses' => $courses,
             'pendingCount' => $pendingCount,
             'approvedCount' => $approvedCount,
             'rejectedCount' => $rejectedCount,
-            'totalCourses' => $pendingCount + $approvedCount + $rejectedCount,
+            'publishedCount' => $publishedCount,
+            'totalCourses' => $pendingCount + $approvedCount + $rejectedCount + $publishedCount,
             'currentStatus' => $currentStatus,
+            'pendingPreview' => $pendingPreview,
         ]);
     }
 
@@ -67,11 +82,18 @@ class CourseReviewController extends Controller
         $course = Curso::findOrFail($id);
         $course->forceFill([
             'status' => 'aprobado',
+            'review_status' => 'approved',
             'rejection_reason' => null,
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
         ])->save();
 
+        if ($course->mentor) {
+            Notification::send($course->mentor, new CourseApproved($course));
+        }
+
         return redirect()
-            ->route('admin.courses.index', ['status' => 'pendiente'])
+            ->route('admin.courses.index', ['status' => 'aprobado'])
             ->with('status', 'Curso aprobado correctamente.');
     }
 
@@ -86,11 +108,18 @@ class CourseReviewController extends Controller
         $course = Curso::findOrFail($id);
         $course->forceFill([
             'status' => 'rechazado',
+            'review_status' => 'rejected',
             'rejection_reason' => $data['rejection_reason'],
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
         ])->save();
 
+        if ($course->mentor) {
+            Notification::send($course->mentor, new CourseRejected($course, $data['rejection_reason']));
+        }
+
         return redirect()
-            ->route('admin.courses.index', ['status' => 'pendiente'])
+            ->route('admin.courses.index', ['status' => 'rechazado'])
             ->with('status', 'Curso rechazado correctamente.');
     }
 
@@ -113,6 +142,7 @@ class CourseReviewController extends Controller
         $course = Curso::findOrFail($id);
         $course->forceFill([
             'status' => 'pendiente',
+            'review_status' => 'pending',
             'rejection_reason' => null,
         ])->save();
 

@@ -1,6 +1,4 @@
-@extends('layouts.mentor')
-
-@php
+<?php
     $statusClasses = [
         'pendiente' => 'badge-pending',
         'aceptada' => 'badge-published',
@@ -27,12 +25,12 @@
     $publishedCount = $listMentorias->where('estado', 'publicada')->count();
     $monthlyIncome = $ingresosDelMes ?? 0;
     $avgRating = $valoracionPromedio ?? 0;
-@endphp
+?>
 
-@section('mentor-title', 'Mis mentorías')
-@section('mentor-subtitle', 'Define tus sesiones y tarifas personalizadas')
+<?php $__env->startSection('mentor-title', 'Mis mentorías'); ?>
+<?php $__env->startSection('mentor-subtitle', 'Define tus sesiones y tarifas personalizadas'); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     .mentor-shell .mentor-header,
     .mentor-shell .mentor-actions {
@@ -292,12 +290,12 @@
         .price-block { text-align: left; }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('mentor-actions', '')
+<?php $__env->startSection('mentor-actions', ''); ?>
 
 
-@section('mentor-content')
+<?php $__env->startSection('mentor-content'); ?>
     <div class="mentorias-dashboard">
         <section class="mentorias-header">
             <div>
@@ -308,7 +306,7 @@
                     <span id="mentorMentoriasCurrentDate"></span>
                 </span>
             </div>
-            <a href="{{ route('mentorias.create') }}" class="btn btn-primary" style="border-radius: 12px;">
+            <a href="<?php echo e(route('mentorias.create')); ?>" class="btn btn-primary" style="border-radius: 12px;">
                 <i class="fa-solid fa-plus"></i> Crear mentoría
             </a>
         </section>
@@ -317,7 +315,7 @@
             <article class="stats-card">
                 <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
                     <div>
-                        <p class="stats-value">{{ $draftCount }}</p>
+                        <p class="stats-value"><?php echo e($draftCount); ?></p>
                         <p class="stats-label">Borradores</p>
                     </div>
                     <div class="stats-icon"><i class="fa-solid fa-file"></i></div>
@@ -327,7 +325,7 @@
             <article class="stats-card">
                 <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
                     <div>
-                        <p class="stats-value">{{ $publishedCount }}</p>
+                        <p class="stats-value"><?php echo e($publishedCount); ?></p>
                         <p class="stats-label">Publicadas</p>
                     </div>
                     <div class="stats-icon" style="background:rgba(16,185,129,0.15);color:#047857;">
@@ -339,7 +337,7 @@
             <article class="stats-card">
                 <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
                     <div>
-                        <p class="stats-value">S/ {{ number_format($monthlyIncome, 0) }}</p>
+                        <p class="stats-value">S/ <?php echo e(number_format($monthlyIncome, 0)); ?></p>
                         <p class="stats-label">Ingresos del mes</p>
                     </div>
                     <div class="stats-icon" style="background:rgba(251,191,36,0.2);color:#b45309;">
@@ -351,7 +349,7 @@
             <article class="stats-card">
                 <div class="flex justify-between items-center" style="display:flex;justify-content:space-between;align-items:center;gap:16px;">
                     <div>
-                        <p class="stats-value">{{ number_format($avgRating, 1) }}</p>
+                        <p class="stats-value"><?php echo e(number_format($avgRating, 1)); ?></p>
                         <p class="stats-label">Valoración promedio</p>
                     </div>
                     <div class="stats-icon" style="background:rgba(244,114,182,0.2);color:#be185d;">
@@ -371,18 +369,19 @@
         </section>
 
         <section class="mentorias-grid">
-            @forelse($listMentorias as $mentoria)
-                <article class="mentoria-card" data-estado="{{ $mentoria->estado }}" data-modalidad="{{ $mentoria->modalidad }}">
+            <?php $__empty_1 = true; $__currentLoopData = $listMentorias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $mentoria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <article class="mentoria-card" data-estado="<?php echo e($mentoria->estado); ?>" data-modalidad="<?php echo e($mentoria->modalidad); ?>">
                     <div class="card-header">
                         <div>
-                            <h3>{{ $mentoria->titulo }}</h3>
-                            <p class="card-meta">{{ ucfirst($mentoria->categoria) }}  {{ ucfirst($mentoria->modalidad) }}</p>
+                            <h3><?php echo e($mentoria->titulo); ?></h3>
+                            <p class="card-meta"><?php echo e(ucfirst($mentoria->categoria)); ?>  <?php echo e(ucfirst($mentoria->modalidad)); ?></p>
                         </div>
                         <div class="price-block">
-                            <span class="badge {{ $mentoria->estado === 'publicada' ? 'badge-published' : ($mentoria->estado === 'borrador' ? 'badge-draft' : 'badge-pending') }}">
-                                <i class="fa-solid fa-circle"></i> {{ ucfirst($mentoria->estado) }}
+                            <span class="badge <?php echo e($mentoria->estado === 'publicada' ? 'badge-published' : ($mentoria->estado === 'borrador' ? 'badge-draft' : 'badge-pending')); ?>">
+                                <i class="fa-solid fa-circle"></i> <?php echo e(ucfirst($mentoria->estado)); ?>
+
                             </span>
-                            <p class="price">S/ {{ number_format($mentoria->precio, 2) }}</p>
+                            <p class="price">S/ <?php echo e(number_format($mentoria->precio, 2)); ?></p>
                             <p class="text-sm text-slate-500">por sesión</p>
                         </div>
                     </div>
@@ -390,71 +389,74 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">Duración</span>
-                            <span class="info-value">{{ $mentoria->duracion_minutos ?? $mentoria->duracion }} min</span>
+                            <span class="info-value"><?php echo e($mentoria->duracion_minutos ?? $mentoria->duracion); ?> min</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Modalidad</span>
                             <span class="info-value">
-                                <span class="badge {{ $mentoria->modalidad === 'virtual' ? 'badge-virtual' : 'badge-presencial' }}">
-                                    {{ ucfirst($mentoria->modalidad) }}
+                                <span class="badge <?php echo e($mentoria->modalidad === 'virtual' ? 'badge-virtual' : 'badge-presencial'); ?>">
+                                    <?php echo e(ucfirst($mentoria->modalidad)); ?>
+
                                 </span>
                             </span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Sesiones/Creación</span>
                             <span class="info-value">
-                                @if($mentoria->estado === 'publicada')
-                                    {{ $mentoria->sesiones_count ?? 0 }} realizadas
-                                @else
-                                    {{ optional($mentoria->created_at)->format('d/m/Y') }}
-                                @endif
+                                <?php if($mentoria->estado === 'publicada'): ?>
+                                    <?php echo e($mentoria->sesiones_count ?? 0); ?> realizadas
+                                <?php else: ?>
+                                    <?php echo e(optional($mentoria->created_at)->format('d/m/Y')); ?>
+
+                                <?php endif; ?>
                             </span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Estado</span>
-                            <span class="info-value">{{ ucfirst($mentoria->estado) }}</span>
+                            <span class="info-value"><?php echo e(ucfirst($mentoria->estado)); ?></span>
                         </div>
                     </div>
 
                     <div class="action-buttons">
-                        <a href="{{ route('mentorias.edit', $mentoria) }}" class="action-btn btn-edit">
+                        <a href="<?php echo e(route('mentorias.edit', $mentoria)); ?>" class="action-btn btn-edit">
                             <i class="fa-solid fa-pen"></i> Editar
                         </a>
-                        @if($mentoria->estado === 'borrador')
-                            <form action="{{ route('mentor.mentorias.publicar', $mentoria) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
+                        <?php if($mentoria->estado === 'borrador'): ?>
+                            <form action="<?php echo e(route('mentor.mentorias.publicar', $mentoria)); ?>" method="POST">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('PATCH'); ?>
                                 <button type="submit" class="action-btn btn-publish">
                                     <i class="fa-solid fa-rocket"></i> Publicar
                                 </button>
                             </form>
-                        @endif
-                        <a href="{{ route('mentorias.show', $mentoria) }}" target="_blank" class="action-btn btn-view">
-                            <i class="fa-solid fa-eye"></i> {{ $mentoria->estado === 'borrador' ? 'Vista previa' : 'Ver público' }}
+                        <?php endif; ?>
+                        <a href="<?php echo e(route('mentorias.show', $mentoria)); ?>" target="_blank" class="action-btn btn-view">
+                            <i class="fa-solid fa-eye"></i> <?php echo e($mentoria->estado === 'borrador' ? 'Vista previa' : 'Ver público'); ?>
+
                         </a>
-                        @if($mentoria->estado === 'borrador')
-                            <form action="{{ route('mentor.mentorias.destroy', $mentoria) }}" method="POST" onsubmit="return confirm('¿Eliminar esta mentoría?');">
-                                @csrf
-                                @method('DELETE')
+                        <?php if($mentoria->estado === 'borrador'): ?>
+                            <form action="<?php echo e(route('mentor.mentorias.destroy', $mentoria)); ?>" method="POST" onsubmit="return confirm('¿Eliminar esta mentoría?');">
+                                <?php echo csrf_field(); ?>
+                                <?php echo method_field('DELETE'); ?>
                                 <button type="submit" class="action-btn btn-delete">
                                     <i class="fa-solid fa-trash"></i> Eliminar
                                 </button>
                             </form>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </article>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="mentoria-empty">
                     <div class="w-24 h-24 rounded-full" style="margin:0 auto 16px; background:linear-gradient(135deg,#f3e8ff,#e0e7ff); display:flex;align-items:center;justify-content:center;">
                         <i class="fa-solid fa-chalkboard-teacher" style="font-size:2rem;color:#6b46c1;"></i>
                     </div>
                     <h3 class="text-xl font-semibold" style="color:#1f2937;">No tienes mentorías creadas</h3>
                     <p style="color:#6b7280;margin:12px auto 20px;max-width:360px;">Comienza a compartir tu experiencia creando mentorías personalizadas.</p>
-                    <a href="{{ route('mentorias.create') }}" class="btn btn-primary" style="padding:12px 28px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;">
+                    <a href="<?php echo e(route('mentorias.create')); ?>" class="btn btn-primary" style="padding:12px 28px;border-radius:12px;display:inline-flex;align-items:center;gap:8px;">
                         <i class="fa-solid fa-plus"></i> Crear mi primera mentoría
                     </a>
                 </div>
-            @endforelse
+            <?php endif; ?>
         </section>
 
         <section class="requests-section">
@@ -463,78 +465,79 @@
                     <h2 class="text-xl font-semibold" style="color:#1f2937;">Solicitudes recibidas</h2>
                     <p class="text-sm" style="color:#6b7280;">Últimas solicitudes de tus mentorías publicadas</p>
                 </div>
-                <span class="text-sm" style="color:#94a3b8;">{{ $stats['total'] ?? 0 }} registro(s)</span>
+                <span class="text-sm" style="color:#94a3b8;"><?php echo e($stats['total'] ?? 0); ?> registro(s)</span>
             </div>
 
             <div class="requests-grid">
-                @forelse ($requests as $session)
-                    @php
+                <?php $__empty_1 = true; $__currentLoopData = $requests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $scheduleDate = $session->fecha_programada ?? $session->fecha_mentoria;
                         $scheduleTime = $session->hora_programada ?? optional($session->fecha_mentoria)?->format('H:i');
                         $amount = $session->monto ?? $session->precio;
-                    @endphp
+                    ?>
                     <article class="request-card">
                         <div class="request-header">
                             <div>
-                                <p class="text-sm" style="color:#6b7280;">Estudiante: {{ $session->estudiante->name ?? 'No asignado' }}</p>
-                                <h4 style="font-size:1.15rem;font-weight:700;color:#1f2937;">{{ $session->titulo }}</h4>
-                                <p class="text-xs" style="color:#94a3b8;">Solicitada {{ optional($session->fecha_solicitud)->format('d/m/Y H:i') ?? 'sin fecha' }}</p>
+                                <p class="text-sm" style="color:#6b7280;">Estudiante: <?php echo e($session->estudiante->name ?? 'No asignado'); ?></p>
+                                <h4 style="font-size:1.15rem;font-weight:700;color:#1f2937;"><?php echo e($session->titulo); ?></h4>
+                                <p class="text-xs" style="color:#94a3b8;">Solicitada <?php echo e(optional($session->fecha_solicitud)->format('d/m/Y H:i') ?? 'sin fecha'); ?></p>
                             </div>
-                            <span class="badge {{ $statusClasses[$session->estado] ?? 'badge-draft' }}">
-                                {{ ucfirst($session->estado) }}
+                            <span class="badge <?php echo e($statusClasses[$session->estado] ?? 'badge-draft'); ?>">
+                                <?php echo e(ucfirst($session->estado)); ?>
+
                             </span>
                         </div>
 
                         <div class="request-meta">
                             <div>
                                 <span class="info-label">Fecha</span>
-                                <span class="info-value">{{ optional($scheduleDate)->format('d/m/Y') ?? 'Por definir' }}</span>
+                                <span class="info-value"><?php echo e(optional($scheduleDate)->format('d/m/Y') ?? 'Por definir'); ?></span>
                             </div>
                             <div>
                                 <span class="info-label">Hora</span>
-                                <span class="info-value">{{ $scheduleTime ?? 'Por definir' }}</span>
+                                <span class="info-value"><?php echo e($scheduleTime ?? 'Por definir'); ?></span>
                             </div>
                             <div>
                                 <span class="info-label">Modalidad</span>
-                                <span class="info-value">{{ ucfirst($session->modalidad) }}</span>
+                                <span class="info-value"><?php echo e(ucfirst($session->modalidad)); ?></span>
                             </div>
                             <div>
                                 <span class="info-label">Monto</span>
-                                <span class="info-value">S/ {{ number_format($amount ?? 0, 2) }}</span>
+                                <span class="info-value">S/ <?php echo e(number_format($amount ?? 0, 2)); ?></span>
                             </div>
                         </div>
 
                         <div class="request-actions">
-                            <a href="{{ route('mentorias.show', $session) }}" class="btn btn-request-neutral">Ver detalles</a>
-                            @if ($session->estado === 'pendiente')
-                                <form method="POST" action="{{ route('mentor.mentorias.accept', $session) }}">
-                                    @csrf
+                            <a href="<?php echo e(route('mentorias.show', $session)); ?>" class="btn btn-request-neutral">Ver detalles</a>
+                            <?php if($session->estado === 'pendiente'): ?>
+                                <form method="POST" action="<?php echo e(route('mentor.mentorias.accept', $session)); ?>">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn btn-request-accept">Aceptar</button>
                                 </form>
-                                <form method="POST" action="{{ route('mentor.mentorias.reject', $session) }}">
-                                    @csrf
+                                <form method="POST" action="<?php echo e(route('mentor.mentorias.reject', $session)); ?>">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn btn-request-reject">Rechazar</button>
                                 </form>
-                            @endif
-                            @if (in_array($session->estado, ['pagada', 'confirmada']))
-                                <form method="POST" action="{{ route('mentor.mentorias.completar', $session) }}">
-                                    @csrf
+                            <?php endif; ?>
+                            <?php if(in_array($session->estado, ['pagada', 'confirmada'])): ?>
+                                <form method="POST" action="<?php echo e(route('mentor.mentorias.completar', $session)); ?>">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn btn-request-accept" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);">Completar sesi�n</button>
                                 </form>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </article>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="request-card" style="text-align:center;color:#6b7280;">
                         Aún no tienes solicitudes de estudiantes.
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
         </section>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const dateEl = document.getElementById('mentorMentoriasCurrentDate');
@@ -562,4 +565,6 @@
         });
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.mentor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/dashboard/mentor/mentorships.blade.php ENDPATH**/ ?>

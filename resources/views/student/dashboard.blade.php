@@ -61,6 +61,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
+            min-height: 120px;
         }
         .student-dashboard-premium .stat-card:hover { transform: translateY(-4px); box-shadow: 0 18px 36px rgba(99, 102, 241, 0.18); }
         .student-dashboard-premium .stat-card::before {
@@ -88,7 +89,7 @@
         }
         .student-dashboard-premium .stat-body { display: flex; flex-direction: column; gap: 4px; }
         .student-dashboard-premium .stat-value { font-size: 28px; font-weight: 800; color: #1f2937; }
-        .student-dashboard-premium .stat-label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+        .student-dashboard-premium .stat-label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; white-space: nowrap; }
         .student-dashboard-premium .stat-trend {
             display: flex;
             align-items: center;

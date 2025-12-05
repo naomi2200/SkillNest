@@ -308,12 +308,16 @@
             cursor: pointer;
             transition: transform 0.2s ease, background 0.2s ease;
             position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mis-cursos-action-group {
             display: flex;
             gap: 6px;
             align-items: center;
+            justify-content: center;
         }
 
         .mis-cursos-action-group form {
@@ -401,12 +405,9 @@
                    placeholder="Buscar cursos..."
                    aria-label="Buscar cursos">
         </form>
-        <form action="<?php echo e(route('cursos.create-draft')); ?>" method="POST">
-            <?php echo csrf_field(); ?>
-            <button type="submit" class="btn-primary shadow-soft">
-                <i class="fa-solid fa-plus"></i> Nuevo curso
-            </button>
-        </form>
+        <a href="<?php echo e(route('mentor.courses.create')); ?>" class="btn-primary shadow-soft">
+            <i class="fa-solid fa-plus"></i> Nuevo curso
+        </a>
     </div>
 <?php $__env->stopSection(); ?>
 
@@ -420,7 +421,7 @@
         $totalStudents = $courses->sum(fn($course) => $course->estudiantes_count ?? $course->students_count ?? 0);
         $statusMap = [
             'aprobado' => ['class' => 'badge-published', 'label' => 'Publicado', 'icon' => 'fa-solid fa-check'],
-            'pendiente' => ['class' => 'badge-review', 'label' => 'En revisi?n', 'icon' => 'fa-solid fa-clock'],
+            'pendiente' => ['class' => 'badge-review', 'label' => 'En revisión', 'icon' => 'fa-solid fa-clock'],
             'borrador' => ['class' => 'badge-draft', 'label' => 'Borrador', 'icon' => 'fa-solid fa-pen'],
             'rechazado' => ['class' => 'badge-archived', 'label' => 'Archivado', 'icon' => 'fa-solid fa-box-archive'],
         ];
@@ -445,11 +446,11 @@
                 'trend_icon' => 'fa-book',
             ],
             [
-                'label' => 'En revision',
+                'label' => 'En revisión',
                 'value' => $pendingCount,
                 'icon' => 'fa-clock',
                 'color' => 'linear-gradient(135deg,#fbbf24,#f97316)',
-                'trend' => 'Esperando aprobacion',
+                'trend' => 'Esperando aprobación',
                 'value_color' => '#d97706',
                 'trend_color' => '#d97706',
                 'trend_icon' => 'fa-hourglass-half',
@@ -543,9 +544,16 @@
                     <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <?php
                             $courseStatus = $course->status ?? 'borrador';
-                            $badge = $statusMap[$courseStatus] ?? $statusMap['borrador'];
+                            $reviewState = $course->review_status ?? null;
+                            $visibleStatus = match($reviewState) {
+                                'pending' => 'pendiente',
+                                'approved' => 'aprobado',
+                                'rejected' => 'rechazado',
+                                default => $courseStatus,
+                            };
+                            $badge = $statusMap[$visibleStatus] ?? $statusMap['borrador'];
                             $studentCount = $course->estudiantes_count ?? $course->students_count ?? 0;
-                            $progress = $course->progress_percentage ?? ($courseStatus === 'aprobado' ? 100 : ($courseStatus === 'pendiente' ? 60 : ($courseStatus === 'borrador' ? 20 : 0)));
+                            $progress = $course->progress_percentage ?? ($visibleStatus === 'aprobado' ? 100 : ($visibleStatus === 'pendiente' ? 60 : ($visibleStatus === 'borrador' ? 20 : 0)));
                             $progress = max(0, min(100, $progress));
                             $rating = $course->rating ?? $course->average_rating ?? null;
                             $reviews = $course->reviews_count ?? $course->total_reviews ?? 0;
@@ -557,7 +565,7 @@
                             };
                             $reviewLabel = ucfirst($course->review_status ?? 'pendiente');
                         ?>
-                        <tr data-status="<?php echo e($courseStatus); ?>">
+                        <tr data-status="<?php echo e($visibleStatus); ?>" data-course-id="<?php echo e($course->id); ?>">
                             <td>
                                 <div class="flex items-center gap-4">
                                     <div class="w-14 h-14 rounded-xl flex items-center justify-center text-xl gradient-text text-white" style="background: linear-gradient(135deg, #667eea, #764ba2);">
@@ -621,13 +629,12 @@
                                     <a href="<?php echo e(route('cursos.editor', $course)); ?>#stats" class="mis-cursos-action-btn" title="Estadísticas">
                                         <i class="fa-solid fa-chart-line"></i>
                                     </a>
-                                    <form action="<?php echo e(route('cursos.destroy', $course)); ?>" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este curso?');">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button type="submit" class="mis-cursos-action-btn delete" title="Eliminar curso">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            class="mis-cursos-action-btn delete mis-cursos-delete-btn"
+                                            data-delete-url="<?php echo e(route('cursos.destroy', $course)); ?>"
+                                            title="Eliminar curso">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -683,8 +690,33 @@
                     });
                 });
             });
+
+            // Eliminación sin recargar la página (botón directo)
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            document.querySelectorAll('.mis-cursos-delete-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (!confirm('¿Seguro que deseas eliminar este curso?')) return;
+                    const url = button.dataset.deleteUrl;
+                    const row = button.closest('tr');
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        },
+                        body: new URLSearchParams({ _method: 'DELETE' }),
+                    }).then(response => {
+                        if (!response.ok) throw new Error('Error al eliminar');
+                        row?.remove();
+                    }).catch(err => {
+                        console.error(err);
+                        alert('No se pudo eliminar el curso. Intenta nuevamente.');
+                    });
+                });
+            });
         });
     </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('layouts.mentor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/dashboard/mentor/courses.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.mentor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/dashboard/mentor/courses.blade.php ENDPATH**/ ?>

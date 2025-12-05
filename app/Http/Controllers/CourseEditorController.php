@@ -7,6 +7,7 @@ use App\Models\Lesson;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CourseEditorController extends Controller
@@ -133,6 +134,70 @@ class CourseEditorController extends Controller
         $lesson->delete();
 
         return response()->json(['status' => 'lesson_deleted']);
+    }
+
+    public function fullSave(Request $request, Curso $curso)
+    {
+        $this->authorizeCourse($request->user(), $curso);
+
+        $payload = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'in:principiante,intermedio,avanzado'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'duration' => ['required', 'integer', 'min:1'],
+            'description' => ['required', 'string'],
+            'objectives' => ['nullable', 'string'],
+            'requirements' => ['nullable', 'string'],
+            'modules' => ['required', 'array'],
+            'modules.*.title' => ['required', 'string', 'max:255'],
+            'modules.*.description' => ['nullable', 'string'],
+            'modules.*.lessons' => ['required', 'array'],
+            'modules.*.lessons.*.title' => ['required', 'string', 'max:255'],
+            'modules.*.lessons.*.type' => ['required', 'in:video,reading,quiz,live,file'],
+            'modules.*.lessons.*.content' => ['nullable', 'string'],
+            'modules.*.lessons.*.video_url' => ['nullable', 'string', 'max:500'],
+            'modules.*.lessons.*.resource_url' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        DB::transaction(function () use ($curso, $payload) {
+            // Actualiza datos básicos sin cambiar status actual.
+            $curso->update([
+                'title' => $payload['title'],
+                'category' => $payload['category'],
+                'level' => $payload['level'],
+                'price' => $payload['price'],
+                'duration' => $payload['duration'],
+                'description' => $payload['description'],
+                'objectives' => $payload['objectives'] ?? null,
+                'requirements' => $payload['requirements'] ?? null,
+            ]);
+
+            // Reemplaza estructura por la enviada.
+            $curso->modules()->delete();
+
+            foreach ($payload['modules'] as $moduleIndex => $moduleData) {
+                $module = $curso->modules()->create([
+                    'title' => $moduleData['title'],
+                    'description' => $moduleData['description'] ?? null,
+                    'position' => $moduleIndex + 1,
+                    'requires_quiz' => false,
+                ]);
+
+                foreach ($moduleData['lessons'] as $lessonIndex => $lessonData) {
+                    $module->lessons()->create([
+                        'title' => $lessonData['title'],
+                        'type' => $lessonData['type'],
+                        'content' => $lessonData['content'] ?? null,
+                        'video_url' => $lessonData['video_url'] ?? null,
+                        'resource_url' => $lessonData['resource_url'] ?? null,
+                        'position' => $lessonIndex + 1,
+                    ]);
+                }
+            }
+        });
+
+        return response()->json(['status' => 'saved']);
     }
 
     public function reorder(Request $request, Curso $curso)

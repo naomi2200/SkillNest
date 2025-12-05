@@ -528,4 +528,4 @@
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
-<?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/layouts/app.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/layouts/app.blade.php ENDPATH**/ ?>

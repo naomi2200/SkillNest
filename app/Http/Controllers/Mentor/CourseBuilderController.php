@@ -3,163 +3,102 @@
 namespace App\Http\Controllers\Mentor;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
-use App\Models\Lesson;
-use App\Models\Module;
+use App\Models\Curso;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Controlador legacy: redirige todas las rutas del builder antiguo
+ * hacia el editor principal para evitar flujos duplicados.
+ */
 class CourseBuilderController extends Controller
 {
     public function create()
     {
-        $this->authorizeMentor();
+        $mentor = $this->authorizeMentor();
+        $curso = $this->createDraftForMentor($mentor);
 
-        return view('mentor.create-course');
+        return redirect()
+            ->route('cursos.editor', $curso)
+            ->with('status', 'Usa el editor principal para continuar.');
     }
 
     public function store(Request $request)
     {
         $mentor = $this->authorizeMentor();
-
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'level' => 'required|in:principiante,intermedio,avanzado',
-            'category' => 'required|string|max:255',
-        ]);
-
-        $course = Course::create(array_merge($data, [
-            'mentor_id' => $mentor->id,
-            'status' => 'borrador',
-            'review_status' => Course::REVIEW_DRAFT,
-        ]));
+        $curso = $this->createDraftForMentor($mentor);
 
         return redirect()
-            ->route('mentor.courses.builder', $course)
-            ->with('status', 'Curso creado. Ahora agrega módulos y lecciones.');
+            ->route('cursos.editor', $curso)
+            ->with('status', 'Curso creado. Usa el editor principal para continuar.');
     }
 
-    public function edit(Course $course)
+    public function edit(Curso $course)
     {
         $this->authorizeMentor($course);
 
-        $course->load('modules.lessons');
-
-        $builderModules = $course->modules->map(function ($module) {
-            return [
-                'local_id' => (string) Str::uuid(),
-                'title' => $module->title,
-                'description' => $module->description,
-                'requires_quiz' => (bool) $module->requires_quiz,
-                'position' => $module->position,
-                'lessons' => $module->lessons->map(function ($lesson) {
-                    return [
-                        'local_id' => (string) Str::uuid(),
-                        'title' => $lesson->title,
-                        'type' => $lesson->type,
-                        'duration_minutes' => $lesson->duration_minutes,
-                        'position' => $lesson->position,
-                    ];
-                })->values(),
-            ];
-        })->values();
-
-        return view('mentor.create-course', compact('course', 'builderModules'));
+        return redirect()
+            ->route('cursos.editor', $course)
+            ->with('status', 'Usa el editor principal para editar este curso.');
     }
 
-    public function update(Request $request, Course $course)
+    public function update(Request $request, Curso $course)
     {
         $this->authorizeMentor($course);
 
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'level' => 'required|in:principiante,intermedio,avanzado',
-            'category' => 'required|string|max:255',
-            'image_url' => 'nullable|url',
+        return redirect()
+            ->route('cursos.editor', $course)
+            ->with('status', 'Usa el editor principal para actualizar este curso.');
+    }
+
+    public function syncStructure(Request $request, Curso $course)
+    {
+        $this->authorizeMentor($course);
+
+        return response()->json([
+            'status' => 'redirect',
+            'redirect_to' => route('cursos.editor', $course),
+            'message' => 'Usa el editor principal para gestionar la estructura.',
         ]);
-
-        $course->update($data);
-
-        return back()->with('status', 'Curso actualizado.');
     }
 
-    public function syncStructure(Request $request, Course $course)
+    public function submitForReview(Curso $course)
     {
         $this->authorizeMentor($course);
 
-        $payload = $request->validate([
-            'modules' => 'required|array|min:1',
-            'modules.*.title' => 'required|string|max:255',
-            'modules.*.description' => 'nullable|string',
-            'modules.*.position' => 'nullable|integer|min:1',
-            'modules.*.requires_quiz' => 'boolean',
-            'modules.*.lessons' => 'required|array|min:1',
-            'modules.*.lessons.*.title' => 'required|string|max:255',
-            'modules.*.lessons.*.type' => 'required|in:video,reading,live,quiz',
-            'modules.*.lessons.*.content' => 'nullable|string',
-            'modules.*.lessons.*.video_url' => 'nullable|url',
-            'modules.*.lessons.*.resource_url' => 'nullable|url',
-            'modules.*.lessons.*.duration_minutes' => 'nullable|integer|min:1',
-        ]);
-
-        DB::transaction(function () use ($course, $payload) {
-            $course->modules()->delete();
-
-            foreach ($payload['modules'] as $index => $moduleData) {
-                $module = $course->modules()->create([
-                    'title' => $moduleData['title'],
-                    'description' => $moduleData['description'] ?? null,
-                    'position' => $moduleData['position'] ?? ($index + 1),
-                    'requires_quiz' => $moduleData['requires_quiz'] ?? true,
-                ]);
-
-                foreach ($moduleData['lessons'] as $lessonIndex => $lessonData) {
-                    $module->lessons()->create([
-                        'title' => $lessonData['title'],
-                        'type' => $lessonData['type'],
-                        'content' => $lessonData['content'] ?? null,
-                        'video_url' => $lessonData['video_url'] ?? null,
-                        'resource_url' => $lessonData['resource_url'] ?? null,
-                        'duration_minutes' => $lessonData['duration_minutes'] ?? null,
-                        'position' => $lessonIndex + 1,
-                    ]);
-                }
-            }
-        });
-
-        return response()->json(['status' => 'estructura guardada']);
+        return redirect()
+            ->route('cursos.editor', $course)
+            ->with('status', 'Envia a revision desde el editor principal.');
     }
 
-    public function submitForReview(Course $course)
-    {
-        $this->authorizeMentor($course);
-
-        if ($course->modules()->count() === 0) {
-            return back()->withErrors('Agrega al menos un módulo antes de enviar a revisión.');
-        }
-
-        $course->update(['review_status' => Course::REVIEW_PENDING]);
-
-        return back()->with('status', 'Curso enviado a revisión.');
-    }
-
-    protected function authorizeMentor(?Course $course = null)
+    protected function authorizeMentor(?Curso $course = null)
     {
         $user = auth()->user();
 
         abort_unless($user && $user->isMentor(), 403);
 
         if ($course) {
-            abort_unless($course->isOwnedBy($user), 403);
+            abort_unless($course->mentor_id === $user->id, 403);
         }
 
         return $user;
+    }
+
+    protected function createDraftForMentor($mentor): Curso
+    {
+        return Curso::create([
+            'mentor_id' => $mentor->id,
+            'title' => 'Curso sin titulo',
+            'description' => 'Agrega una descripcion atractiva a tu curso.',
+            'price' => 0,
+            'duration' => 1,
+            'level' => 'principiante',
+            'category' => 'General',
+            'status' => 'borrador',
+            'review_status' => 'draft',
+            'image_url' => sprintf('https://picsum.photos/seed/%s/800/600', Str::uuid()),
+            'objectives' => null,
+            'requirements' => null,
+        ]);
     }
 }

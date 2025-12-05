@@ -1,15 +1,16 @@
-@extends('layouts.dashboard')
+@extends('layouts.admin')
 
-@section('dashboard-title', 'Curso: ' . $course->title)
+@section('admin-title', 'Curso: ' . $course->title)
+@section('admin-subtitle', 'Revision y acciones administrativas del curso')
 
-@section('dashboard-actions')
+@section('admin-actions')
     <a href="{{ route('admin.courses.index') }}"
        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-primary hover:text-primary">
-        ← Volver al listado
+        Volver al listado
     </a>
 @endsection
 
-@section('dashboard-content')
+@section('admin-content')
     <div class="space-y-8">
         <div class="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-card">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -58,28 +59,30 @@
             <div class="rounded-[32px] border border-slate-200 bg-white/95 p-6 shadow-card space-y-4">
                 <h2 class="text-lg font-semibold text-secondary">Acciones</h2>
                 <div class="space-y-3">
-                    <form action="{{ route('admin.courses.approve', $course->id) }}" method="POST" class="flex flex-col gap-3">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit"
-                                class="rounded-full bg-emerald-100 px-6 py-2 text-sm font-semibold text-emerald-700 shadow-card hover:bg-emerald-200">
-                            Aprobar curso
-                        </button>
-                    </form>
-                    <form action="{{ route('admin.courses.reject', $course->id) }}" method="POST" class="flex flex-col gap-3">
-                        @csrf
-                        @method('PATCH')
-                        <label for="rejection_reason" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                            Motivo del rechazo
-                        </label>
-                        <textarea id="rejection_reason" name="rejection_reason" rows="3" required
-                                  class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-400 focus:outline-none"
-                                  placeholder="Describe los cambios solicitados..."></textarea>
-                        <button type="submit"
-                                class="rounded-full bg-rose-100 px-6 py-2 text-sm font-semibold text-rose-600 shadow-card hover:bg-rose-200">
-                            Rechazar curso
-                        </button>
-                    </form>
+                    @if($course->status === 'pendiente')
+                        <form action="{{ route('admin.courses.approve', $course->id) }}" method="POST" class="flex flex-col gap-3">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                    class="rounded-full bg-emerald-100 px-6 py-2 text-sm font-semibold text-emerald-700 shadow-card hover:bg-emerald-200">
+                                Aprobar curso
+                            </button>
+                        </form>
+                        <form action="{{ route('admin.courses.reject', $course->id) }}" method="POST" class="flex flex-col gap-3">
+                            @csrf
+                            @method('PATCH')
+                            <label for="rejection_reason" class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Motivo del rechazo
+                            </label>
+                            <textarea id="rejection_reason" name="rejection_reason" rows="3" required
+                                      class="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700 focus:border-indigo-400 focus:outline-none"
+                                      placeholder="Describe los cambios solicitados..."></textarea>
+                            <button type="submit"
+                                    class="rounded-full bg-rose-100 px-6 py-2 text-sm font-semibold text-rose-600 shadow-card hover:bg-rose-200">
+                                Rechazar curso
+                            </button>
+                        </form>
+                    @endif
                     @if(in_array($course->status, ['rechazado', 'aprobado'], true))
                         <form action="{{ route('admin.courses.reset', $course->id) }}" method="POST" class="flex flex-col gap-3">
                             @csrf
@@ -136,3 +139,8 @@
         </div>
     </div>
 @endsection
+
+
+
+
+

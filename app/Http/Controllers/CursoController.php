@@ -6,7 +6,10 @@ use App\Models\Curso;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\CourseSubmitted;
 use Illuminate\Support\Str;
+use App\Notifications\CoursePublished;
 
 class CursoController extends Controller
 {
@@ -90,7 +93,7 @@ class CursoController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error de validación',
+                    'message' => 'Error de validaciÃ³n',
                     'errors' => $e->errors(),
                 ], 422);
             }
@@ -154,7 +157,7 @@ class CursoController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error de validación',
+                    'message' => 'Error de validaciÃ³n',
                     'errors' => $e->errors(),
                 ], 422);
             }
@@ -184,7 +187,7 @@ class CursoController extends Controller
         $user = $request->user();
 
         if (!$user) {
-            return redirect()->route('login')->withErrors(['email' => 'Debes iniciar sesión para inscribirte.']);
+            return redirect()->route('login')->withErrors(['email' => 'Debes iniciar sesiÃ³n para inscribirte.']);
         }
 
         $hasPaid = $curso->purchases()
@@ -220,8 +223,8 @@ class CursoController extends Controller
 
         $curso = Curso::create([
             'mentor_id' => $mentor->id,
-            'title' => 'Curso sin título',
-            'description' => 'Añade una descripción atractiva a tu curso.',
+            'title' => 'Curso sin tÃ­tulo',
+            'description' => 'AÃ±ade una descripciÃ³n atractiva a tu curso.',
             'price' => 0,
             'duration' => 1,
             'level' => 'principiante',
@@ -232,7 +235,7 @@ class CursoController extends Controller
             'requirements' => null,
         ]);
 
-        return redirect()->route('cursos.editor', $curso);
+        return redirect()->route('mentor.courses.builder', $curso);
     }
 
     public function editor(Request $request, Curso $curso)
@@ -247,16 +250,63 @@ class CursoController extends Controller
     public function sendToReview(Request $request, Curso $curso)
     {
         $this->authorizeCourseMentor($request->user(), $curso);
-
-        if ($curso->status === 'pendiente') {
+ 
+        $basicFields = [
+            $curso->title,
+            $curso->description,
+            $curso->category,
+            $curso->level,
+        ];
+        if (in_array(null, $basicFields, true) || in_array('', $basicFields, true) || $curso->price <= 0 || $curso->duration <= 0) {
+            return back()->withErrors('Completa los datos básicos del curso antes de enviarlo a revisión.');
+        }
+ 
+        $modulesCount = $curso->modules()->count();
+        $lessonsCount = $curso->modules()->withCount('lessons')->get()->sum('lessons_count');
+        if ($modulesCount === 0 || $lessonsCount === 0) {
+            return back()->withErrors('Agrega al menos un módulo y una lección antes de enviarlo a revisión.');
+        }
+ 
+        if (in_array($curso->review_status, ['pending', 'submitted'], true)) {
             return back()->with('status', 'El curso ya fue enviado a revisión.');
         }
 
-        $curso->update(['status' => 'pendiente']);
-
+        $curso->update([
+            'review_status' => 'pending',
+            'status' => 'pendiente',
+            'published_at' => null,
+        ]);
+ 
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new CourseSubmitted($curso));
+        }
+ 
         return redirect()
             ->route('cursos.editor', $curso)
             ->with('status', 'Curso enviado a revisión.');
+    }
+
+    public function publish(Request $request, Curso $curso)
+    {
+        $this->authorizeCourseMentor($request->user(), $curso);
+
+        if ($curso->status !== 'aprobado') {
+            return back()->withErrors('Solo puedes publicar cursos aprobados por el administrador.');
+        }
+
+        $curso->update([
+            'status' => 'publicado',
+            'published_at' => now(),
+            'review_status' => 'approved',
+        ]);
+
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new CoursePublished($curso));
+        }
+
+        return back()->with('status', 'Curso publicado correctamente.');
     }
 
     protected function authorizeCourseMentor(?User $user, Curso $curso): void
@@ -271,3 +321,13 @@ class CursoController extends Controller
         );
     }
 }
+
+
+
+
+
+
+
+
+
+

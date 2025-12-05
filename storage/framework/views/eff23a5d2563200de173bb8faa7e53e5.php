@@ -121,4 +121,4 @@
         </div>
     </div>
 </nav>
-<?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/components/navbar.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/components/navbar.blade.php ENDPATH**/ ?>

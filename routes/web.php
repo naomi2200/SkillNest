@@ -65,8 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/cursos/draft', [CursoController::class, 'createDraft'])->name('cursos.create-draft');
     Route::get('/cursos/{curso}/editor', [CursoController::class, 'editor'])->name('cursos.editor');
     Route::post('/cursos/{curso}/send-to-review', [CursoController::class, 'sendToReview'])->name('cursos.send-to-review');
+    Route::post('/cursos/{curso}/publish', [CursoController::class, 'publish'])->name('cursos.publish');
     Route::put('/cursos/{curso}/basics', [CourseEditorController::class, 'updateBasics'])->name('cursos.update-basics');
     Route::post('/cursos/{curso}/image', [CourseEditorController::class, 'updateImage'])->name('cursos.update-image');
+    Route::post('/cursos/{curso}/full-save', [CourseEditorController::class, 'fullSave'])->name('cursos.full-save');
     Route::post('/cursos/{curso}/modules', [CourseEditorController::class, 'addModule'])->name('cursos.modules.store');
     Route::put('/modules/{module}', [CourseEditorController::class, 'updateModule'])->name('modules.update');
     Route::delete('/modules/{module}', [CourseEditorController::class, 'deleteModule'])->name('modules.destroy');

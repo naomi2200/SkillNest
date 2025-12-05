@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@php
+<?php
     use Illuminate\Support\Facades\Route;
 
     $mentor = auth()->user();
@@ -42,9 +40,9 @@
             'active' => request()->routeIs('mentor.profile'),
         ],
     ];
-@endphp
+?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         :root {
             --primary: #7c3aed;
@@ -234,9 +232,9 @@
             .mentor-main { padding: 28px 20px; }
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="mentor-shell">
         <aside class="mentor-sidebar">
             <div class="mentor-brand">
@@ -244,19 +242,19 @@
                 <h2>SkillNest</h2>
             </div>
             <nav class="mentor-nav">
-                @foreach($navLinks as $link)
-                    <a href="{{ $link['url'] }}" class="mentor-nav-link {{ $link['active'] ? 'active' : '' }}">
+                <?php $__currentLoopData = $navLinks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $link): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <a href="<?php echo e($link['url']); ?>" class="mentor-nav-link <?php echo e($link['active'] ? 'active' : ''); ?>">
                         <span class="mentor-nav-icon" aria-hidden="true">
-                            <i class="{{ $link['icon'] }}"></i>
+                            <i class="<?php echo e($link['icon']); ?>"></i>
                         </span>
-                        <span>{{ $link['label'] }}</span>
+                        <span><?php echo e($link['label']); ?></span>
                     </a>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </nav>
             <div style="margin-top:auto; font-size:12px; color:#6b7280;">
                 <p style="font-size:11px; letter-spacing:0.25em; text-transform:uppercase;">Sesión</p>
-                <p style="font-weight:700; color:#111827;">{{ $mentor->name }}</p>
-                <p>{{ $mentor->email }}</p>
+                <p style="font-weight:700; color:#111827;"><?php echo e($mentor->name); ?></p>
+                <p><?php echo e($mentor->email); ?></p>
             </div>
         </aside>
 
@@ -264,17 +262,19 @@
             <div class="mentor-header">
                 <div>
                     <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Panel mentor</p>
-                    <h1>@yield('mentor-title', 'Mi panel de mentor')</h1>
-                    <p>@yield('mentor-subtitle', 'Gestiona tus cursos y mentorías')</p>
+                    <h1><?php echo $__env->yieldContent('mentor-title', 'Mi panel de mentor'); ?></h1>
+                    <p><?php echo $__env->yieldContent('mentor-subtitle', 'Gestiona tus cursos y mentorías'); ?></p>
                 </div>
                 <div class="mentor-actions">
-                    @yield('mentor-actions')
+                    <?php echo $__env->yieldContent('mentor-actions'); ?>
                 </div>
             </div>
 
             <div class="mentor-content">
-                @yield('mentor-content')
+                <?php echo $__env->yieldContent('mentor-content'); ?>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/layouts/mentor.blade.php ENDPATH**/ ?>

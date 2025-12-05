@@ -1,7 +1,7 @@
 @extends('layouts.mentor')
 
 @section('mentor-title', 'Mis mentorías')
-@section('mentor-subtitle', 'Define tus sesiones y tarifas Lovable')
+@section('mentor-subtitle', 'Personas inscritas en tus mentorías SkillNest')
 
 @section('mentor-actions')
     <a href="{{ route('mentorias.create') }}" class="btn-gradient rounded-full px-6">Crear mentoría</a>

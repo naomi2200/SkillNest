@@ -14,4 +14,4 @@
         </ul>
     </div>
 <?php endif; ?>
-<?php /**PATH C:\xampp\htdocs\skillnest-backend\resources\views/partials/notifications.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/partials/notifications.blade.php ENDPATH**/ ?>

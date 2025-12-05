@@ -1,9 +1,7 @@
-@extends('layouts.mentor')
+<?php $__env->startSection('mentor-title', isset($course) ? 'Editar curso' : 'Crear curso'); ?>
+<?php $__env->startSection('mentor-subtitle', 'Construye tu curso al estilo Lovable'); ?>
 
-@section('mentor-title', isset($course) ? 'Editar curso' : 'Crear curso')
-@section('mentor-subtitle', 'Construye tu curso al estilo Lovable')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         .course-create-page {
             background: radial-gradient(circle at 20% 20%, rgba(124,58,237,0.12), transparent 38%),
@@ -54,68 +52,69 @@
             box-shadow: 0 22px 45px rgba(103,119,239,0.35);
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('mentor-actions')
-    <a href="{{ route('mentor.courses') }}" class="btn-secondary rounded-full px-6">Mis cursos</a>
-@endsection
+<?php $__env->startSection('mentor-actions'); ?>
+    <a href="<?php echo e(route('mentor.courses')); ?>" class="btn-secondary rounded-full px-6">Mis cursos</a>
+<?php $__env->stopSection(); ?>
 
-@section('mentor-content')
+<?php $__env->startSection('mentor-content'); ?>
     <div class="course-create-page">
         <div class="mx-auto max-w-6xl space-y-8">
 
         <div class="rounded-[32px] border border-slate-100 bg-white shadow-card course-card">
-            <form action="{{ isset($course) ? route('mentor.courses.update', $course) : route('mentor.courses.store') }}" method="POST" class="space-y-6 p-6">
-                @csrf
-                @if(isset($course))
-                    @method('PUT')
-                @endif
+            <form action="<?php echo e(isset($course) ? route('mentor.courses.update', $course) : route('mentor.courses.store')); ?>" method="POST" class="space-y-6 p-6">
+                <?php echo csrf_field(); ?>
+                <?php if(isset($course)): ?>
+                    <?php echo method_field('PUT'); ?>
+                <?php endif; ?>
 
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <label class="text-sm font-semibold text-secondary">Título del curso</label>
-                        <input type="text" name="title" value="{{ old('title', $course->title ?? '') }}" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>
+                        <input type="text" name="title" value="<?php echo e(old('title', $course->title ?? '')); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-secondary">Categoría</label>
-                        <input type="text" name="category" value="{{ old('category', $course->category ?? '') }}" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>
+                        <input type="text" name="category" value="<?php echo e(old('category', $course->category ?? '')); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>
                     </div>
                 </div>
 
                 <div>
                     <label class="text-sm font-semibold text-secondary">Descripción</label>
-                    <textarea name="description" rows="4" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>{{ old('description', $course->description ?? '') }}</textarea>
+                    <textarea name="description" rows="4" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required><?php echo e(old('description', $course->description ?? '')); ?></textarea>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-3">
                     <div>
                         <label class="text-sm font-semibold text-secondary">Precio (S/)</label>
-                        <input type="number" name="price" value="{{ old('price', $course->price ?? 0) }}" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" step="0.1" required>
+                        <input type="number" name="price" value="<?php echo e(old('price', $course->price ?? 0)); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" step="0.1" required>
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-secondary">Duración (horas)</label>
-                        <input type="number" name="duration" value="{{ old('duration', $course->duration ?? 10) }}" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>
+                        <input type="number" name="duration" value="<?php echo e(old('duration', $course->duration ?? 10)); ?>" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3" required>
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-secondary">Nivel</label>
                         <select name="level" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3">
-                            @foreach(['principiante', 'intermedio', 'avanzado'] as $level)
-                                <option value="{{ $level }}" @selected(old('level', $course->level ?? 'principiante') === $level)>{{ ucfirst($level) }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = ['principiante', 'intermedio', 'avanzado']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $level): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($level); ?>" <?php if(old('level', $course->level ?? 'principiante') === $level): echo 'selected'; endif; ?>><?php echo e(ucfirst($level)); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                 </div>
 
                 <div class="flex justify-end">
                     <button class="course-primary-action">
-                        {{ isset($course) ? 'Guardar cambios' : 'Guardar y continuar' }}
+                        <?php echo e(isset($course) ? 'Guardar cambios' : 'Guardar y continuar'); ?>
+
                     </button>
                 </div>
             </form>
 
-            @isset($course)
+            <?php if(isset($course)): ?>
                 <hr class="border-slate-100">
-                <section class="space-y-6 p-6" x-data="builder({{ $course->id }})">
+                <section class="space-y-6 p-6" x-data="builder(<?php echo e($course->id); ?>)">
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-semibold text-secondary">Estructura del curso</h2>
                         <button class="btn-gradient rounded-full px-5" @click="saveStructure">Guardar estructura</button>
@@ -149,21 +148,21 @@
                     <button class="btn-secondary rounded-full px-6" @click="addModule">+ Agregar módulo</button>
 
                     <div class="pt-4">
-                        <form action="{{ route('mentor.courses.submit', $course) }}" method="POST">
-                            @csrf
+                        <form action="<?php echo e(route('mentor.courses.submit', $course)); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <button class="btn-primary rounded-full px-8">Enviar a revisión</button>
                         </form>
                     </div>
                 </section>
-            @endisset
+            <?php endif; ?>
         </div>
     </div>
 
-    @isset($course)
+    <?php if(isset($course)): ?>
         <script>
             function builder(courseId) {
                 return {
-                    modules: @json($builderModules ?? []),
+                    modules: <?php echo json_encode($builderModules ?? [], 15, 512) ?>,
                     addModule() {
                         this.modules.push({
                             local_id: crypto.randomUUID(),
@@ -190,11 +189,11 @@
                         this.modules[moduleIndex].lessons.splice(lessonIndex, 1);
                     },
                     async saveStructure() {
-                        await fetch(`{{ route('mentor.courses.structure', $course ?? 0) }}`, {
+                        await fetch(`<?php echo e(route('mentor.courses.structure', $course ?? 0)); ?>`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                             },
                             body: JSON.stringify({ modules: this.modules })
                         });
@@ -203,5 +202,7 @@
                 }
             }
         </script>
-    @endisset
-@endsection
+    <?php endif; ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.mentor', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PHP\SkillNest\skillNest\resources\views/mentor/create-course.blade.php ENDPATH**/ ?>
