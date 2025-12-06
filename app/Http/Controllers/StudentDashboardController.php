@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StudentProgress;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class StudentDashboardController extends Controller
 {
@@ -11,24 +13,87 @@ class StudentDashboardController extends Controller
         $user = $request->user();
 
         $courses = $user?->cursosInscritos()
+            ->with(['mentor', 'modules.lessons'])
             ->withPivot('progress')
             ->get() ?? collect();
 
-        $mentoriasQuery = $user?->mentoriasComoEstudiante()
-            ->whereIn('estado', ['confirmada', 'pagada', 'completada'])
-            ->latest('fecha_mentoria');
+        $courseProgress = [];
+        $progressValues = [];
+        $completedCourses = 0;
+
+        foreach ($courses as $course) {
+            $totalLessons = $course->lessons->count();
+            $completedLessons = StudentProgress::where('student_id', $user->id)
+                ->where('course_id', $course->id)
+                ->whereNotNull('completed_at')
+                ->count();
+
+            $progress = $course->pivot->progress
+                ?? ($totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0);
+            $progress = min(100, max(0, $progress));
+
+            if ($progress >= 100) {
+                $completedCourses++;
+            }
+
+            $progressValues[] = $progress;
+
+            $courseProgress[] = [
+                'title' => $course->title,
+                'mentor' => $course->mentor->name ?? 'Mentor',
+                'modules' => $course->modules->count(),
+                'hours' => $course->duration,
+                'progress' => $progress,
+                'color' => 'linear-gradient(135deg,#667eea,#764ba2)',
+            ];
+        }
+
+        $activeCourses = max(0, $courses->count() - $completedCourses);
+        $averageProgress = $progressValues
+            ? round(array_sum($progressValues) / count($progressValues))
+            : 0;
+        $totalHours = $courses->sum('duration');
+
+        $mentorships = $user?->mentoriasComoEstudiante()
+            ->with('mentor')
+            ->whereIn('estado', ['confirmada', 'pendiente'])
+            ->orderBy('fecha_programada')
+            ->orderBy('hora_programada')
+            ->take(4)
+            ->get()
+            ->map(function ($mentoria) {
+                $name = $mentoria->mentor->name ?? 'Mentor';
+                $initials = collect(explode(' ', $name))
+                    ->filter()
+                    ->map(fn ($part) => Str::upper(Str::substr($part, 0, 1)))
+                    ->join('') ?: 'M';
+
+                return [
+                    'name' => $name,
+                    'avatar' => $initials,
+                    'specialty' => $mentoria->especialidad ?? $mentoria->titulo ?? 'Mentoría',
+                    'date' => optional($mentoria->fecha_programada)->format('d M') ?? $mentoria->fecha_programada,
+                    'hour' => $mentoria->hora_programada,
+                    'status' => $mentoria->estado,
+                ];
+            }) ?? collect();
 
         $stats = [
-            'courses' => $courses->count(),
-            'mentorias' => (clone $mentoriasQuery)?->count() ?? 0,
+            'active_courses' => $activeCourses,
+            'completed_courses' => $completedCourses,
+            'average_progress' => $averageProgress,
+            'total_hours' => $totalHours,
         ];
 
-        $nextCourse = $courses->sortByDesc(fn ($course) => $course->pivot->progress ?? 0)->first();
-        $upcomingMentorias = $mentoriasQuery
-            ? $mentoriasQuery->take(4)->get()
-            : collect();
+        $mentorshipsArray = $mentorships instanceof \Illuminate\Support\Collection ? $mentorships->toArray() : [];
+        $courseProgressArray = $courseProgress instanceof \Illuminate\Support\Collection ? $courseProgress->toArray() : $courseProgress;
 
-        return view('student.dashboard', compact('stats', 'nextCourse', 'upcomingMentorias'));
+        return view('student.dashboard', [
+            'stats' => $stats,
+            'courseProgress' => $courseProgressArray,
+            'mentorships' => $mentorshipsArray,
+            'upcomingEvents' => [],
+        ]);
     }
 
     public function cursos(Request $request)

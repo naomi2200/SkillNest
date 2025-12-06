@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         :root {
             --primary: #6c47ff;
@@ -371,9 +369,9 @@
             }
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@php
+<?php
     use Illuminate\Support\Str;
 
     $profile = $mentor->mentorProfile;
@@ -392,9 +390,9 @@
     $experienceLabel = $profile?->nivel_experiencia
         ? ($experienceLabels[$profile->nivel_experiencia] ?? ucfirst($profile->nivel_experiencia))
         : 'Nivel no especificado';
-@endphp
+?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         :root {
             --primary: #7c3aed;
@@ -500,35 +498,38 @@
         }
         .form-input:focus { outline: 2px solid rgba(124,58,237,0.3); border-color: rgba(124,58,237,0.5); }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="mentor-container">
         <section class="mentor-hero">
             <div class="mentor-avatar">
-                {{ strtoupper(Str::substr($mentor->name ?? 'S', 0, 1)) }}
+                <?php echo e(strtoupper(Str::substr($mentor->name ?? 'S', 0, 1))); ?>
+
             </div>
             <div class="mentor-info">
                 <div class="mentor-badge">Mentor verificado</div>
-                <h1 class="mentor-name">{{ $mentor->name }}</h1>
-                <p class="mentor-specialty">{{ $specialty }}</p>
+                <h1 class="mentor-name"><?php echo e($mentor->name); ?></h1>
+                <p class="mentor-specialty"><?php echo e($specialty); ?></p>
                 <div class="mentor-stats">
                     <span class="mentor-stat">
-                        ★ {{ number_format($mentor->rating ?? 4.8, 1) }}
-                        • {{ $mentor->sessions_count ?? 0 }} sesiones
+                        ★ <?php echo e(number_format($mentor->rating ?? 4.8, 1)); ?>
+
+                        • <?php echo e($mentor->sessions_count ?? 0); ?> sesiones
                     </span>
                     <span class="mentor-stat">
-                        ⏱ {{ $profile->experiencia_anios ?? 0 }} años experiencia
+                        ⏱ <?php echo e($profile->experiencia_anios ?? 0); ?> años experiencia
                     </span>
                     <span class="mentor-stat highlight">
-                        {{ optional($mentoria)->estado === 'publicada' ? 'Disponible' : 'Agenda cerrada' }}
+                        <?php echo e(optional($mentoria)->estado === 'publicada' ? 'Disponible' : 'Agenda cerrada'); ?>
+
                     </span>
                 </div>
             </div>
             <div class="mentor-pricing">
                 <p class="label">Tarifa por sesión</p>
-                <p class="amount">S/ {{ number_format($mentoriaPrice, 2) }}</p>
-                <p class="label" style="margin-top: 4px;">{{ $mentoriaDuration }} minutos • {{ $modalidad }}</p>
+                <p class="amount">S/ <?php echo e(number_format($mentoriaPrice, 2)); ?></p>
+                <p class="label" style="margin-top: 4px;"><?php echo e($mentoriaDuration); ?> minutos • <?php echo e($modalidad); ?></p>
             </div>
         </section>
 
@@ -537,64 +538,66 @@
                 <section class="content-card">
                     <h2 class="card-title">Acerca de mí</h2>
                     <p class="card-description">
-                        {{ $profile->descripcion ?? 'Este mentor aún no ha completado su biografía.' }}
+                        <?php echo e($profile->descripcion ?? 'Este mentor aún no ha completado su biografía.'); ?>
+
                     </p>
                     <div class="stats-grid">
                         <div class="stat-item">
                             <p class="stat-label">Especialidad</p>
-                            <p class="stat-value">{{ $specialty }}</p>
+                            <p class="stat-value"><?php echo e($specialty); ?></p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Experiencia</p>
-                            <p class="stat-value">{{ $experienceLabel }}</p>
+                            <p class="stat-value"><?php echo e($experienceLabel); ?></p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Modalidad</p>
-                            <p class="stat-value">{{ $modalidad }}</p>
+                            <p class="stat-value"><?php echo e($modalidad); ?></p>
                         </div>
                     </div>
                 </section>
 
                 <section class="content-card">
                     <h2 class="card-title">Habilidades técnicas</h2>
-                    @if($skills)
+                    <?php if($skills): ?>
                         <div class="skills-container">
-                            @foreach($skills as $skill)
-                                <span class="skill-tag">{{ $skill }}</span>
-                            @endforeach
+                            <?php $__currentLoopData = $skills; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $skill): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <span class="skill-tag"><?php echo e($skill); ?></span>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="card-description">Aún no se registran habilidades.</div>
-                    @endif
+                    <?php endif; ?>
                 </section>
 
                 <section class="content-card">
                     <h2 class="card-title">Categorías destacadas</h2>
-                    @if($categories)
+                    <?php if($categories): ?>
                         <div class="categories-container">
-                            @foreach($categories as $category)
-                                <span class="category-tag">{{ $category }}</span>
-                            @endforeach
+                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <span class="category-tag"><?php echo e($category); ?></span>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="card-description">Este mentor aún no define categorías.</div>
-                    @endif
+                    <?php endif; ?>
                 </section>
 
                 <section class="content-card">
                     <h2 class="card-title">Cursos dictados</h2>
                     <div class="courses-grid">
-                        @forelse($courses as $course)
+                        <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <article class="course-item">
-                                <p class="course-category">{{ $course->category ?? 'Curso' }}</p>
-                                <h3 class="course-title">{{ $course->title ?? $course->name }}</h3>
+                                <p class="course-category"><?php echo e($course->category ?? 'Curso'); ?></p>
+                                <h3 class="course-title"><?php echo e($course->title ?? $course->name); ?></h3>
                                 <p class="course-description">
-                                    {{ $course->description ?? 'Detalles no disponibles.' }}
+                                    <?php echo e($course->description ?? 'Detalles no disponibles.'); ?>
+
                                 </p>
                             </article>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="card-description">Este mentor aún no tiene cursos públicos.</div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </section>
             </div>
@@ -605,22 +608,22 @@
                     Sesiones personalizadas 1:1. Comparte tus objetivos y define un plan junto a tu mentor.
                 </p>
 
-                @if(!auth()->check())
-                    <a href="{{ route('login') }}" class="btn">Inicia sesión para agendar</a>
-                @elseif(auth()->user()->isMentor())
+                <?php if(!auth()->check()): ?>
+                    <a href="<?php echo e(route('login')); ?>" class="btn">Inicia sesión para agendar</a>
+                <?php elseif(auth()->user()->isMentor()): ?>
                     <div class="card-description text-sm">
                         Inicia sesión como estudiante para reservar una sesión.
                     </div>
-                @elseif(!$mentoria || $mentoria->estado !== 'publicada')
+                <?php elseif(!$mentoria || $mentoria->estado !== 'publicada'): ?>
                     <div class="card-description text-sm">
                         Este mentor no tiene sesiones disponibles por ahora.
                     </div>
-                @else
-                    <form method="POST" action="{{ route('mentor-market.book', $mentor) }}" class="booking-form">
-                        @csrf
+                <?php else: ?>
+                    <form method="POST" action="<?php echo e(route('mentor-market.book', $mentor)); ?>" class="booking-form">
+                        <?php echo csrf_field(); ?>
                         <div>
                             <label class="form-label">Fecha</label>
-                            <input type="date" class="form-input" name="date" min="{{ now()->toDateString() }}" required>
+                            <input type="date" class="form-input" name="date" min="<?php echo e(now()->toDateString()); ?>" required>
                         </div>
                         <div>
                             <label class="form-label">Hora</label>
@@ -631,30 +634,32 @@
                             <textarea class="form-input" rows="3" name="notes" placeholder="Cuéntale tus objetivos o contexto..."></textarea>
                         </div>
 
-                        @php
+                        <?php
                             $serviceFee = round($mentoriaPrice * 0.05, 2);
                             $total = $mentoriaPrice + $serviceFee;
-                        @endphp
+                        ?>
 
                         <div class="pricing-breakdown">
                             <div class="breakdown-item">
                                 <span>Precio por sesión</span>
-                                <span>S/ {{ number_format($mentoriaPrice, 2) }}</span>
+                                <span>S/ <?php echo e(number_format($mentoriaPrice, 2)); ?></span>
                             </div>
                             <div class="breakdown-item">
                                 <span>Servicio SkillNest (5%)</span>
-                                <span>S/ {{ number_format($serviceFee, 2) }}</span>
+                                <span>S/ <?php echo e(number_format($serviceFee, 2)); ?></span>
                             </div>
                             <div class="breakdown-item breakdown-total">
                                 <span>Total estimado</span>
-                                <span>S/ {{ number_format($total, 2) }}</span>
+                                <span>S/ <?php echo e(number_format($total, 2)); ?></span>
                             </div>
                         </div>
 
                         <button type="submit" class="btn">Agendar sesión</button>
                     </form>
-                @endif
+                <?php endif; ?>
             </aside>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\NADHIRA\Downloads\SkillNest\resources\views/mentor-market/show.blade.php ENDPATH**/ ?>

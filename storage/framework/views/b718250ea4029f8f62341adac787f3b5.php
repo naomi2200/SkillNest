@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@php
+<?php
     $categorias = collect($categorias ?? []);
     $cursos = collect($cursos ?? []);
     $mentores = collect($mentores ?? []);
@@ -215,9 +213,9 @@
     if (\Illuminate\Support\Facades\Route::has('admin.dashboard')) {
         $adminDashboardUrl = route('admin.dashboard');
     }
-@endphp
+?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <style>
     /* ===== ESTILOS MEJORADOS ===== */
     :root {
@@ -466,12 +464,12 @@
                             <div class="relative">
                                 <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20"></div>
                                 <div class="relative glass-effect rounded-2xl shadow-soft">
-                                    <form action="{{ route('home') }}" method="GET" class="flex flex-col sm:flex-row">
+                                    <form action="<?php echo e(route('home')); ?>" method="GET" class="flex flex-col sm:flex-row">
                                         <div class="flex-1 relative">
                                             <i class="fas fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
                                             <input type="text"
                                                    name="q"
-                                                   value="{{ request('q') }}"
+                                                   value="<?php echo e(request('q')); ?>"
                                                    placeholder="¿Qué quieres aprender hoy?"
                                                    class="w-full pl-14 pr-6 py-5 text-lg text-gray-700 rounded-l-2xl border-0 focus:ring-3 focus:ring-purple-200 focus:outline-none bg-transparent placeholder-gray-400">
                                         </div>
@@ -491,7 +489,7 @@
                                     <i class="fas fa-book-open text-blue-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <div class="text-3xl font-bold text-gray-900">{{ $statsCursos }}</div>
+                                    <div class="text-3xl font-bold text-gray-900"><?php echo e($statsCursos); ?></div>
                                     <div class="text-gray-600 text-sm font-medium">Cursos Premium</div>
                                 </div>
                             </div>
@@ -500,7 +498,7 @@
                                     <i class="fas fa-users text-green-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <div class="text-3xl font-bold text-gray-900">{{ $statsEstudiantes }}</div>
+                                    <div class="text-3xl font-bold text-gray-900"><?php echo e($statsEstudiantes); ?></div>
                                     <div class="text-gray-600 text-sm font-medium">Estudiantes Activos</div>
                                 </div>
                             </div>
@@ -509,7 +507,7 @@
                                     <i class="fas fa-star text-yellow-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <div class="text-3xl font-bold text-gray-900">{{ $statsRating }}/5</div>
+                                    <div class="text-3xl font-bold text-gray-900"><?php echo e($statsRating); ?>/5</div>
                                     <div class="text-gray-600 text-sm font-medium">Rating Promedio</div>
                                 </div>
                             </div>
@@ -517,11 +515,11 @@
 
                         <!-- Botones de acción -->
                         <div class="flex flex-col sm:flex-row gap-5">
-                            <a href="{{ Route::has('cursos.index') ? route('cursos.index') : url('/cursos') }}" 
+                            <a href="<?php echo e(Route::has('cursos.index') ? route('cursos.index') : url('/cursos')); ?>" 
                                class="btn-primary text-lg px-10 py-4">
                                 <i class="fas fa-play-circle mr-3"></i>Explorar Cursos
                             </a>
-                            <a href="{{ route('mentor-market.index') }}" 
+                            <a href="<?php echo e(route('mentor-market.index')); ?>" 
                                class="border-2 border-gray-300 text-gray-700 font-semibold px-10 py-4 rounded-xl text-center hover:border-purple-500 hover:text-purple-600 hover:bg-purple-50 transition-all flex items-center justify-center text-lg">
                                 <i class="fas fa-video mr-3"></i>Ver Mentorías
                             </a>
@@ -529,20 +527,20 @@
 
                         <!-- Enlaces rápidos -->
                         <div class="mt-10 flex flex-wrap items-center gap-4 text-sm">
-                            @if($primaryCheckoutCourse && $hasCheckoutRoute)
-                                <a href="{{ route('courses.checkout', $primaryCheckoutCourse) }}" 
+                            <?php if($primaryCheckoutCourse && $hasCheckoutRoute): ?>
+                                <a href="<?php echo e(route('courses.checkout', $primaryCheckoutCourse)); ?>" 
                                    class="inline-flex items-center gap-2 text-purple-600 font-semibold hover:text-purple-800 transition-colors px-4 py-2 rounded-lg hover:bg-purple-50">
                                     <i class="fas fa-shopping-cart"></i>
                                     Comprar curso destacado
                                 </a>
-                            @endif
-                            @if($mentorForBooking && $hasMentorBookRoute)
-                                <a href="{{ route('mentor.book.form', $mentorForBooking) }}" 
+                            <?php endif; ?>
+                            <?php if($mentorForBooking && $hasMentorBookRoute): ?>
+                                <a href="<?php echo e(route('mentor.book.form', $mentorForBooking)); ?>" 
                                    class="inline-flex items-center gap-2 text-purple-600 font-semibold hover:text-purple-800 transition-colors px-4 py-2 rounded-lg hover:bg-purple-50">
                                     <i class="fas fa-calendar-check"></i>
                                     Agendar mentoría
                                 </a>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -752,8 +750,8 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach($categorias as $index => $categoria)
-                    @php
+                <?php $__currentLoopData = $categorias; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $categoria): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $categoriaUrl = Route::has('cursos.categoria') && isset($categoria->slug)
                             ? route('cursos.categoria', $categoria->slug)
                             : (Route::has('cursos.index') ? route('cursos.index') : '#');
@@ -771,33 +769,34 @@
                             ['from-red-500', 'to-pink-500']
                         ];
                         $currentGradient = $gradientColors[$index % count($gradientColors)];
-                    @endphp
+                    ?>
                     
-                    <a href="{{ $categoriaUrl }}" 
+                    <a href="<?php echo e($categoriaUrl); ?>" 
                        class="category-card group hover:shadow-hover animate-slide-in" 
-                       style="animation-delay: {{ $index * 0.1 }}s">
+                       style="animation-delay: <?php echo e($index * 0.1); ?>s">
                         <div class="flex items-start justify-between mb-6">
-                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br {{ $currentGradient[0] }} {{ $currentGradient[1] }} flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <i class="{{ $categoriaIcono }} text-white text-2xl"></i>
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br <?php echo e($currentGradient[0]); ?> <?php echo e($currentGradient[1]); ?> flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <i class="<?php echo e($categoriaIcono); ?> text-white text-2xl"></i>
                             </div>
-                            <span class="text-sm font-semibold px-3 py-1 rounded-full bg-gradient-to-r {{ $currentGradient[0] }} {{ $currentGradient[1] }} text-white">
-                                {{ $categoriaCursosCount }} cursos
+                            <span class="text-sm font-semibold px-3 py-1 rounded-full bg-gradient-to-r <?php echo e($currentGradient[0]); ?> <?php echo e($currentGradient[1]); ?> text-white">
+                                <?php echo e($categoriaCursosCount); ?> cursos
                             </span>
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r {{ $currentGradient[0] }} {{ $currentGradient[1] }} group-hover:bg-clip-text transition-all duration-300">
-                            {{ $categoriaNombre }}
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r <?php echo e($currentGradient[0]); ?> <?php echo e($currentGradient[1]); ?> group-hover:bg-clip-text transition-all duration-300">
+                            <?php echo e($categoriaNombre); ?>
+
                         </h3>
-                        <p class="text-gray-600 mb-6 leading-relaxed">{{ $categoriaDescripcion }}</p>
-                        <div class="flex items-center text-sm font-semibold text-gray-700 group-hover:text-transparent group-hover:bg-gradient-to-r {{ $currentGradient[0] }} {{ $currentGradient[1] }} group-hover:bg-clip-text transition-all duration-300">
+                        <p class="text-gray-600 mb-6 leading-relaxed"><?php echo e($categoriaDescripcion); ?></p>
+                        <div class="flex items-center text-sm font-semibold text-gray-700 group-hover:text-transparent group-hover:bg-gradient-to-r <?php echo e($currentGradient[0]); ?> <?php echo e($currentGradient[1]); ?> group-hover:bg-clip-text transition-all duration-300">
                             Explorar categoría
                             <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform duration-300"></i>
                         </div>
                     </a>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
 
             <div class="text-center mt-16">
-                <a href="{{ Route::has('cursos.index') ? route('cursos.index') : url('/cursos') }}" 
+                <a href="<?php echo e(Route::has('cursos.index') ? route('cursos.index') : url('/cursos')); ?>" 
                    class="btn-primary px-12 py-4 text-lg">
                     <i class="fas fa-compass mr-3"></i>Ver todas las categorías
                 </a>
@@ -813,7 +812,7 @@
                     <h2 class="font-poppins text-4xl font-bold text-gray-900 mb-3">Cursos Destacados</h2>
                     <p class="text-xl text-gray-600">Los cursos mejor valorados por nuestra comunidad</p>
                 </div>
-                <a href="{{ Route::has('cursos.index') ? route('cursos.index') : url('/cursos') }}" 
+                <a href="<?php echo e(Route::has('cursos.index') ? route('cursos.index') : url('/cursos')); ?>" 
                    class="btn-primary px-10 py-4">
                     <i class="fas fa-graduation-cap mr-3"></i>Ver todos los cursos
                 </a>
@@ -825,8 +824,8 @@
                 <div class="overflow-hidden rounded-3xl">
                     <div class="flex transition-transform duration-500 ease-in-out"
                          :style="'transform: translateX(-' + (currentSlide * 100) + '%)'">
-                        @foreach($cursos as $curso)
-                            @php
+                        <?php $__currentLoopData = $cursos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $curso): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $categoriaCurso = optional($curso->categoria)->nombre ?? $curso->category ?? 'Programación';
                                 $courseDuration = $curso->duracion ?? $curso->duration ?? null;
                                 $cursoPrecio = $curso->precio ?? $curso->price ?? 0;
@@ -850,59 +849,63 @@
                                     1 => 'bg-gradient-to-r from-blue-500 to-cyan-500',
                                     default => 'bg-gradient-to-r from-green-500 to-emerald-500',
                                 };
-                            @endphp
+                            ?>
                             
                             <div class="w-full flex-shrink-0 px-4">
                                 <div class="course-card h-full">
                                     <div class="relative h-64 overflow-hidden rounded-t-2xl">
-                                        <img src="{{ $cursoImagen }}" 
-                                             alt="{{ $cursoTitulo }}" 
+                                        <img src="<?php echo e($cursoImagen); ?>" 
+                                             alt="<?php echo e($cursoTitulo); ?>" 
                                              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                         <div class="absolute top-6 right-6">
                                             <span class="glass-dark text-white text-sm font-bold px-4 py-2 rounded-full">
-                                                {{ strtoupper($cursoBadge) }}
+                                                <?php echo e(strtoupper($cursoBadge)); ?>
+
                                             </span>
                                         </div>
                                         <div class="absolute bottom-6 left-6 right-6">
                                             <div class="flex items-center justify-between text-white">
                                                 <div class="flex items-center">
                                                     <i class="fas fa-star text-yellow-300 mr-2"></i>
-                                                    <span class="font-bold text-lg">{{ $cursoRating }}</span>
+                                                    <span class="font-bold text-lg"><?php echo e($cursoRating); ?></span>
                                                     <span class="mx-3">•</span>
                                                     <i class="fas fa-users mr-2"></i>
-                                                    <span>{{ $cursoEstudiantes }} estudiantes</span>
+                                                    <span><?php echo e($cursoEstudiantes); ?> estudiantes</span>
                                                 </div>
-                                                @if($courseDuration)
+                                                <?php if($courseDuration): ?>
                                                     <span class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
-                                                        <i class="fas fa-clock mr-1"></i>{{ $courseDuration }}
+                                                        <i class="fas fa-clock mr-1"></i><?php echo e($courseDuration); ?>
+
                                                     </span>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="p-8">
                                         <div class="flex items-center justify-between mb-4">
                                             <span class="text-sm font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-600">
-                                                {{ $categoriaCurso }}
+                                                <?php echo e($categoriaCurso); ?>
+
                                             </span>
-                                            <div class="text-2xl font-bold text-gray-900">{{ $cursoPrecioTexto }}</div>
+                                            <div class="text-2xl font-bold text-gray-900"><?php echo e($cursoPrecioTexto); ?></div>
                                         </div>
-                                        <h3 class="text-2xl font-bold text-gray-900 mb-4 leading-tight">{{ $cursoTitulo }}</h3>
-                                        <p class="text-gray-600 mb-6 leading-relaxed">{{ $cursoDescripcion }}</p>
+                                        <h3 class="text-2xl font-bold text-gray-900 mb-4 leading-tight"><?php echo e($cursoTitulo); ?></h3>
+                                        <p class="text-gray-600 mb-6 leading-relaxed"><?php echo e($cursoDescripcion); ?></p>
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center">
                                                 <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mr-4">
                                                     <span class="text-purple-600 font-bold text-lg">
-                                                        {{ \Illuminate\Support\Str::of($cursoMentor)->substr(0, 2) }}
+                                                        <?php echo e(\Illuminate\Support\Str::of($cursoMentor)->substr(0, 2)); ?>
+
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <div class="font-semibold text-gray-900">{{ $cursoMentor }}</div>
+                                                    <div class="font-semibold text-gray-900"><?php echo e($cursoMentor); ?></div>
                                                     <div class="text-sm text-gray-500">Instructor</div>
                                                 </div>
                                             </div>
-                                            <a href="{{ $cursoShowUrl }}" 
+                                            <a href="<?php echo e($cursoShowUrl); ?>" 
                                                class="btn-primary px-8 py-3">
                                                 Ver detalles
                                                 <i class="fas fa-arrow-right ml-2"></i>
@@ -911,7 +914,7 @@
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
 
@@ -928,13 +931,13 @@
                 <!-- Puntos de navegación -->
                 <div class="flex justify-center mt-10">
                     <div class="slider-dots">
-                        @foreach($cursos as $index => $curso)
-                            <button @click="goToSlide({{ $index }})"
-                                    :class="{'active': currentSlide === {{ $index }}}"
+                        <?php $__currentLoopData = $cursos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $curso): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <button @click="goToSlide(<?php echo e($index); ?>)"
+                                    :class="{'active': currentSlide === <?php echo e($index); ?>}"
                                     class="slider-dot"
-                                    aria-label="Ir al slide {{ $index + 1 }}">
+                                    aria-label="Ir al slide <?php echo e($index + 1); ?>">
                             </button>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
@@ -952,8 +955,8 @@
             </div>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                @foreach($mentores as $index => $mentor)
-                    @php
+                <?php $__currentLoopData = $mentores; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $mentor): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $mentorUser = $mentor->user ?? null;
                         $mentorNombre = $mentor->nombre ?? $mentor->name ?? ($mentorUser->name ?? 'Mentor');
                         $mentorRol = $mentor->profesion ?? $mentor->especialidad ?? $mentor->role ?? 'Experto';
@@ -981,14 +984,14 @@
                             'bg-gradient-to-r from-purple-500 to-blue-500'
                         ];
                         $currentGradient = $gradientClasses[$index % count($gradientClasses)];
-                    @endphp
+                    ?>
                     
-                    <div class="mentor-card group animate-slide-in" style="animation-delay: {{ $index * 0.1 }}s">
+                    <div class="mentor-card group animate-slide-in" style="animation-delay: <?php echo e($index * 0.1); ?>s">
                         <!-- Avatar del mentor -->
                         <div class="relative inline-block mb-8">
-                            <div class="w-24 h-24 rounded-full {{ $currentGradient }} p-1 mx-auto">
+                            <div class="w-24 h-24 rounded-full <?php echo e($currentGradient); ?> p-1 mx-auto">
                                 <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
-                                    <span class="text-2xl font-bold gradient-text">{{ $mentorIniciales }}</span>
+                                    <span class="text-2xl font-bold gradient-text"><?php echo e($mentorIniciales); ?></span>
                                 </div>
                             </div>
                             <div class="absolute bottom-2 right-2 w-10 h-10 bg-green-500 rounded-full border-4 border-white flex items-center justify-center shadow-lg">
@@ -997,44 +1000,46 @@
                         </div>
 
                         <!-- Información del mentor -->
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ $mentorNombre }}</h3>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2"><?php echo e($mentorNombre); ?></h3>
                         <p class="text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-                            {{ $mentorRol }}
+                            <?php echo e($mentorRol); ?>
+
                         </p>
                         
                         <!-- Rating -->
                         <div class="flex items-center justify-center mb-4">
                             <div class="flex items-center">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="fas fa-star {{ $i <= floor($mentorRating) ? 'text-yellow-400' : 'text-gray-300' }} text-lg"></i>
-                                @endfor
-                                <span class="ml-3 font-bold text-gray-700">{{ $mentorRating }}</span>
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fas fa-star <?php echo e($i <= floor($mentorRating) ? 'text-yellow-400' : 'text-gray-300'); ?> text-lg"></i>
+                                <?php endfor; ?>
+                                <span class="ml-3 font-bold text-gray-700"><?php echo e($mentorRating); ?></span>
                             </div>
                         </div>
                         
                         <!-- Sesiones -->
                         <div class="text-gray-600 mb-6 flex items-center justify-center">
                             <i class="fas fa-video mr-3 text-purple-500"></i>
-                            <span>{{ $mentorSesiones }} sesiones impartidas</span>
+                            <span><?php echo e($mentorSesiones); ?> sesiones impartidas</span>
                         </div>
                         
                         <!-- Precio -->
                         <div class="text-3xl font-bold text-gray-900 mb-8">
-                            {{ $mentorPrecio }}
+                            <?php echo e($mentorPrecio); ?>
+
                             <span class="text-base font-normal text-gray-600">/hora</span>
                         </div>
                         
                         <!-- Botón de acción -->
-                        <a href="{{ $mentorUrl }}" 
+                        <a href="<?php echo e($mentorUrl); ?>" 
                            class="block w-full btn-primary py-4 rounded-xl text-lg">
                             <i class="fas fa-user-tie mr-3"></i>Ver perfil completo
                         </a>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
 
             <div class="text-center mt-16">
-                <a href="{{ route('mentor-market.index') }}" 
+                <a href="<?php echo e(route('mentor-market.index')); ?>" 
                    class="btn-primary px-12 py-4 text-lg">
                     <i class="fas fa-users mr-3"></i>Explorar todos los mentores
                 </a>
@@ -1077,12 +1082,12 @@
 
                 <!-- Botones de acción -->
                 <div class="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-                    <a href="{{ route('register') }}" 
+                    <a href="<?php echo e(route('register')); ?>" 
                        class="bg-white text-purple-600 font-bold px-12 py-5 rounded-2xl hover:shadow-hover transition-all flex items-center justify-center text-lg group">
                         <i class="fas fa-user-graduate mr-4 text-xl group-hover:scale-110 transition-transform"></i>
                         Comenzar Gratis
                     </a>
-                    <a href="{{ url('/mentorias/create') }}" 
+                    <a href="<?php echo e(url('/mentorias/create')); ?>" 
                        class="bg-transparent border-2 border-white text-white font-bold px-12 py-5 rounded-2xl hover:bg-white/10 transition-all flex items-center justify-center text-lg group">
                         <i class="fas fa-chalkboard-teacher mr-4 text-xl group-hover:scale-110 transition-transform"></i>
                         Convertirse en Mentor
@@ -1114,7 +1119,7 @@
     function courseSlider() {
         return {
             currentSlide: 0,
-            totalSlides: {{ $cursos->count() }},
+            totalSlides: <?php echo e($cursos->count()); ?>,
             interval: null,
             
             init() {
@@ -1187,4 +1192,5 @@
         });
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\NADHIRA\Downloads\SkillNest\resources\views/home.blade.php ENDPATH**/ ?>

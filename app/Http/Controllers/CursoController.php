@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,13 +16,44 @@ class CursoController extends Controller
 {
     public function index(Request $request)
     {
-        $cursos = Curso::with('mentor')->latest()->get();
+        $query = Curso::with('mentor')
+            ->where('status', 'approved');
+
+        $categoryIds = array_filter((array) $request->input('categories', []));
+        if (!empty($categoryIds)) {
+            $query->whereIn('category_id', $categoryIds);
+        }
+
+        $levels = array_filter((array) $request->input('levels', []));
+        if (!empty($levels)) {
+            $query->whereIn('level', $levels);
+        }
+
+        $range = $request->input('price_range');
+        if ($range) {
+            $query->when($range === 'free', fn ($q) => $q->where('price', 0))
+                ->when($range === '<100', fn ($q) => $q->whereBetween('price', [0.01, 99.99]))
+                ->when($range === '100-300', fn ($q) => $q->whereBetween('price', [100, 300]))
+                ->when($range === '300-600', fn ($q) => $q->whereBetween('price', [300, 600]))
+                ->when($range === '>600', fn ($q) => $q->where('price', '>', 600));
+        }
+
+        $cursos = $query->latest()->get();
+        $categories = Curso::where('status', 'approved')
+            ->select('category', DB::raw('count(*) as total'))
+            ->groupBy('category')
+            ->orderBy('category')
+            ->get();
 
         if ($request->expectsJson()) {
             return response()->json($cursos);
         }
 
-        return view('cursos.index', compact('cursos'));
+        return view('cursos.index', [
+            'cursos' => $cursos,
+            'catalog' => $cursos,
+            'categories' => $categories,
+        ]);
     }
 
     public function create()
@@ -309,6 +341,27 @@ class CursoController extends Controller
         return back()->with('status', 'Curso publicado correctamente.');
     }
 
+    // CAMBIO INICIO
+    /**
+     * API: devuelve los cursos del mentor autenticado con relaciones básicas.
+     */
+    public function getMentorCourses(Request $request)
+    {
+        $mentor = $request->user();
+        abort_unless($mentor && method_exists($mentor, 'isMentor') && $mentor->isMentor(), 403);
+
+        $courses = Curso::withCount(['modules', 'lessons'])
+            ->with('mentor')
+            ->where('mentor_id', $mentor->id)
+            ->latest('updated_at')
+            ->get();
+
+        return response()->json([
+            'courses' => $courses,
+        ]);
+    }
+    // CAMBIO FIN
+
     protected function authorizeCourseMentor(?User $user, Curso $curso): void
     {
         if ($user && method_exists($user, 'isAdmin') && $user->isAdmin()) {
@@ -321,13 +374,6 @@ class CursoController extends Controller
         );
     }
 }
-
-
-
-
-
-
-
 
 
 

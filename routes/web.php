@@ -19,6 +19,10 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Curso;
+
+// Asegura el binding correcto del recurso {curso} al modelo Curso
+Route::model('curso', Curso::class);
 
 Route::get('/', fn () => view('home'))->name('home');
 
@@ -90,6 +94,9 @@ Route::middleware('auth')->group(function () {
         // 2) CRUD protegido (mentores/admin): create/read/update/delete/publicar/gestionar pagos.
         Route::resource('mentorias', MentoriaController::class);
     });
+    // CAMBIO INICIO
+    Route::get('/mentorias/create', fn () => redirect()->route('mentorias.create'));
+    // CAMBIO FIN
     // 3) Acceso compartido a la sala virtual (mentor/estudiante).
     Route::get('/mentorias/{mentoria}/join', [MentoriaController::class, 'join'])->name('mentorias.join');
 

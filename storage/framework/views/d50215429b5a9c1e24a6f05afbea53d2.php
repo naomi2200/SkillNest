@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@php
+<?php
     use Illuminate\Support\Facades\Route;
 
     $user = auth()->user();
@@ -100,9 +98,9 @@
     $userName = auth()->user()->name ?? 'Usuario';
     $userEmail = auth()->user()->email ?? 'usuario@email.com';
     $userInitial = strtoupper(substr($userName, 0, 1));
-@endphp
+?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     :root {
@@ -423,9 +421,9 @@
         }
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="dashboard-layout">
     <!-- Botón para mostrar/ocultar sidebar en móviles -->
     <button class="sidebar-toggle" id="sidebarToggle" style="display: none;">
@@ -442,14 +440,14 @@
         <div class="sidebar-section">
             <div class="section-label">MENTOR PANEL</div>
             <nav class="dashboard-nav">
-                @foreach($dashboardNav as $item)
-                    <a href="{{ $item['route'] }}" 
-                       class="nav-item {{ $item['active'] ? 'active' : '' }}"
-                       onclick="{{ request()->routeIs('dashboard') && $item['label'] == 'Dashboard' ? 'event.preventDefault();' : '' }}">
-                        <i class="{{ $item['icon'] }}"></i>
-                        <span>{{ $item['label'] }}</span>
+                <?php $__currentLoopData = $dashboardNav; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <a href="<?php echo e($item['route']); ?>" 
+                       class="nav-item <?php echo e($item['active'] ? 'active' : ''); ?>"
+                       onclick="<?php echo e(request()->routeIs('dashboard') && $item['label'] == 'Dashboard' ? 'event.preventDefault();' : ''); ?>">
+                        <i class="<?php echo e($item['icon']); ?>"></i>
+                        <span><?php echo e($item['label']); ?></span>
                     </a>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </nav>
         </div>
 
@@ -457,11 +455,12 @@
         <div class="user-section">
             <div class="user-info">
                 <div class="user-avatar">
-                    {{ $userInitial }}
+                    <?php echo e($userInitial); ?>
+
                 </div>
                 <div class="user-details">
-                    <h4>{{ $userName }}</h4>
-                    <p>{{ $userEmail }}</p>
+                    <h4><?php echo e($userName); ?></h4>
+                    <p><?php echo e($userEmail); ?></p>
                 </div>
             </div>
         </div>
@@ -474,37 +473,38 @@
             <div class="header-content">
                 <div class="header-top">
                     <div class="header-left">
-                        <h1>@yield('dashboard-title', 'Dashboard')</h1>
-                        <p>@yield('dashboard-subtitle', 'Bienvenido a tu panel de control')</p>
+                        <h1><?php echo $__env->yieldContent('dashboard-title', 'Dashboard'); ?></h1>
+                        <p><?php echo $__env->yieldContent('dashboard-subtitle', 'Bienvenido a tu panel de control'); ?></p>
                     </div>
                     <div class="user-welcome">
-                        <span class="welcome-text">Hola, {{ $userName }}</span>
+                        <span class="welcome-text">Hola, <?php echo e($userName); ?></span>
                         <div class="user-avatar" style="width: 36px; height: 36px; font-size: 14px;">
-                            {{ $userInitial }}
+                            <?php echo e($userInitial); ?>
+
                         </div>
                     </div>
                 </div>
                 
-                @hasSection('dashboard-actions')
+                <?php if (! empty(trim($__env->yieldContent('dashboard-actions')))): ?>
                     <div class="dashboard-actions">
-                        @yield('dashboard-actions')
+                        <?php echo $__env->yieldContent('dashboard-actions'); ?>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </header>
 
         <!-- Widgets (si existen) -->
-        @hasSection('dashboard-widgets')
+        <?php if (! empty(trim($__env->yieldContent('dashboard-widgets')))): ?>
             <section class="dashboard-content">
                 <div class="widgets-grid">
-                    @yield('dashboard-widgets')
+                    <?php echo $__env->yieldContent('dashboard-widgets'); ?>
                 </div>
             </section>
-        @endif
+        <?php endif; ?>
 
         <!-- Contenido Principal -->
         <section class="dashboard-content">
-            @yield('dashboard-content')
+            <?php echo $__env->yieldContent('dashboard-content'); ?>
         </section>
     </main>
 </div>
@@ -544,4 +544,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\NADHIRA\Downloads\SkillNest\resources\views/layouts/dashboard.blade.php ENDPATH**/ ?>

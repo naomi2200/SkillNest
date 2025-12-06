@@ -113,8 +113,14 @@ class AuthController extends Controller
                 $request->session()->regenerate();
                 $user = Auth::user();
 
+                $redirectRoute = match ($user->role) {
+                    'mentor' => route('mentor.students'),
+                    'admin' => route('admin.dashboard'),
+                    default => route('dashboard'),
+                };
+
                 return redirect()
-                    ->intended($user->role === 'mentor' ? route('mentor.students') : route('dashboard'))
+                    ->intended($redirectRoute)
                     ->with('status', 'Bienvenido de nuevo, ' . $user->name);
             }
 
@@ -151,6 +157,12 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $redirectTo = match ($user->role) {
+            'mentor' => '/mentor-dashboard',
+            'admin' => '/admin/dashboard',
+            default => '/dashboard',
+        };
+
         return response()->json([
             'message' => 'Login exitoso',
             'user' => [
@@ -160,7 +172,7 @@ class AuthController extends Controller
                 'role' => $user->role,
             ],
             'token' => $token,
-            'redirect_to' => $user->role === 'mentor' ? '/mentor-dashboard' : '/dashboard'
+            'redirect_to' => $redirectTo
         ]);
     }
 

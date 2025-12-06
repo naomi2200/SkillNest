@@ -9,506 +9,160 @@
     $defaultMethod = old('payment_method', 'tarjeta');
 @endphp
 
-@push('styles')
-<style>
-    .checkout-page {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 32px;
-        padding: 56px 32px 80px;
-        margin-top: -16px;
-    }
-
-    .checkout-wrapper {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-        gap: 32px;
-    }
-
-    .checkout-payment,
-    .checkout-summary {
-        background: #fff;
-        border-radius: 32px;
-        padding: 40px;
-        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.18);
-    }
-
-    .checkout-summary {
-        position: sticky;
-        top: 120px;
-        height: fit-content;
-    }
-
-    .checkout-section-title {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #1f2937;
-        margin-bottom: 8px;
-        letter-spacing: -0.02em;
-    }
-
-    .checkout-section-subtitle {
-        color: #6b7280;
-        font-size: 0.95rem;
-        margin-bottom: 32px;
-    }
-
-    .checkout-progress {
-        position: relative;
-        display: flex;
-        margin-bottom: 36px;
-        gap: 16px;
-    }
-
-    .checkout-progress-line {
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        right: 20px;
-        height: 3px;
-        background: #e5e7eb;
-    }
-
-    .checkout-progress-fill {
-        height: 100%;
-        width: 50%;
-        background: linear-gradient(90deg, var(--color-primary), #8b5cf6);
-    }
-
-    .checkout-step {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .checkout-step-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #e5e7eb;
-        color: #9ca3af;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-    }
-
-    .checkout-step.active .checkout-step-circle {
-        background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-        color: #fff;
-        box-shadow: 0 8px 20px rgba(108, 71, 255, 0.4);
-    }
-
-    .checkout-step.completed .checkout-step-circle {
-        background: #10b981;
-        color: #fff;
-    }
-
-    .checkout-step-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #9ca3af;
-    }
-
-    .checkout-step.active .checkout-step-label {
-        color: var(--color-primary);
-    }
-
-    .checkout-methods {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-
-    .checkout-method-card {
-        border: 2px solid #e5e7eb;
-        border-radius: 24px;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        background: #fafbff;
-        transition: all 0.3s ease;
-    }
-
-    .checkout-method-card input {
-        display: none;
-    }
-
-    .checkout-method-card:hover {
-        border-color: var(--color-primary);
-        box-shadow: 0 12px 30px rgba(108,71,255,0.15);
-        transform: translateY(-2px);
-    }
-
-    .checkout-method-card.active {
-        border-color: var(--color-primary);
-        background: linear-gradient(135deg, rgba(108,71,255,0.08), rgba(139,92,246,0.08));
-        box-shadow: 0 12px 30px rgba(108,71,255,0.2);
-    }
-
-    .checkout-method-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-        color: #fff;
-        font-size: 26px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .checkout-method-card[data-method="tarjeta"] .checkout-method-icon {
-        background: linear-gradient(135deg, #8b5cf6, #6c47ff);
-    }
-
-    .checkout-method-name {
-        font-weight: 700;
-        color: #1f2937;
-    }
-
-    .checkout-method-desc {
-        font-size: 0.85rem;
-        color: #6b7280;
-        text-align: center;
-    }
-
-    .checkout-form-section {
-        display: none;
-        animation: fadeIn 0.3s ease;
-    }
-
-    .checkout-form-section.active {
-        display: block;
-    }
-
-    .checkout-yape-card {
-        background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-        border-radius: 24px;
-        padding: 32px;
-        border: 2px dashed #a78bfa;
-        text-align: center;
-    }
-
-    .checkout-yape-qr {
-        width: 220px;
-        height: 220px;
-        margin: 0 auto 20px;
-        background: #fff;
-        border-radius: 20px;
-        padding: 16px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    }
-
-    .checkout-yape-number {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #7c3aed;
-        letter-spacing: 2px;
-        margin-bottom: 12px;
-    }
-
-    .checkout-yape-text {
-        color: #6b7280;
-        line-height: 1.6;
-    }
-
-    .checkout-field {
-        margin-top: 24px;
-    }
-
-    .checkout-label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .checkout-input {
-        width: 100%;
-        border: 2px solid #e5e7eb;
-        border-radius: 16px;
-        padding: 14px 16px;
-        font-size: 0.95rem;
-        background: #f9fafb;
-        transition: all 0.3s ease;
-    }
-
-    .checkout-input:focus {
-        outline: none;
-        border-color: var(--color-primary);
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(108,71,255,0.12);
-    }
-
-    .checkout-input-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 16px;
-    }
-
-    .checkout-submit {
-        width: 100%;
-        margin-top: 32px;
-        padding: 18px;
-        border: none;
-        border-radius: 18px;
-        background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-        color: #fff;
-        font-size: 1.05rem;
-        font-weight: 700;
-        cursor: pointer;
-        box-shadow: 0 15px 40px rgba(108,71,255,0.4);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .checkout-submit:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 20px 50px rgba(108,71,255,0.45);
-    }
-
-    .summary-course {
-        display: flex;
-        gap: 16px;
-        border-bottom: 1px solid #e5e7eb;
-        padding-bottom: 24px;
-        margin-bottom: 24px;
-    }
-
-    .summary-thumbnail {
-        width: 96px;
-        height: 72px;
-        border-radius: 16px;
-        overflow: hidden;
-        flex-shrink: 0;
-        background: #eef2ff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6b7280;
-        font-weight: 600;
-    }
-
-    .summary-price-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 14px;
-        font-size: 0.95rem;
-    }
-
-    .summary-price-row.total {
-        margin-top: 10px;
-        padding-top: 14px;
-        border-top: 2px solid #e5e7eb;
-        font-size: 1.2rem;
-        font-weight: 700;
-    }
-
-    .summary-total-value {
-        font-size: 2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .summary-security {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 16px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.1));
-        border: 1px solid rgba(16,185,129,0.2);
-        color: #047857;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    @media (max-width: 1024px) {
-        .checkout-wrapper {
-            grid-template-columns: 1fr;
-        }
-
-        .checkout-summary {
-            position: static;
-        }
-    }
-@keyframes fadeIn {
-    from {opacity:0; transform: translateY(10px);}
-    to {opacity:1; transform: translateY(0);}
-}
-</style>
-@endpush
-
 @section('content')
-    <div class="checkout-page">
-        <div class="checkout-wrapper">
-            <section class="checkout-payment">
-                <header>
-                    <h1 class="checkout-section-title">Finalizar compra</h1>
-                    <p class="checkout-section-subtitle">Completa tu pago de forma segura</p>
-                </header>
+<div class="mx-auto max-w-6xl px-4 py-16">
+    <div class="space-y-6">
+        <header class="text-center space-y-2">
+            <p class="text-xs uppercase tracking-[0.4em] text-purple-600">Compra segura</p>
+            <h1 class="text-3xl font-semibold text-gray-900">Finalizar compra</h1>
+            <p class="text-sm text-gray-500 max-w-2xl mx-auto">Completa tu pago de forma segura y accede al contenido premium de inmediato.</p>
+        </header>
 
-                <div class="checkout-progress">
-                    <div class="checkout-progress-line">
-                        <div class="checkout-progress-fill"></div>
+        <div class="grid gap-8 lg:grid-cols-[1.25fr,0.75fr]">
+            <section x-data="{ method: '{{ $defaultMethod }}' }" class="space-y-6 rounded-[32px] bg-white shadow-[0_35px_90px_rgba(15,23,42,0.12)] p-8">
+                <div class="space-y-3">
+                    <p class="text-sm uppercase tracking-[0.3em] text-gray-500">Paso 2 · Pago</p>
+                    <h2 class="text-2xl font-bold text-gray-900">Datos de pago</h2>
+                    <p class="text-sm text-gray-500">Ingresa los datos para cerrar la compra del curso seleccionado.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 text-center text-xs font-semibold uppercase tracking-[0.4em] text-gray-500">
+                    <div class="space-y-1">
+                        <div class="mx-auto h-10 w-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">1</div>
+                        <p>Curso</p>
                     </div>
-                    <div class="checkout-step completed">
-                        <div class="checkout-step-circle">&#10003;</div>
-                        <span class="checkout-step-label">Curso</span>
+                    <div class="space-y-1">
+                        <div class="mx-auto h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center">2</div>
+                        <p>Pago</p>
                     </div>
-                    <div class="checkout-step active">
-                        <div class="checkout-step-circle">2</div>
-                        <span class="checkout-step-label">Pago</span>
-                    </div>
-                    <div class="checkout-step">
-                        <div class="checkout-step-circle">3</div>
-                        <span class="checkout-step-label">Confirmaci&#243;n</span>
+                    <div class="space-y-1">
+                        <div class="mx-auto h-10 w-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">3</div>
+                        <p>Confirmación</p>
                     </div>
                 </div>
 
-                <form action="{{ route('courses.purchase', $course) }}" method="POST">
+                <form action="{{ route('courses.purchase', $course) }}" method="POST" class="space-y-6">
                     @csrf
                     <input type="hidden" name="amount" value="{{ $course->price }}">
+                    <input type="hidden" name="payment_method" x-model="method">
 
-                    <div class="checkout-methods">
-                        @foreach (['yape' => ['icon' => '&#128241;', 'label' => 'Yape', 'desc' => 'Pago instant&#225;neo'],
-                                   'tarjeta' => ['icon' => '&#128179;', 'label' => 'Tarjeta', 'desc' => 'D&#233;bito o cr&#233;dito']] as $method => $info)
-                            <label class="checkout-method-card {{ $defaultMethod === $method ? 'active' : '' }}" data-method="{{ $method }}">
-                                <input type="radio" name="payment_method" value="{{ $method }}" {{ $defaultMethod === $method ? 'checked' : '' }}>
-                                <div class="checkout-method-icon">{{ $info['icon'] }}</div>
-                                <span class="checkout-method-name">{{ $info['label'] }}</span>
-                                <span class="checkout-method-desc">{{ $info['desc'] }}</span>
-                            </label>
-                        @endforeach
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="relative cursor-pointer rounded-2xl border p-5 text-center transition" :class="method === 'yape' ? 'border-purple-500 bg-white shadow-lg' : 'border border-gray-200 bg-white/70'">
+                            <input type="radio" class="sr-only" name="payment_method" value="yape" x-model="method">
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="h-12 w-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl">&#128241;</div>
+                                <div class="text-base font-semibold text-gray-800">Yape</div>
+                                <p class="text-xs text-gray-500">Pago instantáneo</p>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer rounded-2xl border p-5 text-center transition" :class="method === 'tarjeta' ? 'border-purple-500 bg-white shadow-lg' : 'border border-gray-200 bg-white/70'">
+                            <input type="radio" class="sr-only" name="payment_method" value="tarjeta" x-model="method">
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="h-12 w-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl">&#128179;</div>
+                                <div class="text-base font-semibold text-gray-800">Tarjeta</div>
+                                <p class="text-xs text-gray-500">Débito o crédito</p>
+                            </div>
+                        </label>
                     </div>
 
-                    <div class="checkout-form-section checkout-yape-form {{ $defaultMethod === 'yape' ? 'active' : '' }}">
-                        <div class="checkout-yape-card">
-                            <div class="checkout-yape-qr">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR pago">
+                    <div x-show="method === 'yape'" style="display:none;" class="space-y-4 rounded-2xl border border-dashed border-purple-200 bg-purple-50/80 p-6 text-sm text-purple-700">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="h-32 w-32 rounded-2xl bg-white p-3 shadow">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR pago" class="h-full w-full object-cover">
                             </div>
-                            <div class="checkout-yape-number">923 456 789</div>
-                            <p class="checkout-yape-text">
-                                1. Escanea el c&#243;digo o haz el pago al n&#250;mero indicado<br>
-                                2. Monto exacto: <strong>S/ {{ number_format($course->price, 2) }}</strong><br>
-                                3. Ingresa el c&#243;digo o referencia de tu operaci&#243;n
-                            </p>
-                            <div class="checkout-field">
-                                <label class="checkout-label">Referencia de pago</label>
-                                <input type="text" name="reference" value="{{ old('reference') }}" class="checkout-input" placeholder="Ingresa tu c&#243;digo de operaci&#243;n">
-                            </div>
+                            <p class="text-base font-semibold">Número: 923 456 789</p>
+                        </div>
+                        <p class="text-xs text-purple-700/80 leading-relaxed">
+                            1. Escanea el código o haz la transferencia<br>
+                            2. Monto exacto: <strong>S/ {{ number_format($course->price, 2) }}</strong><br>
+                            3. Ingresa la referencia en el campo inferior
+                        </p>
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold text-purple-600">Referencia de pago</label>
+                            <input name="reference" value="{{ old('reference') }}" class="w-full rounded-2xl border border-purple-200 bg-white px-4 py-3 text-sm text-purple-700 focus:border-purple-500 focus:outline-none" placeholder="Código de operación">
                         </div>
                     </div>
 
-                    <div class="checkout-form-section checkout-card-form {{ $defaultMethod === 'tarjeta' ? 'active' : '' }}">
-                        <div class="checkout-field">
-                            <label class="checkout-label">N&#250;mero de tarjeta</label>
-                            <input type="text" name="card_number" value="{{ old('card_number') }}" class="checkout-input" maxlength="16" placeholder="0000 0000 0000 0000">
+                    <div x-show="method === 'tarjeta'" style="display:none;" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold text-gray-500">Número de tarjeta</label>
+                            <input name="card_number" value="{{ old('card_number') }}" maxlength="16" class="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:border-purple-500 focus:outline-none" placeholder="0000 0000 0000 0000">
                         </div>
-                        <div class="checkout-field">
-                            <label class="checkout-label">Nombre del titular</label>
-                            <input type="text" name="card_name" value="{{ old('card_name', auth()->user()->name) }}" class="checkout-input" placeholder="Como aparece en la tarjeta">
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold text-gray-500">Nombre del titular</label>
+                            <input name="card_name" value="{{ old('card_name', auth()->user()->name ?? '') }}" class="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:border-purple-500 focus:outline-none" placeholder="Como aparece en la tarjeta">
                         </div>
-                        <div class="checkout-input-row">
-                            <div class="checkout-field">
-                                <label class="checkout-label">Fecha de vencimiento</label>
-                                <input type="text" class="checkout-input" placeholder="MM/AA" maxlength="5">
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div class="space-y-2">
+                                <label class="text-xs font-semibold text-gray-500">Vencimiento (MM/AA)</label>
+                                <input type="text" maxlength="5" class="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:border-purple-500 focus:outline-none" placeholder="MM/AA">
                             </div>
-                            <div class="checkout-field">
-                                <label class="checkout-label">CVV</label>
-                                <input type="text" class="checkout-input" placeholder="123" maxlength="3">
+                            <div class="space-y-2">
+                                <label class="text-xs font-semibold text-gray-500">CVV</label>
+                                <input type="text" maxlength="3" class="w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:border-purple-500 focus:outline-none" placeholder="123">
                             </div>
                         </div>
                     </div>
 
                     @if($errors->any())
-                        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600" style="margin-top:24px;">
+                        <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
                             {{ $errors->first() }}
                         </div>
                     @endif
 
-                    <button type="submit" class="checkout-submit">Confirmar pago</button>
+                    <button type="submit" class="w-full rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 px-6 py-4 text-lg font-semibold text-white shadow-lg shadow-purple-300 transition hover:opacity-95">
+                        Confirmar pago
+                    </button>
                 </form>
             </section>
 
-            <aside class="checkout-summary">
-                <h2 class="checkout-section-title" style="font-size:1.5rem;margin-bottom:24px;">Resumen del pedido</h2>
-                <div class="summary-course">
-                    <div class="summary-thumbnail">
+            <aside class="space-y-6 rounded-[32px] border border-gray-100 bg-white p-6 shadow-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-xl font-bold text-gray-700">
                         @if ($cover)
-                            <img src="{{ $cover }}" alt="Miniatura del curso" style="width:100%;height:100%;object-fit:cover;">
+                            <img src="{{ $cover }}" alt="Miniatura del curso" class="h-full w-full rounded-xl object-cover">
                         @else
-                            {{ strtoupper(substr($course->title,0,2)) }}
+                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($course->title, 0, 2)) }}
                         @endif
                     </div>
                     <div>
-                        <h3 style="margin:0 0 6px; font-size:1rem; font-weight:700;">{{ $course->title }}</h3>
-                        <p style="margin:0; color:#6b7280; font-size:0.9rem;">
-                            {{ $course->duration }} horas &#8226; {{ $course->category ?? 'Curso' }}
-                        </p>
+                        <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Curso</p>
+                        <h3 class="text-xl font-semibold text-gray-900">{{ $course->title }}</h3>
+                        <p class="text-sm text-gray-500">{{ $course->category ?? $course->categoria ?? 'Curso' }}</p>
                     </div>
                 </div>
-
-                <div>
-                    <div class="summary-price-row">
-                        <span class="price-label">Precio del curso</span>
-                        <span class="price-value">S/ {{ number_format($course->price, 2) }}</span>
+                <div class="space-y-2 text-sm text-gray-600">
+                    <div class="flex justify-between">
+                        <span>Duración</span>
+                        <span>{{ $course->duration ?? $course->duracion ?? 'N/A' }}</span>
                     </div>
-                    <div class="summary-price-row">
-                        <span class="price-label">Descuento</span>
-                        <span class="price-value" style="color:#10b981;">- S/ 0.00</span>
+                    <div class="flex justify-between">
+                        <span>Modalidad</span>
+                        <span>{{ $course->modalidad ?? 'Virtual' }}</span>
                     </div>
-                    <div class="summary-price-row total">
+                </div>
+                <div class="space-y-2 border-t border-gray-100 pt-4">
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Precio del curso</span>
+                        <span>S/ {{ number_format($course->price, 2) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Descuento</span>
+                        <span class="text-emerald-500">- S/ 0.00</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-semibold text-gray-900">
                         <span>Total</span>
-                        <span class="summary-total-value">S/ {{ number_format($course->price, 2) }}</span>
+                        <span>S/ {{ number_format($course->price, 2) }}</span>
                     </div>
                 </div>
-
-                <div class="summary-security">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <div class="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-700">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
                     Pago 100% seguro y encriptado
                 </div>
             </aside>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const methodCards = document.querySelectorAll('.checkout-method-card');
-            const yapeSection = document.querySelector('.checkout-yape-form');
-            const cardSection = document.querySelector('.checkout-card-form');
-
-            const toggleSections = (method) => {
-                methodCards.forEach(card => {
-                    const active = card.dataset.method === method;
-                    card.classList.toggle('active', active);
-                    const input = card.querySelector('input[type="radio"]');
-                    if (input) input.checked = active;
-                });
-
-                yapeSection.classList.toggle('active', method === 'yape');
-                cardSection.classList.toggle('active', method === 'tarjeta');
-            };
-
-            methodCards.forEach(card => {
-                card.addEventListener('click', () => toggleSections(card.dataset.method));
-            });
-
-            toggleSections(document.querySelector('input[name="payment_method"]:checked')?.value || 'tarjeta');
-        });
-    </script>
-    @endpush
+</div>
 @endsection

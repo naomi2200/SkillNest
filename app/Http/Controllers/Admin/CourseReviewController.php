@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Curso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\CourseApproved;
 use App\Notifications\CourseRejected;
@@ -80,13 +81,24 @@ class CourseReviewController extends Controller
         $this->authorizeAdmin();
 
         $course = Curso::findOrFail($id);
-        $course->forceFill([
+        $data = [
             'status' => 'aprobado',
-            'review_status' => 'approved',
-            'rejection_reason' => null,
-            'reviewed_by' => Auth::id(),
-            'reviewed_at' => now(),
-        ])->save();
+        ];
+
+        if (Schema::hasColumn('cursos', 'review_status')) {
+            $data['review_status'] = 'approved';
+        }
+        if (Schema::hasColumn('cursos', 'rejection_reason')) {
+            $data['rejection_reason'] = null;
+        }
+        if (Schema::hasColumn('cursos', 'reviewed_by')) {
+            $data['reviewed_by'] = Auth::id();
+        }
+        if (Schema::hasColumn('cursos', 'reviewed_at')) {
+            $data['reviewed_at'] = now();
+        }
+
+        $course->forceFill($data)->save();
 
         if ($course->mentor) {
             Notification::send($course->mentor, new CourseApproved($course));
@@ -106,13 +118,28 @@ class CourseReviewController extends Controller
         ]);
 
         $course = Curso::findOrFail($id);
-        $course->forceFill([
+        $updates = [
             'status' => 'rechazado',
-            'review_status' => 'rejected',
-            'rejection_reason' => $data['rejection_reason'],
-            'reviewed_by' => Auth::id(),
-            'reviewed_at' => now(),
-        ])->save();
+        ];
+
+        if (Schema::hasColumn('cursos', 'review_status')) {
+            $updates['review_status'] = 'rejected';
+        }
+
+        if (Schema::hasColumn('cursos', 'rejection_reason')) {
+            $updates['rejection_reason'] = $data['rejection_reason'];
+        } elseif (Schema::hasColumn('cursos', 'motivo_rechazo')) {
+            $updates['motivo_rechazo'] = $data['rejection_reason'];
+        }
+
+        if (Schema::hasColumn('cursos', 'reviewed_by')) {
+            $updates['reviewed_by'] = Auth::id();
+        }
+        if (Schema::hasColumn('cursos', 'reviewed_at')) {
+            $updates['reviewed_at'] = now();
+        }
+
+        $course->forceFill($updates)->save();
 
         if ($course->mentor) {
             Notification::send($course->mentor, new CourseRejected($course, $data['rejection_reason']));

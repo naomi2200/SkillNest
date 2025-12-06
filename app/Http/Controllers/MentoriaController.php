@@ -283,6 +283,93 @@ class MentoriaController extends Controller
             ->with('status', 'Sesi?n completada. La ganancia del mentor ha sido registrada.');
     }
 
+    // CAMBIO INICIO
+    /**
+     * API: listado compacto de mentorías del mentor autenticado.
+     */
+    public function getMentorMentorships(Request $request)
+    {
+        $mentor = $request->user();
+        abort_unless($mentor && $mentor->isMentor(), 403);
+
+        $mentorias = Mentoria::with('estudiante')
+            ->where('mentor_id', $mentor->id)
+            ->latest('fecha_solicitud')
+            ->latest('created_at')
+            ->get();
+
+        return response()->json([
+            'mentorias' => $mentorias,
+            'stats' => [
+                'total' => $mentorias->count(),
+                'pending' => $mentorias->where('estado', 'pendiente')->count(),
+                'accepted' => $mentorias->where('estado', 'aceptada')->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * API: sesiones pendientes o aceptadas para el mentor.
+     */
+    public function getPendingSessions(Request $request)
+    {
+        $mentor = $request->user();
+        abort_unless($mentor && $mentor->isMentor(), 403);
+
+        $sessions = Mentoria::with('estudiante')
+            ->where('mentor_id', $mentor->id)
+            ->whereIn('estado', ['pendiente', 'aceptada'])
+            ->orderByDesc('fecha_programada')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'sessions' => $sessions,
+            'count' => $sessions->count(),
+        ]);
+    }
+
+    /**
+     * API: actualiza el estado de una mentoría del mentor autenticado.
+     */
+    public function updateSessionStatus(Request $request, $id)
+    {
+        $mentor = $request->user();
+        abort_unless($mentor && $mentor->isMentor(), 403);
+
+        $data = $request->validate([
+            'status' => ['required', 'in:pendiente,aceptada,rechazada,pagada,confirmada,completada'],
+        ]);
+
+        $mentoria = Mentoria::where('mentor_id', $mentor->id)->findOrFail($id);
+
+        $updates = [
+            'estado' => $data['status'],
+        ];
+
+        if ($data['status'] === 'rechazada') {
+            $updates['payment_status'] = null;
+            $updates['link_pago'] = null;
+            $updates['link_sesion'] = null;
+            $updates['jitsi_room'] = null;
+        }
+
+        if ($data['status'] === 'pagada') {
+            $updates['payment_status'] = 'paid';
+        }
+
+        $mentoria->forceFill($updates)->save();
+
+        if ($mentoria->shouldGenerateLink()) {
+            $mentoria->ensureSessionLink();
+        }
+
+        return response()->json([
+            'mentoria' => $mentoria->fresh(),
+        ]);
+    }
+    // CAMBIO FIN
+
     /** Utilidad para mantener consistencia al generar enlaces (uso en seeds/tests). */
     protected function generarLinkMeet(): string
     {

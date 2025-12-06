@@ -33,8 +33,9 @@ class MentoriaBookingController extends Controller
 
         $data = $request->validate([
             'date' => ['required', 'date', 'after_or_equal:today'],
-            'time' => ['required'],
+            'time' => ['required', 'date_format:H:i'],
             'notes' => ['nullable', 'string', 'max:500'],
+            'monto' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $baseMentoria = Mentoria::where('mentor_id', $mentor->id)
@@ -43,20 +44,25 @@ class MentoriaBookingController extends Controller
             ->latest('updated_at')
             ->first();
 
+        abort_unless($baseMentoria, 404, 'El mentor no tiene mentorías públicas disponibles.');
+
         $duration = $baseMentoria->duracion_minutos ?? 60;
         $modalidad = $baseMentoria->modalidad ?? 'virtual';
         $especialidad = $baseMentoria->especialidad ?? $profile->profesion ?? 'Generalista';
 
-        $scheduledAt = Carbon::parse(
+        $scheduledAt = Carbon::createFromFormat(
+            'Y-m-d H:i',
             sprintf('%s %s', $data['date'], $data['time']),
             config('app.timezone')
         );
 
+        if (! $scheduledAt) {
+            abort(422, 'Fecha y hora inválidas.');
+        }
+
         $baseAmount = $baseMentoria->monto ?? $baseMentoria->precio ?? $profile->precio_hora ?? 0;
-        $amount = (float) ($request->input('monto')
-            ?? $request->input('precio')
-            ?? $baseAmount);
-        $amount = round($amount, 2);
+        $amount = $data['monto'] ?? $baseAmount;
+        $amount = round((float) $amount, 2);
 
         // CRUD Create (flujo secundario): se clona configuracion del mentor sin exponer IDs al front.
         Mentoria::create([

@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
     :root {
         --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -770,9 +768,9 @@
         line-height: 1.5;
     }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@php
+<?php
     // DATOS DE EJEMPLO COMPLETOS - SIN CONDICIONES
     $catalog = collect([
         [
@@ -906,16 +904,16 @@
     $levels = ['Principiante', 'Intermedio', 'Avanzado'];
     
     $totalCursos = $catalog->count();
-@endphp
+?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="courses-page">
     <div class="courses-container">
         <!-- Header del catálogo -->
         <header class="catalog-header animate-fade-in-up">
             <h1>Catálogo de Cursos Premium</h1>
             <p class="catalog-subtitle">
-                Descubre {{ $totalCursos }} cursos especializados con mentores expertos. 
+                Descubre <?php echo e($totalCursos); ?> cursos especializados con mentores expertos. 
                 Aprende habilidades demandadas y transforma tu carrera profesional.
             </p>
             
@@ -949,51 +947,51 @@
                     <!-- Categorías -->
                     <div class="filter-group">
                         <label>Categorías</label>
-                        @foreach($categories as $category)
+                        <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="filter-option">
                                 <input type="checkbox" 
-                                       id="cat-{{ $category['slug'] }}"
+                                       id="cat-<?php echo e($category['slug']); ?>"
                                        x-model="selectedCategories"
-                                       value="{{ $category['slug'] }}"
+                                       value="<?php echo e($category['slug']); ?>"
                                        @change="filterCourses()">
                                 <span class="custom-checkbox"></span>
-                                <span class="filter-text">{{ $category['name'] }}</span>
-                                <span class="filter-count">{{ $category['count'] }}</span>
+                                <span class="filter-text"><?php echo e($category['name']); ?></span>
+                                <span class="filter-count"><?php echo e($category['count']); ?></span>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
                     <!-- Precio -->
                     <div class="filter-group">
                         <label>Rango de Precio</label>
-                        @foreach($priceRanges as $range)
+                        <?php $__currentLoopData = $priceRanges; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $range): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="filter-option">
                                 <input type="radio" 
-                                       id="price-{{ $loop->index }}"
+                                       id="price-<?php echo e($loop->index); ?>"
                                        name="price"
                                        x-model="selectedPrice"
-                                       value="{{ $range['value'] }}"
+                                       value="<?php echo e($range['value']); ?>"
                                        @change="filterCourses()">
                                 <span class="custom-radio"></span>
-                                <span class="filter-text">{{ $range['label'] }}</span>
+                                <span class="filter-text"><?php echo e($range['label']); ?></span>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
                     <!-- Nivel -->
                     <div class="filter-group">
                         <label>Nivel de Dificultad</label>
-                        @foreach($levels as $level)
+                        <?php $__currentLoopData = $levels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $level): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="filter-option">
                                 <input type="checkbox" 
-                                       id="level-{{ Str::slug($level) }}"
+                                       id="level-<?php echo e(Str::slug($level)); ?>"
                                        x-model="selectedLevels"
-                                       value="{{ $level }}"
+                                       value="<?php echo e($level); ?>"
                                        @change="filterCourses()">
                                 <span class="custom-checkbox"></span>
-                                <span class="filter-text">{{ $level }}</span>
+                                <span class="filter-text"><?php echo e($level); ?></span>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
                     <button type="button" class="apply-filters" @click="applyFilters()">
@@ -1034,8 +1032,8 @@
 
                 <!-- Grid de cursos -->
                 <div class="courses-grid">
-                    @foreach($catalog as $index => $course)
-                        @php
+                    <?php $__currentLoopData = $catalog; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $image = $course['image'] ?? ($course->image_url ?? null);
                             if ($course->image_url ?? false) {
                                 $image = \Illuminate\Support\Str::startsWith($course->image_url, ['http://', 'https://'])
@@ -1062,23 +1060,23 @@
                             $price = $course['price'] ?? ($course->price ?? 0);
                             $originalPrice = $originalPrice ?? ($course->original_price ?? null);
                             $badge = $course['badge'] ?? ($course->badge ?? 'popular');
-                        @endphp
-                        <article class="course-card" style="--index: {{ $index }}">
+                        ?>
+                        <article class="course-card" style="--index: <?php echo e($index); ?>">
                             <!-- Imagen y badge -->
                             <div class="course-image-container">
-                                <img src="{{ $image }}" 
-                                     alt="{{ $title }}" 
+                                <img src="<?php echo e($image); ?>" 
+                                     alt="<?php echo e($title); ?>" 
                                      class="course-card__image">
-                                <span class="course-badge badge-{{ $badge }}">
-                                    @if($badge == 'popular')
+                                <span class="course-badge badge-<?php echo e($badge); ?>">
+                                    <?php if($badge == 'popular'): ?>
                                         Popular
-                                    @elseif($badge == 'new')
+                                    <?php elseif($badge == 'new'): ?>
                                         Nuevo
-                                    @elseif($badge == 'free')
+                                    <?php elseif($badge == 'free'): ?>
                                         Gratis
-                                    @else
+                                    <?php else: ?>
                                         Más Vendido
-                                    @endif
+                                    <?php endif; ?>
                                 </span>
                             </div>
                             
@@ -1087,42 +1085,43 @@
                                 <!-- Categoría y nivel -->
                                 <div class="course-meta-top">
                                     <div class="course-category">
-                                        @if($categorySlug == 'idiomas')
+                                        <?php if($categorySlug == 'idiomas'): ?>
                                             <i class="fas fa-language"></i>
-                                        @elseif($categorySlug == 'programacion')
+                                        <?php elseif($categorySlug == 'programacion'): ?>
                                             <i class="fas fa-code"></i>
-                                        @elseif($categorySlug == 'diseno')
+                                        <?php elseif($categorySlug == 'diseno'): ?>
                                             <i class="fas fa-palette"></i>
-                                        @elseif($categorySlug == 'marketing')
+                                        <?php elseif($categorySlug == 'marketing'): ?>
                                             <i class="fas fa-chart-line"></i>
-                                        @elseif($categorySlug == 'fotografia')
+                                        <?php elseif($categorySlug == 'fotografia'): ?>
                                             <i class="fas fa-camera"></i>
-                                        @else
+                                        <?php else: ?>
                                             <i class="fas fa-graduation-cap"></i>
-                                        @endif
-                                        <span>{{ $category }}</span>
+                                        <?php endif; ?>
+                                        <span><?php echo e($category); ?></span>
                                     </div>
-                                    <div class="course-level level-{{ strtolower($level) }}">
-                                        {{ $level }}
+                                    <div class="course-level level-<?php echo e(strtolower($level)); ?>">
+                                        <?php echo e($level); ?>
+
                                     </div>
                                 </div>
                                 
                                 <!-- Título -->
-                                <h3 class="course-title">{{ $title }}</h3>
+                                <h3 class="course-title"><?php echo e($title); ?></h3>
                                 
                                 <!-- Descripción -->
-                                <p class="course-description">{{ $description }}</p>
+                                <p class="course-description"><?php echo e($description); ?></p>
                                 
                                 <!-- Perfil del mentor -->
                                 <div class="mentor-profile">
                                     <div class="mentor-avatar">
-                                        <img src="{{ $mentorAvatar }}" 
-                                             alt="{{ $mentorName }}"
-                                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($mentorName) }}&background=667eea&color=fff&size=200'">
+                                        <img src="<?php echo e($mentorAvatar); ?>" 
+                                             alt="<?php echo e($mentorName); ?>"
+                                             onerror="this.src='https://ui-avatars.com/api/?name=<?php echo e(urlencode($mentorName)); ?>&background=667eea&color=fff&size=200'">
                                     </div>
                                     <div class="mentor-info">
-                                        <div class="mentor-name">{{ $mentorName }}</div>
-                                        <div class="mentor-specialty">{{ $mentorSpecialty }}</div>
+                                        <div class="mentor-name"><?php echo e($mentorName); ?></div>
+                                        <div class="mentor-specialty"><?php echo e($mentorSpecialty); ?></div>
                                     </div>
                                 </div>
                                 
@@ -1130,54 +1129,56 @@
                                 <div class="course-stats">
                                     <div class="stat-item">
                                         <div class="rating-stars">
-                                            @for($i = 1; $i <= 5; $i++)
-                                                <i class="{{ $i <= floor($rating) ? 'fas fa-star' : 'far fa-star' }}"></i>
-                                            @endfor
+                                            <?php for($i = 1; $i <= 5; $i++): ?>
+                                                <i class="<?php echo e($i <= floor($rating) ? 'fas fa-star' : 'far fa-star'); ?>"></i>
+                                            <?php endfor; ?>
                                         </div>
-                                        <span>{{ $rating }}</span>
-                                        <span class="text-gray-400">({{ $reviews }} reseñas)</span>
+                                        <span><?php echo e($rating); ?></span>
+                                        <span class="text-gray-400">(<?php echo e($reviews); ?> reseñas)</span>
                                     </div>
                                     <div class="stat-item">
                                         <i class="fas fa-user-graduate"></i>
-                                        @if($students >= 1000)
-                                            {{ number_format($students / 1000, 1) }}K estudiantes
-                                        @else
-                                            {{ $students }} estudiantes
-                                        @endif
+                                        <?php if($students >= 1000): ?>
+                                            <?php echo e(number_format($students / 1000, 1)); ?>K estudiantes
+                                        <?php else: ?>
+                                            <?php echo e($students); ?> estudiantes
+                                        <?php endif; ?>
                                     </div>
                                     <div class="stat-item">
                                         <i class="far fa-clock"></i>
-                                        {{ $duration }}
+                                        <?php echo e($duration); ?>
+
                                     </div>
                                 </div>
                                 
                                 <!-- Precio y acciones -->
                                 <div class="course-footer">
-                                    <div class="course-price {{ $price === 0 ? 'free' : '' }}">
-                                        @if($price > 0)
+                                    <div class="course-price <?php echo e($price === 0 ? 'free' : ''); ?>">
+                                        <?php if($price > 0): ?>
                                             <div class="flex items-baseline">
                                                 <span class="price-currency">S/</span>
-                                                <span>{{ $price }}</span>
+                                                <span><?php echo e($price); ?></span>
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <span class="font-bold">Gratis</span>
-                                        @endif
-                                        @if($originalPrice && $originalPrice > $price)
+                                        <?php endif; ?>
+                                        <?php if($originalPrice && $originalPrice > $price): ?>
                                             <span class="ml-2 text-sm text-gray-500 line-through">
-                                                S/ {{ $originalPrice }}
+                                                S/ <?php echo e($originalPrice); ?>
+
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                     
                                     <div class="course-actions">
-                                        <a href="{{ route('cursos.show', $course->id) }}" 
+                                        <a href="<?php echo e(route('cursos.show', $course->id)); ?>" 
                                            class="btn-view">
                                             <i class="far fa-eye"></i>
                                             Ver Curso
                                         </a>
                                         <button type="button" 
                                                 class="btn-enroll"
-                                                onclick="enrollCourse({{ $course->id }}, '{{ $title }}')">
+                                                onclick="enrollCourse(<?php echo e($course->id); ?>, '<?php echo e($title); ?>')">
                                             <i class="fas fa-shopping-cart"></i>
                                             Inscribirme
                                         </button>
@@ -1185,7 +1186,7 @@
                                 </div>
                             </div>
                         </article>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
                 <!-- Paginación -->
@@ -1285,7 +1286,7 @@
         };
     }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
 
 
 
@@ -1295,3 +1296,5 @@
 
 
 
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\NADHIRA\Downloads\SkillNest\resources\views/cursos/index.blade.php ENDPATH**/ ?>
